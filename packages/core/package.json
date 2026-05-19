@@ -1,0 +1,51 @@
+{
+  "name": "@anyhow/core",
+  "version": "0.1.0",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./result": {
+      "import": "./dist/result/index.js",
+      "require": "./dist/result/index.cjs",
+      "types": "./dist/result/index.d.ts"
+    },
+    "./fmt": {
+      "import": "./dist/fmt/index.js",
+      "require": "./dist/fmt/index.cjs",
+      "types": "./dist/fmt/index.d.ts"
+    },
+    "./guard": {
+      "import": "./dist/guard/index.js",
+      "require": "./dist/guard/index.cjs",
+      "types": "./dist/guard/index.d.ts"
+    },
+    "./async": {
+      "import": "./dist/async/index.js",
+      "require": "./dist/async/index.cjs",
+      "types": "./dist/async/index.d.ts"
+    },
+    "./iter": {
+      "import": "./dist/iter/index.js",
+      "require": "./dist/iter/index.cjs",
+      "types": "./dist/iter/index.d.ts"
+    },
+    "./math": {
+      "import": "./dist/math/index.js",
+      "require": "./dist/math/index.cjs",
+      "types": "./dist/math/index.d.ts"
+    },
+    "./cache": {
+      "import": "./dist/cache/index.js",
+      "require": "./dist/cache/index.cjs",
+      "types": "./dist/cache/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run typecheck && bun run build"
+  }
+}
