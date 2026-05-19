@@ -140,4 +140,50 @@ describe("LRU", () => {
       expect(cache.size).toBe(1);
     });
   });
+
+  describe("iteration", () => {
+    it("iterates over [key, value] pairs", () => {
+      const cache = new LRU<string, number>(10);
+      cache.set("a", 1);
+      cache.set("b", 2);
+      const entries = [...cache];
+      expect(entries).toEqual([
+        ["a", 1],
+        ["b", 2],
+      ]);
+    });
+
+    it("entries() returns [key, value] pairs", () => {
+      const cache = new LRU<string, number>(10);
+      cache.set("a", 1);
+      expect([...cache.entries()]).toEqual([["a", 1]]);
+    });
+
+    it("keys() returns keys", () => {
+      const cache = new LRU<string, number>(10);
+      cache.set("a", 1);
+      cache.set("b", 2);
+      expect([...cache.keys()]).toEqual(["a", "b"]);
+    });
+
+    it("values() returns values", () => {
+      const cache = new LRU<string, number>(10);
+      cache.set("a", 1);
+      cache.set("b", 2);
+      expect([...cache.values()]).toEqual([1, 2]);
+    });
+
+    it("skips expired entries during iteration", async () => {
+      const cache = new LRU<string, number>(10, 10);
+      cache.set("a", 1);
+      cache.set("b", 2);
+      await new Promise((r) => setTimeout(r, 20));
+      expect([...cache]).toEqual([]);
+    });
+
+    it("empty cache yields nothing", () => {
+      const cache = new LRU<string, number>(10);
+      expect([...cache]).toEqual([]);
+    });
+  });
 });

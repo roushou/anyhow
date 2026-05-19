@@ -77,4 +77,51 @@ export class LRU<K = string, V = unknown> {
   get size(): number {
     return this.#map.size;
   }
+
+  /**
+   * Iterates over `[key, value]` pairs in insertion order (oldest first).
+   * Expired entries are skipped.
+   */
+  *entries(): IterableIterator<[K, V]> {
+    for (const [key, entry] of this.#map) {
+      if (entry.exp !== null && Date.now() > entry.exp) continue;
+      yield [key, entry.v];
+    }
+  }
+
+  /**
+   * Iterates over keys in insertion order (oldest first).
+   * Expired entries are skipped.
+   */
+  *keys(): IterableIterator<K> {
+    for (const [key, entry] of this.#map) {
+      if (entry.exp !== null && Date.now() > entry.exp) continue;
+      yield key;
+    }
+  }
+
+  /**
+   * Iterates over values in insertion order (oldest first).
+   * Expired entries are skipped.
+   */
+  *values(): IterableIterator<V> {
+    for (const [, entry] of this.#map) {
+      if (entry.exp !== null && Date.now() > entry.exp) continue;
+      yield entry.v;
+    }
+  }
+
+  /**
+   * Makes the cache iterable, yielding `[key, value]` pairs.
+   *
+   * @example
+   * ```ts
+   * for (const [key, value] of cache) {
+   *   console.log(key, value);
+   * }
+   * ```
+   */
+  [Symbol.iterator](): IterableIterator<[K, V]> {
+    return this.entries();
+  }
 }
