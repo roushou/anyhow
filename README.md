@@ -1,6 +1,6 @@
 # anyhow
 
-A batteries-included TypeScript utility toolkit featuring type-safe error handling, runtime guards, async primitives, iterators, formatting, math, and caching.
+A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, runtime guards, async primitives, iterators, formatting, string utilities, math, random, and caching.
 
 ## Installation
 
@@ -44,6 +44,44 @@ match(
 // Wrap throwing functions
 const parsed = trySync(() => JSON.parse('{"name":"Alice"}'));
 const data = await tryAsync(() => fetch("/api").then((r) => r.json()));
+
+// Fall back to an alternative
+or(result, ok(0)); // use result if ok, else ok(0)
+orElse(result, (e) => ok(`recovered: ${e}`)); // lazy fallback
+
+// Expect a value or throw with a custom message
+expect(result, "expected a value"); // throws if err
+```
+
+### Option
+
+A discriminated union for optional values. `Some<T>` carries a value; `None` represents absence.
+
+```ts
+import { some, none, map, andThen, unwrapOr, match, or, orElse } from "@anyhow/core/option";
+import type { Option } from "@anyhow/core/option";
+
+const opt = some(42);
+
+// Transform if present
+map(opt, (v) => v * 2); // { some: true, value: 84 }
+
+// Chain optional operations
+andThen(opt, (v) => (v > 0 ? some(v) : none())); // { some: true, value: 42 }
+
+// Extract with a fallback
+unwrapOr(none(), 0); // 0
+
+// Pattern match
+match(
+  opt,
+  (v) => `Got ${v}`,
+  () => "Nothing",
+); // "Got 42"
+
+// Fall back to another Option
+or(none(), some(10)); // { some: true, value: 10 }
+orElse(none(), () => some(10)); // lazy fallback
 ```
 
 ### Guard
@@ -131,6 +169,40 @@ const results = await concurrent(
 
 // Memoize an expensive async function
 const memoized = memoizeAsync(fetchUser, { maxSize: 100, ttlMs: 60_000 });
+```
+
+### String
+
+Case conversion, slugification, string templating, and indent stripping.
+
+```ts
+import {
+  camelCase,
+  pascalCase,
+  snakeCase,
+  kebabCase,
+  slugify,
+  stripIndent,
+  template,
+} from "@anyhow/core/string";
+
+// Case conversion
+camelCase("hello-world"); // "helloWorld"
+pascalCase("hello-world"); // "HelloWorld"
+snakeCase("helloWorld"); // "hello_world"
+kebabCase("helloWorld"); // "hello-world"
+
+// Slugify for URLs
+slugify("Hello World!"); // "hello-world"
+
+// Strip common leading whitespace
+stripIndent(`
+  hello
+  world
+`); // "hello\nworld"
+
+// Simple template substitution
+template("Hello {{name}}!", { name: "Alice" }); // "Hello Alice!"
 ```
 
 ### Fmt
@@ -224,6 +296,26 @@ average([1, 2, 3, 4, 5]); // 3
 median([1, 5, 2, 4, 3]); // 3
 ```
 
+### Random
+
+Seeded PRNG (Mulberry32) with shuffle, pick, weighted choice, and a drop-in auto-seeded singleton.
+
+```ts
+import { random, createRandom } from "@anyhow/core/random";
+
+// Drop-in use (auto-seeded)
+random.int(1, 6); // 4
+random.float(0, 1); // 0.573…
+random.bool(); // true
+random.pick(["a", "b", "c"]); // "b"
+random.shuffle([1, 2, 3]); // [3, 1, 2]
+random.weighted(["a", "b"], [0.9, 0.1]); // "a" most of the time
+
+// Deterministic (same seed = same sequence)
+const rng = createRandom(42);
+rng.int(1, 10); // always the same for seed 42
+```
+
 ### Cache
 
 An LRU cache with optional TTL, and a sync memoization helper.
@@ -239,6 +331,13 @@ const user = cache.get("user:42"); // User | undefined
 
 // Auto-compute on miss
 const user = cache.getOrSet("user:42", () => fetchUser("42"));
+
+// Iterate over entries (oldest first, skips expired)
+for (const [key, value] of cache) {
+  console.log(key, value);
+}
+console.log([...cache.keys()]); // ["user:42", ...]
+console.log([...cache.values()]); // [User, ...]
 
 // Memoize a sync function
 const fib = memoizeSync(
