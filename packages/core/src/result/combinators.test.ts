@@ -1,5 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { andThen, map, mapErr, match, unwrap, unwrapOr } from "./combinators.js";
+import {
+  andThen,
+  map,
+  mapErr,
+  match,
+  or,
+  orElse,
+  expect as expectResult,
+  unwrap,
+  unwrapOr,
+} from "./combinators.js";
 import { err, ok } from "./constructors.js";
 import type { Result } from "./types.js";
 
@@ -97,5 +107,58 @@ describe("match", () => {
       (e) => `error: ${e}`,
     );
     expect(result).toBe("error: oops");
+  });
+});
+
+describe("or", () => {
+  it("returns the first if Ok", () => {
+    const result = or(ok(42), ok(0));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(42);
+  });
+
+  it("returns the second if Err", () => {
+    const result = or(err("fail"), ok(0));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(0);
+  });
+
+  it("returns the second even if both are Err", () => {
+    const result = or(err("first"), err("second"));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toBe("second");
+  });
+});
+
+describe("orElse", () => {
+  it("returns the result if Ok", () => {
+    const result = orElse(ok(42), (_e) => ok(0));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(42);
+  });
+
+  it("calls fn with the error if Err", () => {
+    const result = orElse(err("fail"), (e) => ok(`recovered: ${e}`));
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe("recovered: fail");
+  });
+
+  it("does not call fn if Ok", () => {
+    let called = false;
+    orElse(ok(42), () => {
+      called = true;
+      return ok(0);
+    });
+    expect(called).toBe(false);
+  });
+});
+
+describe("expect", () => {
+  it("returns the value on Ok", () => {
+    expect(expectResult(ok(42), "should have value")).toBe(42);
+  });
+
+  it("throws the message on Err", () => {
+    expect(() => expectResult(err("boom"), "should have value")).toThrow("should have value");
   });
 });
