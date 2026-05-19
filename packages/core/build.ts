@@ -1,6 +1,17 @@
 import { rm, rename } from "node:fs/promises";
 
-const modules = ["result", "fmt", "guard", "async", "iter", "math", "cache"];
+const modules = [
+  "result",
+  "fmt",
+  "guard",
+  "async",
+  "iter",
+  "math",
+  "cache",
+  "string",
+  "random",
+  "option",
+];
 
 // Clean dist first
 await rm("./dist", { recursive: true, force: true });
