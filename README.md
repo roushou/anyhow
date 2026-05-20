@@ -420,7 +420,18 @@ All functions auto-create parent directories as needed and never leave
 you to guess which errors Node might throw.
 
 ```ts
-import { readText, readJson, writeText, writeJson, ensureDir, remove, exists, tmpDir, glob, walk } from "@anyhow/fs";
+import {
+  readText,
+  readJson,
+  writeText,
+  writeJson,
+  ensureDir,
+  remove,
+  exists,
+  tmpDir,
+  glob,
+  walk,
+} from "@anyhow/fs";
 
 // Read and write safely
 const text = await readText("./file.txt");
@@ -435,9 +446,10 @@ if (!config.ok) {
 await writeJson("./out/data.json", { name: "Alice" }, 2);
 
 // Directory helpers
-await ensureDir("./a/b/c");           // mkdir -p
-await remove("./tmp");                 // rm -rf
-if (await exists("./file.txt")) { }     // fs.existsSync, but async
+await ensureDir("./a/b/c"); // mkdir -p
+await remove("./tmp"); // rm -rf
+if (await exists("./file.txt")) {
+} // fs.existsSync, but async
 
 // Create a temp directory (caller cleans up)
 const tmp = await tmpDir("build-");
