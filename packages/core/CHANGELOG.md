@@ -1,5 +1,11 @@
 # @anyhow/core
 
+## 0.2.5
+
+### Patch Changes
+
+- fc60fea: This is attempt 5 to fix the Release workflow
+
 ## 0.2.4
 
 ### Patch Changes

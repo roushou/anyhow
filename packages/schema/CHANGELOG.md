@@ -1,5 +1,13 @@
 # @anyhow/schema
 
+## 0.1.6
+
+### Patch Changes
+
+- fc60fea: This is attempt 5 to fix the Release workflow
+- Updated dependencies [fc60fea]
+  - @anyhow/core@0.2.5
+
 ## 0.1.5
 
 ### Patch Changes
