@@ -16,7 +16,7 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "bun run typecheck && bun run build"
+    "prepublishOnly": "bun run build && bun run typecheck"
   },
   "dependencies": {
     "@anyhow/core": "workspace:*"
