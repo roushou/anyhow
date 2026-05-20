@@ -1,5 +1,11 @@
 # @anyhow/core
 
+## 0.2.2
+
+### Patch Changes
+
+- 27aec87: This is another attempt to fix the Release workflow
+
 ## 0.2.1
 
 ### Patch Changes
