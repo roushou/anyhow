@@ -16,8 +16,8 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - name: build (core)
-        run: bun run --filter '@anyhow/core' build
+      - name: build
+        run: bun run build
 
       - name: format
         run: bun run format:check
@@ -30,6 +30,3 @@ jobs:
 
       - name: test
         run: bun test
-
-      - name: build
-        run: bun run build
