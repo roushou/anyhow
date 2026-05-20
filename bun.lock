@@ -15,9 +15,18 @@
       "name": "@anyhow/core",
       "version": "0.1.0",
     },
+    "packages/schema": {
+      "name": "@anyhow/schema",
+      "version": "0.1.0",
+      "dependencies": {
+        "@anyhow/core": "workspace:*",
+      },
+    },
   },
   "packages": {
     "@anyhow/core": ["@anyhow/core@workspace:packages/core"],
+
+    "@anyhow/schema": ["@anyhow/schema@workspace:packages/schema"],
 
     "@oxfmt/binding-android-arm-eabi": ["@oxfmt/binding-android-arm-eabi@0.50.0", "", { "os": "android", "cpu": "arm" }, "sha512-ICXQVKrDvsWUtfx6EiVJxfWrajKTwTfRV8vz2XiMkxZeuCKJLgD4YAj6dE3BWvpqDlkVkie4VSTAtMUWO9LDXg=="],
 

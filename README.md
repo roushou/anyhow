@@ -1,11 +1,12 @@
 # anyhow
 
-A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, runtime guards, async primitives, iterators, formatting, string utilities, math, random, and caching.
+A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
 
 ## Installation
 
 ```bash
 bun add @anyhow/core
+bun add @anyhow/schema
 ```
 
 ## Modules
@@ -363,6 +364,48 @@ const fib = memoizeSync(
   },
   { maxSize: 1000 },
 );
+```
+
+## Packages
+
+### @anyhow/schema
+
+Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/core/result` and `@anyhow/core/safe`.
+
+```ts
+import { s, type Infer } from "@anyhow/schema";
+
+// Primitives
+s.string();
+s.number();
+s.boolean();
+s.literal("hello");
+s.enum(["a", "b", "c"]);
+
+// Composites
+const User = s.object({
+  name: s.string(),
+  age: s.number(),
+  tags: s.array(s.string()).optional().default([]),
+});
+type User = Infer<typeof User>; // { name: string; age: number; tags: string[] }
+
+// Parse
+const result = User.parse({ name: "Alice", age: 30 });
+// { ok: true, value: { name: "Alice", age: 30, tags: [] } }
+
+User.parse({ name: 42 });
+// { ok: false, error: { path: "name", expected: "string", ... } }
+
+// Modifiers
+s.string().optional(); // string | undefined
+s.string().nullable(); // string | null
+s.string().default(""); // fills undefined with ""
+
+// More shapes
+s.array(s.number()); // number[]
+s.tuple([s.string(), s.number()]); // [string, number]
+s.union([s.string(), s.number()]); // string | number
 ```
 
 ## Development
