@@ -16,7 +16,7 @@
     "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist",
     "check": "bun run lint && bun run format:check && bun run typecheck",
     "changeset:add": "bun changeset add",
-    "release": "bun run build:all && bun changeset version && bun changeset publish",
+    "release": "bun run build:all && bun changeset publish",
     "build:all": "bun run --filter '@anyhow/core' build && bun run --filter '@anyhow/fs' build && bun run --filter '@anyhow/schema' build"
   },
   "devDependencies": {
