@@ -1,5 +1,11 @@
 # @anyhow/core
 
+## 0.2.1
+
+### Patch Changes
+
+- 7ab2063: This release an attempt to fix the publishing from the Github Action to NPM
+
 ## 0.2.0
 
 ### Minor Changes
