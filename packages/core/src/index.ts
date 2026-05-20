@@ -28,3 +28,4 @@ export * from "./string/index.js";
 export { Random, createRandom, random } from "./random/index.js";
 export { some as someOption, none, or, orElse, expect as expectOption } from "./option/index.js";
 export type { Option } from "./option/index.js";
+export { safe } from "./safe/index.js";

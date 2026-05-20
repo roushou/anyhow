@@ -15,7 +15,7 @@ bun add @anyhow/core
 A discriminated union for type-safe error handling. Instead of throwing, functions return `{ ok: true; value: T }` or `{ ok: false; error: E }`.
 
 ```ts
-import { ok, err, trySync, tryAsync, map, andThen, unwrapOr, match } from "@anyhow/core/result";
+import { ok, err, map, andThen, unwrapOr, match } from "@anyhow/core/result";
 import type { Result } from "@anyhow/core/result";
 
 function divide(a: number, b: number): Result<number, string> {
@@ -40,10 +40,6 @@ match(
   (v) => `Got ${v}`,
   (e) => `Error: ${e}`,
 ); // "Got 5"
-
-// Wrap throwing functions
-const parsed = trySync(() => JSON.parse('{"name":"Alice"}'));
-const data = await tryAsync(() => fetch("/api").then((r) => r.json()));
 
 // Fall back to an alternative
 or(result, ok(0)); // use result if ok, else ok(0)
@@ -101,7 +97,6 @@ import {
   assertDefined,
   assertNever,
   invariant,
-  safeJsonParse,
 } from "@anyhow/core/guard";
 
 // Type guards
@@ -134,12 +129,6 @@ function area(s: Shape): number {
 
 // Invariant checks (strippable for production)
 invariant(limit > 0, "limit must be positive");
-
-// Safe JSON parsing
-const parsed = safeJsonParse<{ name: string }>('{"name":"Alice"}');
-if (parsed.ok) {
-  parsed.value.name; // string
-}
 ```
 
 ### Async
@@ -169,6 +158,33 @@ const results = await concurrent(
 
 // Memoize an expensive async function
 const memoized = memoizeAsync(fetchUser, { maxSize: 100, ttlMs: 60_000 });
+```
+
+### Safe
+
+Wraps unsafe JavaScript operations (throwy functions, `NaN`-returning parsers,
+missing env vars) in {@link Result} or {@link Option}.
+
+```ts
+import { safe } from "@anyhow/core/safe";
+
+// Wrap any throwy function
+const parsed = safe.sync(() => JSON.parse('{"name":"Alice"}'));
+const data = await safe.async(() => fetch("/api").then((r) => r.json()));
+
+// JSON helpers
+safe.json('{"name":"Alice"}'); // Result<unknown>
+safe.jsonStringify({ name: "Alice" }); // Result<string>
+
+// Parse without NaN
+safe.parseInt("42"); // { ok: true, value: 42 }
+safe.parseFloat("3.14"); // { ok: true, value: 3.14 }
+
+// Safe URI decoding
+safe.decodeURIComponent("hello%20world"); // { ok: true, value: "hello world" }
+
+// Environment variables (Option — missing isn't an error)
+safe.env("API_KEY"); // { some: true, value: "sk-abc123" }
 ```
 
 ### String

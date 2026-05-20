@@ -55,6 +55,11 @@
       "import": "./dist/option/index.js",
       "require": "./dist/option/index.cjs",
       "types": "./dist/option/index.d.ts"
+    },
+    "./safe": {
+      "import": "./dist/safe/index.js",
+      "require": "./dist/safe/index.cjs",
+      "types": "./dist/safe/index.d.ts"
     }
   },
   "scripts": {
