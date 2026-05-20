@@ -1,5 +1,11 @@
 # @anyhow/core
 
+## 0.2.4
+
+### Patch Changes
+
+- 0d37a76: This is the 4th attempt to fix the Release workflow
+
 ## 0.2.3
 
 ### Patch Changes

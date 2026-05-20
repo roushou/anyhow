@@ -1,5 +1,13 @@
 # @anyhow/schema
 
+## 0.1.5
+
+### Patch Changes
+
+- 0d37a76: This is the 4th attempt to fix the Release workflow
+- Updated dependencies [0d37a76]
+  - @anyhow/core@0.2.4
+
 ## 0.1.4
 
 ### Patch Changes
