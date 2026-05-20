@@ -11,6 +11,7 @@ A batteries-included TypeScript utility toolkit featuring type-safe error handli
 ```bash
 bun add @anyhow/core
 bun add @anyhow/schema
+bun add @anyhow/fs
 ```
 
 ## Modules
@@ -410,6 +411,53 @@ s.string().default(""); // fills undefined with ""
 s.array(s.number()); // number[]
 s.tuple([s.string(), s.number()]); // [string, number]
 s.union([s.string(), s.number()]); // string | number
+```
+
+### @anyhow/fs
+
+Safe filesystem operations that return {@link Result} instead of throwing.
+All functions auto-create parent directories as needed and never leave
+you to guess which errors Node might throw.
+
+```ts
+import { readText, readJson, writeText, writeJson, ensureDir, remove, exists, tmpDir, glob, walk } from "@anyhow/fs";
+
+// Read and write safely
+const text = await readText("./file.txt");
+if (text.ok) console.log(text.value);
+
+const config = await readJson<AppConfig>("./config.json");
+if (!config.ok) {
+  console.error("Bad config:", config.error);
+  process.exit(1);
+}
+
+await writeJson("./out/data.json", { name: "Alice" }, 2);
+
+// Directory helpers
+await ensureDir("./a/b/c");           // mkdir -p
+await remove("./tmp");                 // rm -rf
+if (await exists("./file.txt")) { }     // fs.existsSync, but async
+
+// Create a temp directory (caller cleans up)
+const tmp = await tmpDir("build-");
+if (tmp.ok) {
+  await writeText(`${tmp.value}/out.txt`, "...");
+  await remove(tmp.value);
+}
+
+// Glob matching
+const files = await glob("src/**/*.ts");
+if (files.ok) {
+  for (const file of files.value) {
+    console.log(file); // "src/a.ts", "src/lib/b.ts", ...
+  }
+}
+
+// Lazy directory walking
+for await (const entry of walk("./src")) {
+  console.log(entry.path, entry.isDir ? "(dir)" : "(file)");
+}
 ```
 
 ## Development
