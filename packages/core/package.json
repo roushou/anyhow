@@ -1,6 +1,11 @@
 {
   "name": "@anyhow/core",
   "version": "0.2.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roushou/anyhow",
+    "directory": "packages/core"
+  },
   "files": [
     "dist"
   ],
@@ -61,6 +66,9 @@
       "require": "./dist/safe/index.cjs",
       "types": "./dist/safe/index.d.ts"
     }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "bun run build.ts",
