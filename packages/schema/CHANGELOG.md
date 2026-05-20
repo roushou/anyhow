@@ -1,5 +1,13 @@
 # @anyhow/schema
 
+## 0.1.3
+
+### Patch Changes
+
+- 27aec87: This is another attempt to fix the Release workflow
+- Updated dependencies [27aec87]
+  - @anyhow/core@0.2.2
+
 ## 0.1.2
 
 ### Patch Changes
