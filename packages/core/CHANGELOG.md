@@ -1,5 +1,11 @@
 # @anyhow/core
 
+## 0.2.3
+
+### Patch Changes
+
+- e581c09: This is another attempt to fix the release workflow
+
 ## 0.2.2
 
 ### Patch Changes
