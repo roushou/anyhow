@@ -1,5 +1,13 @@
 # @anyhow/fs
 
+## 0.1.4
+
+### Patch Changes
+
+- e581c09: This is another attempt to fix the release workflow
+- Updated dependencies [e581c09]
+  - @anyhow/core@0.2.3
+
 ## 0.1.3
 
 ### Patch Changes
