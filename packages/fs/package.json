@@ -7,9 +7,9 @@
     "directory": "packages/fs"
   },
   "files": [
-      "dist",
-      "README.md"
-    ],
+    "dist",
+    "README.md"
+  ],
   "type": "module",
   "exports": {
     ".": {

@@ -17,13 +17,13 @@ function divide(a: number, b: number) {
 }
 
 divide(10, 2)
-  .map(v => v * 2)
+  .map((v) => v * 2)
   .unwrapOr(0); // 10
 
 import { some, none } from "@anyhow/std/option";
 
 some(42)
-  .filter(v => v > 0)
+  .filter((v) => v > 0)
   .unwrapOr(0); // 42
 ```
 
