@@ -53,7 +53,7 @@ Should conform to the Result pattern (or offer a safe variant).
 
 Missing `leading` option for `debounce` and `trailing` option for `throttle`.
 
-### 9. `safe.json` doesn't integrate with `@anyhow/schema`
+### 9. `safe.json` doesn't integrate with `@anyhow/std/schema`
 
 Currently accepts a raw type guard, but should accept a `Schema` for richer validation
 with proper error messages.
@@ -239,7 +239,7 @@ uuid/v4, nanoid, randomHex, randomString, randomColor
 
 ---
 
-## 🟠 Schema Improvements — @anyhow/schema
+## 🟠 Schema Improvements — @anyhow/std/schema
 
 ### Missing base schemas
 

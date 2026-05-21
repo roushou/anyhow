@@ -1,5 +1,5 @@
-import type { Result } from "@anyhow/std/result";
-import { ok, err } from "@anyhow/std/result";
+import type { Result } from "../result/result.js";
+import { ok, err } from "../result/result.js";
 import type { Schema, ValidationError } from "./types.js";
 
 /** Creates a {@link ValidationError} at the given path. */

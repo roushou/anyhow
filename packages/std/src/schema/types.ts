@@ -24,7 +24,7 @@ export type ValidationError = {
  */
 export interface Schema<T> {
   /** Parses `data`, returning `Ok(T)` or `Err(ValidationError)`. */
-  parse(data: unknown): import("@anyhow/std/result").Result<T, ValidationError>;
+  parse(data: unknown): import("../result/result.js").Result<T, ValidationError>;
 
   /** Returns a schema that also accepts `undefined`. */
   optional(): Schema<T | undefined>;

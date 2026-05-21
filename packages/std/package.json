@@ -77,6 +77,11 @@
       "require": "./dist/collections/index.cjs",
       "types": "./dist/collections/index.d.ts"
     },
+    "./schema": {
+      "import": "./dist/schema/index.js",
+      "require": "./dist/schema/index.cjs",
+      "types": "./dist/schema/index.d.ts"
+    },
     "./fs": {
       "import": "./dist/fs/index.js",
       "require": "./dist/fs/index.cjs",

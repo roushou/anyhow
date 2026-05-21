@@ -10,7 +10,6 @@ A batteries-included TypeScript utility toolkit featuring type-safe error handli
 
 ```bash
 bun add @anyhow/std
-bun add @anyhow/schema
 ```
 
 ## Modules
@@ -270,7 +269,7 @@ const data = await safe.async(() => fetch("/api").then((r) => r.json()));
 
 // JSON helpers
 safe.json('{"name":"Alice"}'); // Result<unknown>
-// With a schema (from @anyhow/schema):
+// With a schema (from @anyhow/std/schema):
 const User = s.object({ name: s.string() });
 const user = safe.json('{"name":"Alice"}', User.parse); // Result<{ name: string }>
 safe.jsonStringify({ name: "Alice" }); // Result<string>
@@ -636,14 +635,12 @@ for await (const entry of walk("./src")) {
 }
 ```
 
-## Packages
-
-### @anyhow/schema
+### Schema
 
 Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/std/result` and `@anyhow/std/safe`.
 
 ```ts
-import { s, type Infer } from "@anyhow/schema";
+import { s, type Infer } from "@anyhow/std/schema";
 
 // Primitives
 s.string();

@@ -1,5 +1,5 @@
 import { createSchema, fail } from "./core.js";
-import { ok, err } from "@anyhow/std/result";
+import { ok, err } from "../result/result.js";
 import type { Schema } from "./types.js";
 
 /**

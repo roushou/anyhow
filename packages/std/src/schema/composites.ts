@@ -1,5 +1,5 @@
 import { createSchema, fail, joinPath } from "./core.js";
-import { ok, err } from "@anyhow/std/result";
+import { ok, err } from "../result/result.js";
 import type { Schema, ObjectSchema, InferShape, ValidationError } from "./types.js";
 
 // ── object ──
