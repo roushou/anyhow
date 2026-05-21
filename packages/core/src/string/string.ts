@@ -1,3 +1,6 @@
+import { ResultStatic as Result } from "../result/static.js";
+import type { Result as R } from "../result/result.js";
+
 // ── Character predicates ──────────────────────────────────────────
 
 const isUpper = (ch: string): boolean => ch >= "A" && ch <= "Z";
@@ -8,10 +11,6 @@ const isAlphanumeric = (ch: string): boolean => isAlpha(ch) || isDigit(ch);
 
 // ── Word splitting ───────────────────────────────────────────────
 
-/**
- * Splits a string into word tokens using case transitions and
- * non-alphanumeric characters as boundaries.
- */
 const splitWords = (str: string): string[] => {
   let out = "";
   for (let i = 0; i < str.length; i++) {
@@ -45,18 +44,12 @@ const toDelimited = (words: string[], sep: string): string =>
 /**
  * Converts a string to `camelCase`.
  *
- * Word boundaries are detected at lowercase→uppercase, letter→digit,
- * digit→letter, and non-alphanumeric characters.
- *
  * @param str - The input string.
  * @returns The camelCased string.
  *
  * @example
  * ```ts
- * camelCase("hello-world");   // "helloWorld"
- * camelCase("hello world");   // "helloWorld"
- * camelCase("helloWorld");    // "helloWorld"
- * camelCase("HelloWorld");    // "helloWorld"
+ * camelCase("hello-world"); // "helloWorld"
  * ```
  */
 export const camelCase = (str: string): string => toCamel(splitWords(str));
@@ -69,8 +62,7 @@ export const camelCase = (str: string): string => toCamel(splitWords(str));
  *
  * @example
  * ```ts
- * pascalCase("hello-world");  // "HelloWorld"
- * pascalCase("helloWorld");   // "HelloWorld"
+ * pascalCase("hello-world"); // "HelloWorld"
  * ```
  */
 export const pascalCase = (str: string): string => toPascal(splitWords(str));
@@ -83,9 +75,7 @@ export const pascalCase = (str: string): string => toPascal(splitWords(str));
  *
  * @example
  * ```ts
- * snakeCase("helloWorld");    // "hello_world"
- * snakeCase("HelloWorld");    // "hello_world"
- * snakeCase("hello-world");   // "hello_world"
+ * snakeCase("helloWorld"); // "hello_world"
  * ```
  */
 export const snakeCase = (str: string): string => toDelimited(splitWords(str), "_");
@@ -98,9 +88,7 @@ export const snakeCase = (str: string): string => toDelimited(splitWords(str), "
  *
  * @example
  * ```ts
- * kebabCase("helloWorld");    // "hello-world"
- * kebabCase("HelloWorld");    // "hello-world"
- * kebabCase("hello_world");   // "hello-world"
+ * kebabCase("helloWorld"); // "hello-world"
  * ```
  */
 export const kebabCase = (str: string): string => toDelimited(splitWords(str), "-");
@@ -108,17 +96,12 @@ export const kebabCase = (str: string): string => toDelimited(splitWords(str), "
 /**
  * Creates a URL-friendly slug from a string.
  *
- * Lowercases, replaces non-alphanumeric runs with a single hyphen,
- * and trims leading / trailing hyphens.
- *
  * @param str - The input string.
  * @returns The slugified string.
  *
  * @example
  * ```ts
- * slugify("Hello World!");    // "hello-world"
- * slugify("  Foo & Bar  ");   // "foo-bar"
- * slugify("a---b");           // "a-b"
+ * slugify("Hello World!"); // "hello-world"
  * ```
  */
 export const slugify = (str: string): string =>
@@ -130,16 +113,12 @@ export const slugify = (str: string): string =>
 /**
  * Removes the common leading whitespace from every line.
  *
- * Empty lines are ignored when computing the common indent.
- *
  * @param str - The input string.
  * @returns The dedented string.
  *
  * @example
  * ```ts
- * stripIndent("  hello\n  world");       // "hello\nworld"
- * stripIndent("  hello\n    world");     // "hello\n  world"
- * stripIndent("hello\nworld");           // "hello\nworld"
+ * stripIndent("  hello\n  world"); // "hello\nworld"
  * ```
  */
 export const stripIndent = (str: string): string => {
@@ -157,22 +136,28 @@ export const stripIndent = (str: string): string => {
 /**
  * Substitutes `{{key}}` placeholders in a template string with values.
  *
- * Throws if a referenced key is missing from `values`.
+ * Returns a {@link Result} — `Ok(interpolated)` on success, or `Err(error)`
+ * if a referenced key is missing from `values`.
  *
  * @param str - The template string containing `{{key}}` placeholders.
  * @param values - A map of placeholder keys to replacement values.
- * @returns The interpolated string.
+ * @returns `Ok(interpolated)` or `Err(Error)` if a key is missing.
  *
  * @example
  * ```ts
- * template("Hello {{name}}!", { name: "Alice" });  // "Hello Alice!"
- * template("{{a}} + {{b}}", { a: 1, b: 2 });       // "1 + 2"
+ * const r = template("Hello {{name}}!", { name: "Alice" });
+ * if (r.ok) console.log(r.value); // "Hello Alice!"
+ *
+ * const r2 = template("Hello {{name}}!", {});
+ * if (!r.ok) console.log(r2.error.message); // Missing template key: "name"
  * ```
  */
-export const template = (str: string, values: Record<string, string | number>): string =>
-  str.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
-    if (!(key in values)) {
-      throw new Error(`Missing template key: "${key}"`);
-    }
-    return String(values[key]!);
-  });
+export const template = (str: string, values: Record<string, string | number>): R<string> =>
+  Result.from(() =>
+    str.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+      if (!(key in values)) {
+        throw new Error(`Missing template key: "${key}"`);
+      }
+      return String(values[key]!);
+    }),
+  );
