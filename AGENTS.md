@@ -7,7 +7,7 @@ Guidance for AI coding agents (and humans) contributing to anyhow.
 anyhow is a **zero-dependency, TypeScript-first utility toolkit**. Every function should be:
 
 - **Obvious** — a developer (or AI) reading just the signature and JSDoc should understand it completely.
-- **Tree-shakeable** — each module is independently importable via subpath exports (`@anyhow/core/result`).
+- **Tree-shakeable** — each module is independently importable via subpath exports (`@anyhow/std/result`).
 - **Boring** — no magic, no clever metaprogramming, no implicit global state. Predictable code wins.
 - **Stable** — add, don't rename. Deprecate before removing.
 - **Well-tested** — every public API has co-located `*.test.ts` files.
@@ -35,26 +35,31 @@ anyhow/
 ├── .oxfmtrc.json          # Formatter config
 ├── oxlintrc.json          # Linter config
 └── packages/
-    └── core/              # @anyhow/core
-        ├── package.json   # Subpath exports map
-        ├── build.ts       # Dual ESM/CJS build script
-        └── src/
-            ├── index.ts   # Root barrel — re-exports all modules
-            ├── result/    # Result<T, E> type + constructors + combinators
-            ├── guard/     # Runtime type guards + assertions
-            ├── async/     # sleep, debounce, throttle, retry, concurrent, memoize
-            ├── fmt/       # Human-readable formatting (strings, units, Intl wrappers)
-            ├── iter/      # Lazy iterator combinators over Iterable
-            ├── math/      # Interpolation + statistics
-            └── cache/     # LRU cache + memoization helpers
+    ├── std/               # @anyhow/std
+    │   ├── package.json   # Subpath exports map
+    │   ├── build.ts       # Dual ESM/CJS build script
+    │   └── src/
+    │       ├── result/    # Result<T, E> type + methods + static combinators
+    │       ├── option/    # Option<T> type + methods + static combinators
+    │       ├── guard/     # Runtime type guards + assertions
+    │       ├── async/     # sleep, debounce, throttle, retry, concurrent, memoize
+    │       ├── safe/      # Wraps throwy operations in Result
+    │       ├── fmt/       # Human-readable formatting (strings, units, Intl wrappers)
+    │       ├── iter/      # Lazy iterator combinators over Iterable
+    │       ├── math/      # Interpolation + statistics + number theory
+    │       ├── cache/     # LRU cache + memoization helpers
+    │       ├── string/    # Case conversion, slugify, template, HTML escaping
+    │       └── random/    # Seeded PRNG with shuffle, pick, gaussian, uuid
+    ├── schema/            # @anyhow/schema
+    └── fs/                # @anyhow/fs
 ```
 
 ## File conventions
 
 - **File names**: `kebab-case.ts` for modules, `kebab-case.test.ts` for tests.
-- **One concept per file**: e.g. `result/combinators.ts` not `result/everything.ts`.
+- **One concept per file**: e.g. `result/result.ts` for the core type, `result/static.ts` for static methods.
 - **Barrel exports**: each module has an `index.ts` that re-exports only its public surface.
-- **Source and tests co-located**: `src/result/constructors.ts` → `src/result/constructors.test.ts`.
+- **Source and tests co-located**: `src/result/result.ts` → `src/result/result.test.ts`.
 - **Max ~150 lines per file**: if a file grows larger, split by sub-concept.
 
 ## Naming conventions
@@ -102,13 +107,13 @@ Example:
 - Cover: happy path, edge cases, error branches, and type narrowing assertions.
 - Test file names mirror source: `lru.ts` → `lru.test.ts`.
 
-## Adding a new module to `@anyhow/core`
+## Adding a new module to `@anyhow/std`
 
-1. Create `packages/core/src/<name>/` with:
+1. Create `packages/std/src/<name>/` with:
    - Implementation file(s) — one per concept.
    - `index.ts` barrel re-exporting all public APIs.
    - `*.test.ts` for each implementation file.
-2. Add a subpath entry to `packages/core/package.json` `exports`:
+2. Add a subpath entry to `packages/std/package.json` `exports`:
    ```json
    "./<name>": {
      "import": "./dist/<name>/index.js",
@@ -116,19 +121,18 @@ Example:
      "types": "./dist/<name>/index.d.ts"
    }
    ```
-3. Add `"<name>"` to the `modules` array in `packages/core/build.ts`.
-4. Re-export from `packages/core/src/index.ts`.
-5. Document in `README.md` under `## Modules`.
+3. Add `"<name>"` to the `modules` array in `packages/std/build.ts`.
+4. Document in `README.md` under `## Modules`.
 
 ## Adding a new package
 
-1. Create `packages/<name>/` mirroring the structure of `packages/core/`.
+1. Create `packages/<name>/` mirroring the structure of `packages/std/`.
 2. Add it to the root `package.json` `workspaces` array.
 3. Follow the same conventions: zero dependencies, subpath exports, dual ESM/CJS, co-located tests.
 
 ## Build system
 
-The build script (`packages/core/build.ts`):
+The build script (`packages/std/build.ts`):
 
 1. Runs `tsc -p tsconfig.build.json` for `.d.ts` declaration files.
 2. Uses `Bun.build` to emit ESM (`.js`) and CJS (`.cjs`) for each module.

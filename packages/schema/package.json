@@ -7,8 +7,9 @@
     "directory": "packages/schema"
   },
   "files": [
-    "dist"
-  ],
+      "dist",
+      "README.md"
+    ],
   "type": "module",
   "exports": {
     ".": {

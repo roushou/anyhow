@@ -7,8 +7,9 @@
     "directory": "packages/std"
   },
   "files": [
-    "dist"
-  ],
+      "dist",
+      "README.md"
+    ],
   "type": "module",
   "exports": {
     "./result": {

@@ -153,17 +153,13 @@ Runtime type guards and assertions for validating unknown data at the boundary.
 
 ```ts
 import {
-  isString,
-  isNumber,
-  isBoolean,
-  isObject,
-  isDefined,
-  hasProperty,
-  isArrayOf,
-  assert,
-  assertDefined,
-  assertNever,
-  invariant,
+  isString, isNumber, isBoolean, isObject, isDefined,
+  isArray, isFunction, isDate, isRegExp, isError,
+  isSymbol, isBigInt, isPromise, isMap, isSet,
+  isNull, isUndefined, isNotNullish, isTruthy, isFalsy,
+  isPrimitive, isIterable, isAsyncIterable,
+  hasProperty, isArrayOf,
+  assert, assertDefined, assertNever, invariant,
 } from "@anyhow/std/guard";
 
 // Type guards
@@ -190,7 +186,7 @@ function area(s: Shape): number {
     case "square":
       return s.side ** 2;
     default:
-      return assertNever(s);
+      return assertNever(s, `Unhandled shape kind: ${(s as any).kind}`);
   }
 }
 
@@ -205,16 +201,19 @@ Primitives for timing, retries, concurrency, and memoization.
 ```ts
 import { sleep, debounce, throttle, retry, concurrent, memoizeAsync } from "@anyhow/std/async";
 
-// Debounce rapid calls
-const onChange = debounce((query: string) => search(query), 300);
+// Debounce rapid calls (fire immediately on first call, then debounce)
+const onChange = debounce((query: string) => search(query), 300, { leading: true });
 
-// Throttle to at most one call per interval
-const onScroll = throttle(() => updatePosition(), 100);
+// Throttle to at most one call per interval (fire trailing call at end)
+const onScroll = throttle(() => updatePosition(), 100, { trailing: true });
 
 // Retry with exponential backoff, returns a Result
 const result = await retry(() => fetch("/api").then((r) => r.json()), {
   attempts: 5,
   backoff: 200, // starts at 200ms, then 400ms, 800ms, 1600ms
+  shouldRetry: (e) => e instanceof TypeError || (e as any).status === 429, // only retry certain errors
+  onRetry: (e, i) => console.warn(`Attempt ${i} failed:`, e),
+  signal: AbortSignal.timeout(10_000), // give up after 10s total
 });
 if (result.ok) console.log(result.value);
 
@@ -222,10 +221,15 @@ if (result.ok) console.log(result.value);
 const results = await concurrent(
   [fn1, fn2, fn3, fn4, fn5],
   2, // only 2 at a time
+  { ordered: false }, // results in completion order
 );
 
-// Memoize an expensive async function
-const memoized = memoizeAsync(fetchUser, { maxSize: 100, ttlMs: 60_000 });
+// Memoize an expensive async function with a custom key resolver
+const memoized = memoizeAsync(fetchUser, {
+  maxSize: 100,
+  ttlMs: 60_000,
+  resolver: (userId: string) => userId, // use userId as key directly
+});
 ```
 
 ### Safe
@@ -245,6 +249,9 @@ const data = await safe.async(() => fetch("/api").then((r) => r.json()));
 
 // JSON helpers
 safe.json('{"name":"Alice"}'); // Result<unknown>
+// With a schema (from @anyhow/schema):
+const User = s.object({ name: s.string() });
+const user = safe.json('{"name":"Alice"}', User.parse); // Result<{ name: string }>
 safe.jsonStringify({ name: "Alice" }); // Result<string>
 
 // Parse without NaN
@@ -271,6 +278,8 @@ import {
   slugify,
   stripIndent,
   template,
+  escapeHtml, unescapeHtml, escapeRegExp,
+  lines, words,
 } from "@anyhow/std/string";
 
 // Case conversion
@@ -288,8 +297,20 @@ stripIndent(`
   world
 `); // "hello\nworld"
 
-// Simple template substitution
-template("Hello {{name}}!", { name: "Alice" }); // "Hello Alice!"
+// Simple template substitution (returns Result)
+const r = template("Hello {{name}}!", { name: "Alice" });
+if (r.ok) console.log(r.value); // "Hello Alice!"
+
+// HTML escaping
+escapeHtml("<div>hello & goodbye</div>"); // "&lt;div&gt;hello &amp; goodbye&lt;/div&gt;"
+unescapeHtml("&lt;div&gt;hello&amp;goodbye&lt;/div&gt;"); // "<div>hello&goodbye</div>"
+
+// Escape for regex
+escapeRegExp("1 + 1 = 2?"); // "1 \\+ 1 = 2\\?"
+
+// Split into lines or words
+lines("a\nb\nc"); // ["a", "b", "c"]
+words("hello  world"); // ["hello", "world"]
 ```
 
 ### Fmt
@@ -302,11 +323,16 @@ import {
   pluralize,
   filesize,
   duration,
+  durationMs,
   currency,
   number,
   date,
   relativeTime,
+  relativeTimeFromNow,
   list,
+  ordinal,
+  compact,
+  percentage,
 } from "@anyhow/std/fmt";
 
 // Strings
@@ -326,7 +352,15 @@ currency(9.99, "USD"); // "$9.99"
 number(1_234_567.89); // "1,234,567.89"
 date(new Date(), "full"); // "Monday, January 1, 2024"
 relativeTime(-3, "day"); // "3 days ago"
+relativeTimeFromNow(Date.now() - 60_000); // "1 minute ago"
 list(["Alice", "Bob", "Carol"]); // "Alice, Bob, and Carol"
+
+// More formatters
+ordinal(3); // "3rd"
+compact(1_234_567); // "1.2M"
+percentage(0.857, 2); // "85.70%"
+percentage(0.5); // "50%"
+durationMs(450); // "450ms"
 ```
 
 ### Iter
@@ -340,6 +374,10 @@ import {
   flatMap,
   take,
   skip,
+  takeWhile,
+  skipWhile,
+  scan,
+  cycle,
   enumerate,
   unique,
   zip,
@@ -353,6 +391,8 @@ import {
   reduce,
   forEach,
   groupBy,
+  sortBy,
+  partition,
 } from "@anyhow/std/iter";
 
 map([1, 2, 3], (n) => n * 2); // [2, 4, 6]
@@ -363,6 +403,24 @@ zip(["a", "b"], [1, 2]); // [["a", 1], ["b", 2]]
 unique([1, 2, 2, 3, 3, 3]); // [1, 2, 3]
 groupBy([1, 2, 3, 4, 5], (n) => (n % 2 === 0 ? "even" : "odd"));
 // Map { "odd" => [1, 3, 5], "even" => [2, 4] }
+
+// Conditional iteration
+takeWhile([1, 2, 3, 4, 5], (n) => n < 4); // [1, 2, 3]
+skipWhile([1, 2, 3, 4, 5], (n) => n < 3); // [3, 4, 5]
+
+// Accumulating scan
+scan([1, 2, 3], (acc, n) => acc + n, 0); // [1, 3, 6]
+
+// Cycling
+cycle(["a", "b"], 5); // ["a", "b", "a", "b", "a"]
+
+// Sorting
+sortBy([3, 1, 4, 1, 5]); // [1, 1, 3, 4, 5]
+sortBy(["cat", "elephant", "dog"], (s) => s.length); // ["cat", "dog", "elephant"]
+
+// Partition
+partition([1, 2, 3, 4], (n) => n % 2 === 0);
+// { matching: [2, 4], nonMatching: [1, 3] }
 ```
 
 ### Math
@@ -370,17 +428,49 @@ groupBy([1, 2, 3, 4, 5], (n) => (n % 2 === 0 ? "even" : "odd"));
 Interpolation, statistics, and numeric utilities.
 
 ```ts
-import { clamp, lerp, normalize, mapRange, roundTo, sum, average, median } from "@anyhow/std/math";
+import {
+  clamp, lerp, normalize, mapRange, roundTo, degToRad, radToDeg,
+  sum, average, median, mode, variance, stddev, min, max, product,
+  isEven, isOdd, isInteger, isFloat, sign, inRange,
+  gcd, lcm, isPrime, factorial, fibonacci, isPowerOfTwo,
+} from "@anyhow/std/math";
 
+// Interpolation & scaling
 clamp(150, 0, 100); // 100
 lerp(0, 100, 0.5); // 50
 normalize(50, 0, 100); // 0.5
 mapRange(50, 0, 100, 0, 1); // 0.5
 roundTo(3.14159, 2); // 3.14
+degToRad(180); // 3.14159…
+radToDeg(Math.PI); // 180
 
+// Statistics
 sum([1, 2, 3, 4, 5]); // 15
 average([1, 2, 3, 4, 5]); // 3
 median([1, 5, 2, 4, 3]); // 3
+mode([1, 2, 2, 3]); // 2
+variance([1, 2, 3, 4, 5]); // 2.5
+stddev([1, 2, 3, 4, 5]); // 1.581…
+min([3, 1, 4, 1, 5]); // 1
+max([3, 1, 4, 1, 5]); // 5
+product([2, 3, 4]); // 24
+
+// Number predicates
+isEven(4); // true
+isOdd(3); // true
+isInteger(5.0); // true
+isFloat(3.14); // true
+sign(-5); // -1
+inRange(5, 0, 10); // true
+inRange(5, 0, 10, "()"); // true (exclusive bounds)
+
+// Number theory
+gcd(12, 8); // 4
+lcm(4, 6); // 12
+isPrime(17); // true
+factorial(5); // 120
+fibonacci(7); // 13
+isPowerOfTwo(64); // true
 ```
 
 ### Random
@@ -397,6 +487,9 @@ random.bool(); // true
 random.pick(["a", "b", "c"]); // "b"
 random.shuffle([1, 2, 3]); // [3, 1, 2]
 random.weighted(["a", "b"], [0.9, 0.1]); // "a" most of the time
+random.gaussian(100, 15); // normally-distributed (mean 100, stddev 15)
+random.uuid(); // "a3f1b2c0-1234-4abc-9def-0123456789ab"
+random.sample([1, 2, 3, 4, 5], 3); // [3, 1, 5]
 
 // Deterministic (same seed = same sequence)
 const rng = createRandom(42);
@@ -476,6 +569,20 @@ s.string().default(""); // fills undefined with ""
 s.array(s.number()); // number[]
 s.tuple([s.string(), s.number()]); // [string, number]
 s.union([s.string(), s.number()]); // string | number
+s.record(s.number()); // Record<string, number>
+s.date(); // Date
+s.lazy(() => s.number()); // recursive schemas
+s.coerce(s.string(), (v) => String(v)); // coerce values
+s.brand(s.number(), "USD"); // branded (nominal) types
+s.any(); // any value (no validation)
+s.undefined(); // undefined only
+s.null(); // null only
+s.instanceof(Date); // instanceof check
+
+// Object methods
+const Admin = User.extend({ role: s.string() }); // add fields
+const Public = User.omit(["age"]); // remove fields
+const Subset = User.pick(["name"]); // keep only these fields
 ```
 
 ### @anyhow/fs
