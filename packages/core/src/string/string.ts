@@ -23,7 +23,9 @@ const splitWords = (str: string): string[] => {
 };
 
 const toCamel = (words: string[]): string =>
-  words.map((w, i) => (i === 0 ? w.toLowerCase() : w[0]!.toUpperCase() + w.slice(1).toLowerCase())).join("");
+  words
+    .map((w, i) => (i === 0 ? w.toLowerCase() : w[0]!.toUpperCase() + w.slice(1).toLowerCase()))
+    .join("");
 const toPascal = (words: string[]): string =>
   words.map((w) => w[0]!.toUpperCase() + w.slice(1).toLowerCase()).join("");
 const toDelimited = (words: string[], sep: string): string =>
@@ -35,7 +37,10 @@ export const snakeCase = (str: string): string => toDelimited(splitWords(str), "
 export const kebabCase = (str: string): string => toDelimited(splitWords(str), "-");
 
 export const slugify = (str: string): string =>
-  str.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 export const stripIndent = (str: string): string => {
   const lines = str.split("\n");
@@ -59,8 +64,20 @@ export const template = (str: string, values: Record<string, string | number>): 
 
 // ── HTML escaping ──
 
-const HTML_ESCAPE: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
-const HTML_UNESCAPE: Record<string, string> = { "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'" };
+const HTML_ESCAPE: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+const HTML_UNESCAPE: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+};
 
 /**
  * Escapes HTML special characters (`&`, `<`, `>`, `"`, `'`).
@@ -78,8 +95,7 @@ export const unescapeHtml = (str: string): string =>
  * Escapes special regex characters in a string so it can be used as a literal
  * pattern inside `new RegExp()`.
  */
-export const escapeRegExp = (str: string): string =>
-  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
  * Splits a string into lines (preserving empty lines).

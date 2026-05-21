@@ -16,7 +16,10 @@ export function filesize(bytes: number, opts?: FilesizeOpts): string {
   if (bytes === 0) return "0 B";
   let i = 0;
   let v = bytes;
-  while (v >= base && i < units.length - 1) { v /= base; i++; }
+  while (v >= base && i < units.length - 1) {
+    v /= base;
+    i++;
+  }
   const rounded = parseFloat(v.toFixed(decimals));
   return `${rounded} ${units[i]}`;
 }
@@ -76,7 +79,10 @@ export function compact(n: number): string {
   const sign = n < 0 ? "-" : "";
   let v = Math.abs(n);
   let i = 0;
-  while (v >= 1000 && i < COMPACT_SUFFIXES.length - 1) { v /= 1000; i++; }
+  while (v >= 1000 && i < COMPACT_SUFFIXES.length - 1) {
+    v /= 1000;
+    i++;
+  }
   const rounded = Math.round(v * 10) / 10;
   return `${sign}${rounded}${COMPACT_SUFFIXES[i]}`;
 }

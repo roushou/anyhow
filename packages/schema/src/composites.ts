@@ -28,8 +28,7 @@ export function object<T extends Record<string, Schema<any>>>(
   shape: T,
 ): ObjectSchema<InferShape<T>> {
   const baseSchema = createSchema<InferShape<T>>((data, path) => {
-    if (typeof data !== "object" || data === null)
-      return err(fail(path, "object", data));
+    if (typeof data !== "object" || data === null) return err(fail(path, "object", data));
 
     const record = data as Record<string, unknown>;
     const result: Record<string, unknown> = {};
@@ -76,9 +75,7 @@ export function object<T extends Record<string, Schema<any>>>(
       return object(requiredShape) as ObjectSchema<InferShape<T>>;
     },
 
-    pick<K extends keyof InferShape<T>>(
-      keys: K[],
-    ): ObjectSchema<Pick<InferShape<T>, K>> {
+    pick<K extends keyof InferShape<T>>(keys: K[]): ObjectSchema<Pick<InferShape<T>, K>> {
       const picked = {} as Record<string, Schema<any>>;
       for (const k of keys) {
         if (k in shape) picked[k as string] = shape[k as string]!;
@@ -86,9 +83,7 @@ export function object<T extends Record<string, Schema<any>>>(
       return object(picked) as any;
     },
 
-    omit<K extends keyof InferShape<T>>(
-      keys: K[],
-    ): ObjectSchema<Omit<InferShape<T>, K>> {
+    omit<K extends keyof InferShape<T>>(keys: K[]): ObjectSchema<Omit<InferShape<T>, K>> {
       const kept = {} as Record<string, Schema<any>>;
       for (const key of Object.keys(shape)) {
         if (!(keys as string[]).includes(key)) kept[key] = shape[key]!;
@@ -110,8 +105,7 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
   mode: "passthrough" | "strict",
 ): ObjectSchema<InferShape<T>> {
   const baseSchema = createSchema<InferShape<T>>((data, path) => {
-    if (typeof data !== "object" || data === null)
-      return err(fail(path, "object", data));
+    if (typeof data !== "object" || data === null) return err(fail(path, "object", data));
 
     const record = data as Record<string, unknown>;
 
@@ -167,9 +161,7 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
       return object(requiredShape) as ObjectSchema<InferShape<T>>;
     },
 
-    pick<K extends keyof InferShape<T>>(
-      keys: K[],
-    ): ObjectSchema<Pick<InferShape<T>, K>> {
+    pick<K extends keyof InferShape<T>>(keys: K[]): ObjectSchema<Pick<InferShape<T>, K>> {
       const picked = {} as Record<string, Schema<any>>;
       for (const k of keys) {
         if (k in shape) picked[k as string] = shape[k as string]!;
@@ -177,9 +169,7 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
       return object(picked) as any;
     },
 
-    omit<K extends keyof InferShape<T>>(
-      keys: K[],
-    ): ObjectSchema<Omit<InferShape<T>, K>> {
+    omit<K extends keyof InferShape<T>>(keys: K[]): ObjectSchema<Omit<InferShape<T>, K>> {
       const kept = {} as Record<string, Schema<any>>;
       for (const key of Object.keys(shape)) {
         if (!(keys as string[]).includes(key)) kept[key] = shape[key]!;
@@ -336,8 +326,7 @@ export function union<T extends Schema<any>[]>(
  */
 export function record<T>(valueSchema: Schema<T>): Schema<Record<string, T>> {
   return createSchema((data, path) => {
-    if (typeof data !== "object" || data === null)
-      return err(fail(path, "object", data));
+    if (typeof data !== "object" || data === null) return err(fail(path, "object", data));
 
     const record = data as Record<string, unknown>;
     const result: Record<string, unknown> = {};
@@ -373,8 +362,7 @@ export function record<T>(valueSchema: Schema<T>): Schema<Record<string, T>> {
  */
 export function date(): Schema<Date> {
   return createSchema((data, path) => {
-    if (!(data instanceof Date) || isNaN(data.getTime()))
-      return err(fail(path, "Date", data));
+    if (!(data instanceof Date) || isNaN(data.getTime())) return err(fail(path, "Date", data));
     return ok(data);
   });
 }
@@ -401,7 +389,7 @@ export function date(): Schema<Date> {
  */
 export function lazy<T>(fn: () => Schema<T>): Schema<T> {
   let cached: Schema<T> | undefined;
-  return createSchema((data, path) => {
+  return createSchema((data, _) => {
     if (!cached) cached = fn();
     return cached.parse(data);
   });
@@ -458,9 +446,6 @@ type Branded<T, B> = T & { [brandSym]: B };
  * const id: UserId = UserId.parse("abc-123");
  * ```
  */
-export function brand<T, B extends string>(
-  schema_: Schema<T>,
-  _brand: B,
-): Schema<Branded<T, B>> {
+export function brand<T, B extends string>(schema_: Schema<T>, _brand: B): Schema<Branded<T, B>> {
   return schema_ as any;
 }

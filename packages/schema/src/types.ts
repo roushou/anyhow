@@ -74,9 +74,7 @@ export interface ObjectSchema<T extends Record<string, unknown>> extends Schema<
   omit<K extends keyof T>(keys: K[]): ObjectSchema<Omit<T, K>>;
 
   /** Returns a schema that adds new keys. */
-  extend<U extends Record<string, Schema<any>>>(
-    extra: U,
-  ): ObjectSchema<T & InferShape<U>>;
+  extend<U extends Record<string, Schema<any>>>(extra: U): ObjectSchema<T & InferShape<U>>;
 }
 
 /** Extracts the TypeScript type from a {@link Schema}. */
