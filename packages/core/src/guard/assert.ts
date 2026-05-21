@@ -38,6 +38,7 @@ export function assertDefined<T>(val: T, name = "value"): asserts val is NonNull
  * branch of a `switch` to get a compile-time error when a case is unhandled.
  *
  * @param x - The value that should be of type `never`.
+ * @param msg - Optional custom error message.
  * @returns Never returns (always throws).
  *
  * @example
@@ -47,11 +48,11 @@ export function assertDefined<T>(val: T, name = "value"): asserts val is NonNull
  *   switch (s.kind) {
  *     case "circle": return 1;
  *     case "square": return 2;
- *     default: return assertNever(s);
+ *     default: return assertNever(s, `Unexpected kind: ${(s as any).kind}`);
  *   }
  * }
  * ```
  */
-export function assertNever(x: never): never {
-  throw new Error(`Unhandled case: ${JSON.stringify(x)}`);
+export function assertNever(x: never, msg?: string): never {
+  throw new Error(msg ?? `Unhandled case: ${JSON.stringify(x)}`);
 }
