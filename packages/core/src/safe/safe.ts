@@ -1,53 +1,12 @@
-import { ok, err } from "../result/constructors.js";
-import type { Result } from "../result/types.js";
-import { some, none } from "../option/constructors.js";
-import type { Option } from "../option/types.js";
+import { ok, err, type Result } from "../result/result.js";
+import { ResultStatic as R } from "../result/static.js";
+import { some, none, type Option } from "../option/option.js";
 
-/**
- * Wraps a synchronous function that may throw, returning a {@link Result}
- * instead of letting the error propagate.
- *
- * If the thrown value is not an `Error`, it is converted to one.
- *
- * @param fn - A synchronous function that may throw.
- * @returns `Ok(fn())` on success, `Err(error)` on failure.
- *
- * @example
- * ```ts
- * const parsed = safe.sync(() => JSON.parse('{"name":"Alice"}'));
- * if (parsed.ok) console.log(parsed.value.name);
- * ```
- */
-function sync<T>(fn: () => T): Result<T> {
-  try {
-    return ok(fn());
-  } catch (e) {
-    return err(e instanceof Error ? e : new Error(String(e)));
-  }
-}
-
-/**
- * Wraps an asynchronous function that may throw, returning a promise of a
- * {@link Result} instead of letting the error propagate.
- *
- * If the thrown value is not an `Error`, it is converted to one.
- *
- * @param fn - An async function that may throw.
- * @returns A promise resolving to `Ok(value)` or `Err(error)`.
- *
- * @example
- * ```ts
- * const data = await safe.async(() => fetch("/api").then(r => r.json()));
- * if (data.ok) console.log(data.value);
- * ```
- */
-async function async_<T>(fn: () => Promise<T>): Promise<Result<T>> {
-  try {
-    return ok(await fn());
-  } catch (e) {
-    return err(e instanceof Error ? e : new Error(String(e)));
-  }
-}
+// `safe.sync` and `safe.async` delegate to `Result.from` / `Result.fromAsync`.
+// These aliases exist so that `safe.*` reads as a coherent namespace for
+// wrapping unsafe JavaScript operations.
+const sync = R.from;
+const async_ = R.fromAsync;
 
 /**
  * Parses JSON text into a {@link Result} instead of throwing.
@@ -155,7 +114,7 @@ function decodeURIComponent_(encoded: string): Result<string> {
  * Reads an environment variable, returning an {@link Option}.
  *
  * Returns `None` when the variable is missing — use {@link Result}
- * wrappers like `safe.sync` for cases where a missing variable is an error.
+ * wrappers like `Result.from` for cases where a missing variable is an error.
  *
  * @param name - The environment variable name.
  * @returns `Some(value)` if set, `None` if missing.

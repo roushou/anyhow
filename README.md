@@ -18,72 +18,133 @@ bun add @anyhow/fs
 
 ### Result
 
-A discriminated union for type-safe error handling. Instead of throwing, functions return `{ ok: true; value: T }` or `{ ok: false; error: E }`.
+A class-based discriminated union for type-safe error handling. Methods chain
+like Rust — no standalone functions needed.
 
 ```ts
-import { ok, err, map, andThen, unwrapOr, match } from "@anyhow/core/result";
-import type { Result } from "@anyhow/core/result";
+import { ok, err, Result, Pipeline, pipeline } from "@anyhow/core/result";
+import type { Result as R } from "@anyhow/core/result";
 
-function divide(a: number, b: number): Result<number, string> {
+function divide(a: number, b: number): R<number, string> {
   if (b === 0) return err("division by zero");
   return ok(a / b);
 }
 
-const result = divide(10, 2);
+// ── Method chaining ──
 
-// Transform the value if ok
-map(result, (v) => v * 2); // { ok: true, value: 10 }
+divide(10, 2)
+  .map((v) => v * 2) // Ok(10)
+  .andThen((v) => divide(v, 5)) // Ok(1)
+  .tap(console.log) // side effect, passes through
+  .unwrapOr(0); // 1
 
-// Chain fallible operations
-andThen(result, (v) => divide(v, 5)); // { ok: true, value: 1 }
+// ── Pattern matching ──
 
-// Extract with a fallback
-unwrapOr(result, 0); // 5
-
-// Pattern match on both branches
-match(
-  result,
+const label = divide(10, 0).match(
   (v) => `Got ${v}`,
   (e) => `Error: ${e}`,
-); // "Got 5"
+); // "Error: division by zero"
 
-// Fall back to an alternative
-or(result, ok(0)); // use result if ok, else ok(0)
-orElse(result, (e) => ok(`recovered: ${e}`)); // lazy fallback
+// ── Fallback chains ──
 
-// Expect a value or throw with a custom message
-expect(result, "expected a value"); // throws if err
+divide(10, 0)
+  .or(ok(0)) // fall back to 0
+  .orElse((e) => ok(`recovered: ${e}`)); // lazy fallback
+
+// ── Transform the error ──
+
+divide(10, 0)
+  .mapErr((e) => new Error(e)) // wrap the error
+  .expect("should have a value"); // throws with custom message
+
+// ── Static combinators ──
+
+Result.from(() => JSON.parse(text)); // wrap throwy sync
+Result.fromAsync(() => fetch("/api")); // wrap throwy async
+Result.fromNullable(env.PORT, new Error("…")); // nullable → Result
+
+Result.all([ok(1), ok(2), ok(3)]); // Ok([1, 2, 3])
+Result.partition([ok(1), err("a"), ok(2)]); // { ok: [1,2], err: ["a"] }
+Result.any([err("a"), ok(42)]); // Ok(42)
+
+// ── Pipeline (reusable, observable stages) ──
+
+const orderPipe = pipeline<RawOrder>()
+  .pipe("parse", parseOrder)
+  .pipe("validate", validateOrder)
+  .pipeWithRecovery("save", saveOrder, (err, input) => ok(queueForRetry(input)));
+
+orderPipe.run(rawOrder);
+orderPipe.describe(); // ["parse", "validate", "save"]
+
+// ── Stepper (state machine for wizards / checkouts) ──
+
+import { Stepper } from "@anyhow/core/result";
+
+const checkout = new Stepper<"cart" | "ship" | "pay", CartData, string>()
+  .step("cart", validateCart)
+  .step("ship", validateShipping)
+  .after("cart", ["ship"])
+  .after("ship", ["pay", "cart"]);
+
+checkout.run("cart", initialData, ["ship", "pay"]);
+checkout.nextSteps("cart"); // ["ship"]
 ```
 
 ### Option
 
-A discriminated union for optional values. `Some<T>` carries a value; `None` represents absence.
+A class-based discriminated union for optional values. `Some<T>` carries a value;
+`None` represents absence. Methods chain like Rust.
 
 ```ts
-import { some, none, map, andThen, unwrapOr, match, or, orElse } from "@anyhow/core/option";
-import type { Option } from "@anyhow/core/option";
+import { some, none, Option } from "@anyhow/core/option";
+import type { Option as O } from "@anyhow/core/option";
 
 const opt = some(42);
 
-// Transform if present
-map(opt, (v) => v * 2); // { some: true, value: 84 }
+// ── Method chaining ──
 
-// Chain optional operations
-andThen(opt, (v) => (v > 0 ? some(v) : none())); // { some: true, value: 42 }
+some(42)
+  .map((v) => v * 2) // Some(84)
+  .filter((v) => v > 0) // Some(84) (would be None if ≤ 0)
+  .andThen((v) => some(v + 1)) // Some(85)
+  .unwrapOr(0); // 85
 
-// Extract with a fallback
-unwrapOr(none(), 0); // 0
+// ── Fallback chains ──
 
-// Pattern match
-match(
-  opt,
-  (v) => `Got ${v}`,
-  () => "Nothing",
-); // "Got 42"
+none()
+  .or(some(10)) // Some(10)
+  .orElse(() => some(20)) // lazy fallback
+  .match(
+    (v) => `Got ${v}`,
+    () => "Nothing",
+  ); // "Got 10"
 
-// Fall back to another Option
-or(none(), some(10)); // { some: true, value: 10 }
-orElse(none(), () => some(10)); // lazy fallback
+// ── Type-narrowing guards ──
+
+const o: O<number> = some(42);
+if (o.isSome()) {
+  o.value; // number (narrowed)
+}
+if (o.isNone()) {
+  // o is None here
+}
+
+// ── Zip ──
+
+some("a").zip(some(1)); // Some(["a", 1])
+some(2).zipWith(some(3), (a, b) => a * b); // Some(6)
+
+// ── Flatten ──
+
+some(some(5)).flatten(); // Some(5)
+some(none()).flatten(); // None
+
+// ── Static combinators ──
+
+Option.fromNullable(maybeNull); // Some(value) or None
+Option.okOr(some(5), "missing"); // Ok(5)
+Option.transpose(some(ok(5))); // Ok(Some(5))
 ```
 
 ### Guard
@@ -150,11 +211,12 @@ const onChange = debounce((query: string) => search(query), 300);
 // Throttle to at most one call per interval
 const onScroll = throttle(() => updatePosition(), 100);
 
-// Retry with exponential backoff
-const data = await retry(() => fetch("/api").then((r) => r.json()), {
+// Retry with exponential backoff, returns a Result
+const result = await retry(() => fetch("/api").then((r) => r.json()), {
   attempts: 5,
   backoff: 200, // starts at 200ms, then 400ms, 800ms, 1600ms
 });
+if (result.ok) console.log(result.value);
 
 // Run promises with a concurrency limit
 const results = await concurrent(
@@ -170,6 +232,9 @@ const memoized = memoizeAsync(fetchUser, { maxSize: 100, ttlMs: 60_000 });
 
 Wraps unsafe JavaScript operations (throwy functions, `NaN`-returning parsers,
 missing env vars) in {@link Result} or {@link Option}.
+
+`safe.sync` and `safe.async` delegate to {@link Result.from} and
+{@link Result.fromAsync} — use either API.
 
 ```ts
 import { safe } from "@anyhow/core/safe";
@@ -297,7 +362,7 @@ chunk([1, 2, 3, 4, 5], 2); // [[1, 2], [3, 4], [5]]
 zip(["a", "b"], [1, 2]); // [["a", 1], ["b", 2]]
 unique([1, 2, 2, 3, 3, 3]); // [1, 2, 3]
 groupBy([1, 2, 3, 4, 5], (n) => (n % 2 === 0 ? "even" : "odd"));
-// { odd: [1, 3, 5], even: [2, 4] }
+// Map { "odd" => [1, 3, 5], "even" => [2, 4] }
 ```
 
 ### Math

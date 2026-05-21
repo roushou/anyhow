@@ -1,7 +1,6 @@
 import { createSchema, fail, joinPath } from "./core.js";
+import { ok, err } from "@anyhow/core/result";
 import type { Schema, ObjectSchema, InferShape } from "./types.js";
-
-// ── Composites ──
 
 /**
  * Returns a schema that validates an object with known keys.
@@ -10,6 +9,8 @@ import type { Schema, ObjectSchema, InferShape } from "./types.js";
  *
  * @typeParam T - The shape (a record of string keys to schemas).
  * @param shape - An object mapping keys to their schemas.
+ * @returns An {@link ObjectSchema} with `.strict()`, `.passthrough()`,
+ *   `.partial()`, and `.required()` modifiers.
  *
  * @example
  * ```ts
@@ -25,8 +26,7 @@ export function object<T extends Record<string, Schema<any>>>(
   shape: T,
 ): ObjectSchema<InferShape<T>> {
   const baseSchema = createSchema<InferShape<T>>((data, path) => {
-    if (typeof data !== "object" || data === null)
-      return { ok: false, error: fail(path, "object", data) };
+    if (typeof data !== "object" || data === null) return err(fail(path, "object", data));
 
     const record = data as Record<string, unknown>;
     const result: Record<string, unknown> = {};
@@ -35,18 +35,15 @@ export function object<T extends Record<string, Schema<any>>>(
       const parsed = shape[key]!.parse(record[key]);
       if (!parsed.ok) {
         const nested = parsed.error;
-        return {
-          ok: false,
-          error: {
-            ...nested,
-            path: joinPath(path, key) + (nested.path ? `.${nested.path}` : ""),
-          },
-        };
+        return err({
+          ...nested,
+          path: joinPath(path, key) + (nested.path ? `.${nested.path}` : ""),
+        });
       }
       result[key] = parsed.value;
     }
 
-    return { ok: true, value: result as InferShape<T> };
+    return ok(result as InferShape<T>);
   });
 
   return {
@@ -83,15 +80,14 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
   mode: "passthrough" | "strict",
 ): ObjectSchema<InferShape<T>> {
   const baseSchema = createSchema<InferShape<T>>((data, path) => {
-    if (typeof data !== "object" || data === null)
-      return { ok: false, error: fail(path, "object", data) };
+    if (typeof data !== "object" || data === null) return err(fail(path, "object", data));
 
     const record = data as Record<string, unknown>;
 
     if (mode === "strict") {
       for (const key of Object.keys(record)) {
         if (!(key in shape)) {
-          return { ok: false, error: fail(joinPath(path, key), "no extra keys", key) };
+          return err(fail(joinPath(path, key), "no extra keys", key));
         }
       }
     }
@@ -102,18 +98,15 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
       const parsed = shape[key]!.parse(record[key]);
       if (!parsed.ok) {
         const nested = parsed.error;
-        return {
-          ok: false,
-          error: {
-            ...nested,
-            path: joinPath(path, key) + (nested.path ? `.${nested.path}` : ""),
-          },
-        };
+        return err({
+          ...nested,
+          path: joinPath(path, key) + (nested.path ? `.${nested.path}` : ""),
+        });
       }
       result[key] = parsed.value;
     }
 
-    return { ok: true, value: result as InferShape<T> };
+    return ok(result as InferShape<T>);
   });
 
   return {
@@ -150,15 +143,17 @@ function objectWithMode<T extends Record<string, Schema<any>>>(
  *
  * @typeParam T - The element type.
  * @param itemSchema - Schema to apply to each element.
+ * @returns A schema that accepts arrays of `T`.
  *
  * @example
  * ```ts
  * s.array(s.number()).parse([1, 2, 3]); // { ok: true, value: [1, 2, 3] }
+ * s.array(s.number()).parse("not");     // { ok: false }
  * ```
  */
 export function array<T>(itemSchema: Schema<T>): Schema<T[]> {
   return createSchema((data, path) => {
-    if (!Array.isArray(data)) return { ok: false, error: fail(path, "array", data) };
+    if (!Array.isArray(data)) return err(fail(path, "array", data));
 
     const arr = data as unknown[];
     const result: T[] = [];
@@ -167,18 +162,15 @@ export function array<T>(itemSchema: Schema<T>): Schema<T[]> {
       const parsed = itemSchema.parse(arr[i]);
       if (!parsed.ok) {
         const nested = parsed.error;
-        return {
-          ok: false,
-          error: {
-            ...nested,
-            path: joinPath(path, i) + (nested.path ? `.${nested.path}` : ""),
-          },
-        };
+        return err({
+          ...nested,
+          path: joinPath(path, i) + (nested.path ? `.${nested.path}` : ""),
+        });
       }
       result.push(parsed.value);
     }
 
-    return { ok: true, value: result };
+    return ok(result);
   });
 }
 
@@ -187,6 +179,7 @@ export function array<T>(itemSchema: Schema<T>): Schema<T[]> {
  *
  * @typeParam T - A tuple of schemas.
  * @param schemas - The element schemas in order.
+ * @returns A schema that accepts arrays matching the tuple structure.
  *
  * @example
  * ```ts
@@ -198,9 +191,9 @@ export function tuple<T extends [Schema<any>, ...Schema<any>[]]>(
   schemas: T,
 ): Schema<{ [K in keyof T]: T[K] extends Schema<infer U> ? U : never }> {
   return createSchema((data, path) => {
-    if (!Array.isArray(data)) return { ok: false, error: fail(path, "tuple", data) };
+    if (!Array.isArray(data)) return err(fail(path, "tuple", data));
     if (data.length !== schemas.length)
-      return { ok: false, error: fail(path, `tuple of length ${schemas.length}`, data) };
+      return err(fail(path, `tuple of length ${schemas.length}`, data));
 
     const arr = data as unknown[];
     const result: unknown[] = [];
@@ -209,18 +202,15 @@ export function tuple<T extends [Schema<any>, ...Schema<any>[]]>(
       const parsed = schemas[i]!.parse(arr[i]);
       if (!parsed.ok) {
         const nested = parsed.error;
-        return {
-          ok: false,
-          error: {
-            ...nested,
-            path: joinPath(path, i) + (nested.path ? `.${nested.path}` : ""),
-          },
-        };
+        return err({
+          ...nested,
+          path: joinPath(path, i) + (nested.path ? `.${nested.path}` : ""),
+        });
       }
       result.push(parsed.value);
     }
 
-    return { ok: true, value: result as any };
+    return ok(result as any);
   });
 }
 
@@ -230,11 +220,13 @@ export function tuple<T extends [Schema<any>, ...Schema<any>[]]>(
  *
  * @typeParam T - The union of schema types.
  * @param schemas - Schemas to try in order.
+ * @returns A schema that accepts values matching at least one schema.
  *
  * @example
  * ```ts
  * s.union([s.string(), s.number()]).parse("hello"); // { ok: true, value: "hello" }
  * s.union([s.string(), s.number()]).parse(42);       // { ok: true, value: 42 }
+ * s.union([s.string(), s.number()]).parse(true);     // { ok: false }
  * ```
  */
 export function union<T extends Schema<any>[]>(
@@ -243,8 +235,8 @@ export function union<T extends Schema<any>[]>(
   return createSchema((data, path) => {
     for (const schema of schemas) {
       const parsed = schema.parse(data);
-      if (parsed.ok) return parsed as any;
+      if (parsed.ok) return ok(parsed.value) as any;
     }
-    return { ok: false, error: fail(path, "union", data) };
+    return err(fail(path, "union", data));
   });
 }
