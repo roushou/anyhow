@@ -106,3 +106,40 @@ export const lines = (str: string): string[] => str.split("\n");
  * Splits a string into words on whitespace.
  */
 export const words = (str: string): string[] => str.trim().split(/\s+/).filter(Boolean);
+
+/**
+ * Capitalizes the first character of a string and lowercases the rest.
+ *
+ * @param str - The input string.
+ * @returns The capitalized string.
+ *
+ * @example
+ * ```ts
+ * capitalize("hello"); // "Hello"
+ * capitalize("HELLO"); // "Hello"
+ * ```
+ */
+export const capitalize = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+/**
+ * Generates a random alphanumeric string of the given length.
+ *
+ * Uses characters `[A-Za-z0-9]`.
+ *
+ * @param length - The desired string length.
+ * @returns A random string.
+ *
+ * @example
+ * ```ts
+ * randomString(8); // "aB3xK9mQ"
+ * ```
+ */
+export const randomString = (length: number): string => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+};

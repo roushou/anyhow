@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { duration, filesize } from "./unit.js";
+import { duration, filesize, durationHuman } from "./unit.js";
 
 // ── filesize ──
 
@@ -101,4 +101,21 @@ describe("duration", () => {
     expect(duration(0.4)).toBe("0ms");
     expect(duration(0.5)).toBe("1ms");
   });
+});
+
+// ── durationHuman ──
+
+describe("durationHuman", () => {
+  it("returns '0 seconds' for zero", () => expect(durationHuman(0)).toBe("0 seconds"));
+  it("formats milliseconds only", () => expect(durationHuman(500)).toBe("500 milliseconds"));
+  it("formats a single millisecond", () => expect(durationHuman(1)).toBe("1 millisecond"));
+  it("formats seconds only", () => expect(durationHuman(5_000)).toBe("5 seconds"));
+  it("formats a single second", () => expect(durationHuman(1_000)).toBe("1 second"));
+  it("formats minutes only", () => expect(durationHuman(120_000)).toBe("2 minutes"));
+  it("formats compound durations", () => {
+    expect(durationHuman(3_661_000)).toBe("1 hour, 1 minute, 1 second");
+  });
+  it("formats hours only", () => expect(durationHuman(7_200_000)).toBe("2 hours"));
+  it("formats days", () => expect(durationHuman(90_000_000)).toBe("1 day, 1 hour"));
+  it("handles negative values", () => expect(durationHuman(-5_000)).toBe("5 seconds"));
 });

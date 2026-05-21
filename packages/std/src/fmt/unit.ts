@@ -190,3 +190,45 @@ export function compact(n: number): string {
   const rounded = Math.round(v * 10) / 10;
   return `${sign}${rounded}${COMPACT_SUFFIXES[i]}`;
 }
+
+// ── durationHuman ──
+
+const HUMAN_UNITS: { unit: string; ms: number }[] = [
+  { unit: "day", ms: 86_400_000 },
+  { unit: "hour", ms: 3_600_000 },
+  { unit: "minute", ms: 60_000 },
+  { unit: "second", ms: 1_000 },
+];
+
+/**
+ * Formats a millisecond duration as a long-form human-readable string
+ * ("1 hour, 2 minutes, 30 seconds"). Zero-value units are omitted.
+ *
+ * @param ms - The duration in milliseconds.
+ * @returns A long-form duration string, or `"0 seconds"` for zero.
+ *
+ * @example
+ * ```ts
+ * durationHuman(3_661_000); // "1 hour, 1 minute, 1 second"
+ * durationHuman(500);       // "500 milliseconds"
+ * durationHuman(0);         // "0 seconds"
+ * ```
+ */
+export function durationHuman(ms: number): string {
+  if (ms < 0) ms = -ms;
+  if (ms === 0) return "0 seconds";
+  if (ms < 1000) return `${ms} millisecond${ms === 1 ? "" : "s"}`;
+
+  const parts: string[] = [];
+  let remaining = ms;
+
+  for (const { unit, ms: bp } of HUMAN_UNITS) {
+    if (remaining >= bp) {
+      const count = Math.floor(remaining / bp);
+      parts.push(`${count} ${unit}${count === 1 ? "" : "s"}`);
+      remaining -= count * bp;
+    }
+  }
+
+  return parts.join(", ");
+}

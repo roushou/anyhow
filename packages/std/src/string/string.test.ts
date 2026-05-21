@@ -7,6 +7,8 @@ import {
   slugify,
   stripIndent,
   template,
+  capitalize,
+  randomString,
 } from "./string.js";
 
 describe("camelCase", () => {
@@ -89,5 +91,26 @@ describe("template", () => {
     const r = template("Hello world!", {});
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value).toBe("Hello world!");
+  });
+});
+
+describe("capitalize", () => {
+  it("capitalizes a lowercase word", () => expect(capitalize("hello")).toBe("Hello"));
+  it("lowercases the rest of an all-caps word", () => expect(capitalize("HELLO")).toBe("Hello"));
+  it("handles already capitalized", () => expect(capitalize("Hello")).toBe("Hello"));
+  it("handles empty string", () => expect(capitalize("")).toBe(""));
+  it("handles single character", () => expect(capitalize("a")).toBe("A"));
+});
+
+describe("randomString", () => {
+  it("returns a string of the given length", () => expect(randomString(8).length).toBe(8));
+  it("returns a string of length 0 for 0", () => expect(randomString(0).length).toBe(0));
+  it("contains only alphanumeric characters", () => {
+    for (let i = 0; i < 20; i++) {
+      expect(/^[A-Za-z0-9]+$/.test(randomString(32))).toBe(true);
+    }
+  });
+  it("produces different strings on successive calls", () => {
+    expect(randomString(16)).not.toBe(randomString(16));
   });
 });

@@ -11,4 +11,6 @@ export {
   escapeRegExp,
   lines,
   words,
+  capitalize,
+  randomString,
 } from "./string.js";
