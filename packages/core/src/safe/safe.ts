@@ -2,9 +2,6 @@ import { ok, err, type Result } from "../result/result.js";
 import { ResultStatic as R } from "../result/static.js";
 import { some, none, type Option } from "../option/option.js";
 
-// `safe.sync` and `safe.async` delegate to `Result.from` / `Result.fromAsync`.
-// These aliases exist so that `safe.*` reads as a coherent namespace for
-// wrapping unsafe JavaScript operations.
 const sync = R.from;
 const async_ = R.fromAsync;
 
@@ -12,24 +9,34 @@ const async_ = R.fromAsync;
  * Parses JSON text into a {@link Result} instead of throwing.
  *
  * @param text - The JSON string to parse.
- * @param validator - Optional type guard to validate the parsed value.
+ * @param validator - Optional type guard, or a function returning a `Result`
+ *   (such as `Schema.parse` from `@anyhow/schema`).
  * @returns `Ok(parsed)` on success, `Err(SyntaxError)` on invalid JSON,
- *   or `Err(Error)` if validation fails.
+ *   or `Err` if validation fails.
  *
  * @example
  * ```ts
  * const parsed = safe.json<{ name: string }>('{"name":"Alice"}');
  * if (parsed.ok) console.log(parsed.value.name);
+ *
+ * // With a schema:
+ * const User = s.object({ name: s.string() });
+ * const user = safe.json('{"name":"Alice"}', User.parse);
  * ```
  */
 function json<T = unknown>(text: string): Result<T>;
 function json<T>(text: string, validator: (v: unknown) => v is T): Result<T>;
-function json<T>(text: string, validator?: (v: unknown) => v is T): Result<T> {
+function json<T>(text: string, validator: (v: unknown) => Result<T, any>): Result<T>;
+function json<T>(text: string, validator?: (v: T) => any): Result<T> {
   const result = sync(() => JSON.parse(text) as T);
   if (!result.ok) return result;
   if (validator) {
-    if (!validator(result.value)) {
-      return err(new Error("JSON validation failed: value did not match the expected shape"));
+    const validated: any = validator(result.value);
+    if (typeof validated === "boolean") {
+      if (!validated)
+        return err(new Error("JSON validation failed: value did not match the expected shape"));
+    } else if (!validated.ok) {
+      return validated;
     }
   }
   return result;
@@ -37,7 +44,6 @@ function json<T>(text: string, validator?: (v: unknown) => v is T): Result<T> {
 
 /**
  * Stringifies a value to JSON, returning a {@link Result} instead of throwing.
- *
  * Catches circular references and other `JSON.stringify` errors.
  *
  * @param value - The value to stringify.
@@ -47,7 +53,6 @@ function json<T>(text: string, validator?: (v: unknown) => v is T): Result<T> {
  * @example
  * ```ts
  * safe.jsonStringify({ name: "Alice" }, 2);
- * // { ok: true, value: '{\n  "name": "Alice"\n}' }
  * ```
  */
 function jsonStringify(value: unknown, space?: string | number): Result<string> {
@@ -65,7 +70,7 @@ function jsonStringify(value: unknown, space?: string | number): Result<string> 
  * @example
  * ```ts
  * safe.parseInt("42");    // { ok: true, value: 42 }
- * safe.parseInt("hello"); // { ok: false, error: Error("...") }
+ * safe.parseInt("hello"); // { ok: false }
  * ```
  */
 function parseInt_(text: string, radix?: number): Result<number> {
@@ -84,7 +89,7 @@ function parseInt_(text: string, radix?: number): Result<number> {
  * @example
  * ```ts
  * safe.parseFloat("3.14");  // { ok: true, value: 3.14 }
- * safe.parseFloat("hello"); // { ok: false, error: Error("...") }
+ * safe.parseFloat("hello"); // { ok: false }
  * ```
  */
 function parseFloat_(text: string): Result<number> {
@@ -103,7 +108,7 @@ function parseFloat_(text: string): Result<number> {
  * @example
  * ```ts
  * safe.decodeURIComponent("hello%20world"); // { ok: true, value: "hello world" }
- * safe.decodeURIComponent("%ZZ");           // { ok: false, error: URIError(...) }
+ * safe.decodeURIComponent("%ZZ");           // { ok: false }
  * ```
  */
 function decodeURIComponent_(encoded: string): Result<string> {
@@ -112,9 +117,6 @@ function decodeURIComponent_(encoded: string): Result<string> {
 
 /**
  * Reads an environment variable, returning an {@link Option}.
- *
- * Returns `None` when the variable is missing — use {@link Result}
- * wrappers like `Result.from` for cases where a missing variable is an error.
  *
  * @param name - The environment variable name.
  * @returns `Some(value)` if set, `None` if missing.

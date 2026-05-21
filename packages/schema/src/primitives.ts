@@ -97,3 +97,74 @@ export function enum_<T extends string>(values: readonly T[]): Schema<T> {
     return ok(data as T);
   });
 }
+
+/**
+ * Returns a schema that accepts any value (never fails).
+ *
+ * @returns A schema that passes everything through.
+ *
+ * @example
+ * ```ts
+ * s.any().parse("hello"); // { ok: true, value: "hello" }
+ * s.any().parse(42);      // { ok: true, value: 42 }
+ * ```
+ */
+export function any(): Schema<any> {
+  return createSchema((data) => ok(data));
+}
+
+/**
+ * Returns a schema that validates `undefined`.
+ *
+ * @returns A schema that accepts only `undefined`.
+ *
+ * @example
+ * ```ts
+ * s.undefined().parse(undefined); // { ok: true, value: undefined }
+ * s.undefined().parse(null);      // { ok: false }
+ * ```
+ */
+export function undefined_(): Schema<undefined> {
+  return createSchema((data, path) => {
+    if (data !== undefined) return err(fail(path, "undefined", data));
+    return ok(undefined);
+  });
+}
+
+/**
+ * Returns a schema that validates `null`.
+ *
+ * @returns A schema that accepts only `null`.
+ *
+ * @example
+ * ```ts
+ * s.null().parse(null);      // { ok: true, value: null }
+ * s.null().parse(undefined); // { ok: false }
+ * ```
+ */
+export function null_(): Schema<null> {
+  return createSchema((data, path) => {
+    if (data !== null) return err(fail(path, "null", data));
+    return ok(null);
+  });
+}
+
+/**
+ * Returns a schema that validates `instanceof` a constructor.
+ *
+ * @typeParam T - The instance type.
+ * @param ctor - The constructor to check against.
+ * @returns A schema that accepts instances of `ctor`.
+ *
+ * @example
+ * ```ts
+ * s.instanceof(Date).parse(new Date()); // { ok: true, value: Date }
+ * s.instanceof(Date).parse("2024");     // { ok: false }
+ * ```
+ */
+export function instanceof_<T>(ctor: new (...args: any[]) => T): Schema<T> {
+  return createSchema((data, path) => {
+    if (!(data instanceof ctor)) return err(fail(path, ctor.name, data));
+    return ok(data as T);
+  });
+}
