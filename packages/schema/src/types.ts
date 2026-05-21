@@ -5,12 +5,15 @@
  * @property message - Human-readable description of the failure.
  * @property expected - What the schema expected (e.g. `"string"`, `"number"`).
  * @property received - The actual value received, serialized as a string.
+ * @property errors - For union schemas, all branch errors that were collected.
  */
 export type ValidationError = {
   path: string;
   message: string;
   expected: string;
   received: string;
+  /** Branch errors from a union schema (only set when all branches fail). */
+  errors?: ValidationError[];
 };
 
 /**
@@ -63,6 +66,17 @@ export interface ObjectSchema<T extends Record<string, unknown>> extends Schema<
 
   /** Rejects `undefined` for every field. */
   required(): ObjectSchema<T>;
+
+  /** Returns a schema that keeps only the given keys. */
+  pick<K extends keyof T>(keys: K[]): ObjectSchema<Pick<T, K>>;
+
+  /** Returns a schema that drops the given keys. */
+  omit<K extends keyof T>(keys: K[]): ObjectSchema<Omit<T, K>>;
+
+  /** Returns a schema that adds new keys. */
+  extend<U extends Record<string, Schema<any>>>(
+    extra: U,
+  ): ObjectSchema<T & InferShape<U>>;
 }
 
 /** Extracts the TypeScript type from a {@link Schema}. */
