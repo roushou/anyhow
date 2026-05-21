@@ -1,13 +1,29 @@
 // ── filesize ──
 
 interface FilesizeOpts {
+  /** Use base-2 units (KiB, MiB, …) instead of base-10 (KB, MB, …). */
   binary?: boolean;
+  /** Number of decimal places.  Defaults to `1`. */
   decimals?: number;
 }
 
 const DECIMAL = ["B", "KB", "MB", "GB", "TB", "PB", "EB"] as const;
 const BINARY = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"] as const;
 
+/**
+ * Format a byte count as a human-readable string.
+ *
+ * @param bytes - The number of bytes.
+ * @param opts.binary - Use base-2 units (KiB, MiB) instead of base-10 (KB, MB).
+ * @param opts.decimals - Number of decimal places (default: `1`).
+ * @returns A human-readable filesize string.
+ *
+ * @example
+ * ```ts
+ * filesize(1_500_000);                 // "1.5 MB"
+ * filesize(1_500_000, { binary: true }); // "1.4 MiB"
+ * ```
+ */
 export function filesize(bytes: number, opts?: FilesizeOpts): string {
   const { binary = false, decimals = 1 } = opts ?? {};
   const units = binary ? BINARY : DECIMAL;
@@ -27,6 +43,7 @@ export function filesize(bytes: number, opts?: FilesizeOpts): string {
 // ── duration ──
 
 interface DurationOpts {
+  /** Maximum number of unit parts to show.  Defaults to `Infinity`. */
   maxParts?: number;
 }
 
@@ -38,6 +55,19 @@ const BREAKPOINTS: { unit: string; ms: number }[] = [
   { unit: "ms", ms: 1 },
 ];
 
+/**
+ * Format a millisecond duration as a human-readable string.
+ *
+ * @param ms - The duration in milliseconds.
+ * @param opts.maxParts - Maximum number of unit parts to show (default: `Infinity`).
+ * @returns A human-readable duration string.
+ *
+ * @example
+ * ```ts
+ * duration(3_661_000);              // "1h 1m 1s"
+ * duration(3_661_000, { maxParts: 2 }); // "1h 1m"
+ * ```
+ */
 export function duration(ms: number, opts?: DurationOpts): string {
   const { maxParts = Infinity } = opts ?? {};
   if (ms < 0) ms = -ms;
@@ -59,7 +89,22 @@ export function duration(ms: number, opts?: DurationOpts): string {
 
 // ── ordinal ──
 
-/** Formats a number as an ordinal (1st, 2nd, 3rd, 4th, …). */
+/**
+ * Formats a number as an ordinal (1st, 2nd, 3rd, 4th, …).
+ *
+ * @param n - The number to format.
+ * @returns The ordinal string.
+ *
+ * @example
+ * ```ts
+ * ordinal(1);  // "1st"
+ * ordinal(2);  // "2nd"
+ * ordinal(3);  // "3rd"
+ * ordinal(4);  // "4th"
+ * ordinal(11); // "11th"
+ * ordinal(21); // "21st"
+ * ```
+ */
 export function ordinal(n: number): string {
   const j = n % 10;
   const k = n % 100;
@@ -73,7 +118,19 @@ export function ordinal(n: number): string {
 
 const COMPACT_SUFFIXES = ["", "K", "M", "B", "T"];
 
-/** Formats a number in compact notation (1.2K, 3.4M, …). */
+/**
+ * Formats a number in compact notation (1.2K, 3.4M, …).
+ *
+ * @param n - The number to format.
+ * @returns The compact string.
+ *
+ * @example
+ * ```ts
+ * compact(1_234);      // "1.2K"
+ * compact(1_234_567);  // "1.2M"
+ * compact(0);          // "0"
+ * ```
+ */
 export function compact(n: number): string {
   if (n === 0) return "0";
   const sign = n < 0 ? "-" : "";

@@ -8,6 +8,20 @@ const dtCache = new LRU<string, Intl.DateTimeFormat>(CACHE_SIZE);
 const rtCache = new LRU<string, Intl.RelativeTimeFormat>(CACHE_SIZE);
 const liCache = new LRU<string, Intl.ListFormat>(CACHE_SIZE);
 
+/**
+ * Format a number as currency using `Intl.NumberFormat`.
+ * The formatter is cached per `(locale, currency)` pair.
+ *
+ * @param value - The numeric value.
+ * @param currency - ISO 4217 currency code (e.g. `"USD"`, `"EUR"`).
+ * @param loc - Locale string (defaults to runtime locale).
+ * @returns The formatted currency string.
+ *
+ * @example
+ * ```ts
+ * currency(9.99, "USD"); // "$9.99"
+ * ```
+ */
 export const currency = (value: number, currency: string, loc = locale()) =>
   numCache
     .getOrSet(
@@ -16,11 +30,40 @@ export const currency = (value: number, currency: string, loc = locale()) =>
     )
     .format(value);
 
+/**
+ * Format a number using `Intl.NumberFormat`.
+ * The formatter is cached per `(locale, options)` pair.
+ *
+ * @param value - The number to format.
+ * @param opts - `Intl.NumberFormatOptions`.
+ * @param loc - Locale string (defaults to runtime locale).
+ * @returns The formatted number string.
+ *
+ * @example
+ * ```ts
+ * number(1_234_567.89); // "1,234,567.89"
+ * number(0.42, { style: "percent" }); // "42%"
+ * ```
+ */
 export const number = (value: number, opts?: Intl.NumberFormatOptions, loc = locale()) =>
   numCache
     .getOrSet(`num:${loc}:${JSON.stringify(opts)}`, () => new Intl.NumberFormat(loc, opts))
     .format(value);
 
+/**
+ * Format a date using `Intl.DateTimeFormat`.
+ * The formatter is cached per `(locale, options)` pair.
+ *
+ * @param value - The date to format.
+ * @param opts - `Intl.DateTimeFormatOptions`, or `"full"` / `"short"` presets.
+ * @param loc - Locale string (defaults to runtime locale).
+ * @returns The formatted date string.
+ *
+ * @example
+ * ```ts
+ * date(new Date(), "full"); // "Monday, January 1, 2024"
+ * ```
+ */
 export const date = (
   value: Date,
   opts?: Intl.DateTimeFormatOptions | "full" | "short",
@@ -37,11 +80,40 @@ export const date = (
     .format(value);
 };
 
+/**
+ * Format a relative time using `Intl.RelativeTimeFormat`.
+ * The formatter is cached per locale.
+ *
+ * @param value - The numeric value (e.g. `-3`, `1`).
+ * @param unit - The time unit (e.g. `"day"`, `"hour"`).
+ * @param loc - Locale string (defaults to runtime locale).
+ * @returns The formatted relative time string.
+ *
+ * @example
+ * ```ts
+ * relativeTime(-3, "day"); // "3 days ago"
+ * relativeTime(1, "week");  // "next week"
+ * ```
+ */
 export const relativeTime = (value: number, unit: Intl.RelativeTimeFormatUnit, loc = locale()) =>
   rtCache
     .getOrSet(`rt:${loc}`, () => new Intl.RelativeTimeFormat(loc, { numeric: "auto" }))
     .format(value, unit);
 
+/**
+ * Format a list of strings using `Intl.ListFormat`.
+ * The formatter is cached per `(locale, type)` pair.
+ *
+ * @param items - The strings to join.
+ * @param type - `"conjunction"` ("A, B, and C") or `"disjunction"` ("A, B, or C").
+ * @param loc - Locale string (defaults to runtime locale).
+ * @returns The formatted list string.
+ *
+ * @example
+ * ```ts
+ * list(["Alice", "Bob", "Carol"]); // "Alice, Bob, and Carol"
+ * ```
+ */
 export const list = (
   items: string[],
   type: "conjunction" | "disjunction" = "conjunction",

@@ -12,8 +12,16 @@ interface TruncateOpts {
  * Truncate a string to at most `maxLen` characters, appending an ellipsis
  * when truncation occurs.
  *
+ * @param str - The string to truncate.
+ * @param maxLen - The maximum length (including ellipsis).
+ * @param opts - Ellipsis string or options object.
+ * @param opts.ellipsis - The ellipsis string (default: `"…"`).
+ * @param opts.position - Where to place the ellipsis (default: `"end"`).
+ * @returns The truncated string.
+ *
+ * @example
  * ```ts
- * truncate("hello world", 8);            // "hello..."
+ * truncate("hello world", 8);            // "hello…"
  * truncate("hello world", 8, "…");       // "hello w…"
  * truncate("hello world", 8, { ellipsis: "…", position: "middle" }); // "hel…rld"
  * ```
@@ -54,16 +62,23 @@ interface PluralizeOpts {
 }
 
 /**
- * Pluralize a word based on `count` using {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules | Intl.PluralRules}.
+ * Pluralize a word based on `count` using `Intl.PluralRules`.
  *
  * In the browser the locale is detected automatically; on the server it
  * defaults to `"en"`.  Pass `{ locale }` to override.
  *
+ * @param count - The count (0 = plural in English).
+ * @param singularOrForms - The singular form, or a `PluralForms` record.
+ * @param pluralOrOpts - The plural form (when first arg is singular), or options.
+ * @param maybeOpts - Options when using `PluralForms`.
+ * @returns The formatted string (e.g. `"3 cats"`).
+ *
+ * @example
  * ```ts
- * pluralize(1, "cat");              // "1 cat"
- * pluralize(3, "cat");              // "3 cats"
- * pluralize(1, "child", "children"); // "1 child"
- * pluralize(3, "child", "children"); // "3 children"
+ * pluralize(1, "cat");                                          // "1 cat"
+ * pluralize(3, "cat");                                          // "3 cats"
+ * pluralize(1, "child", "children");                            // "1 child"
+ * pluralize(3, "child", "children");                            // "3 children"
  * pluralize(3, { one: "kota", other: "kotov" }, { locale: "ru" }); // "3 kotov"
  * ```
  */
@@ -80,21 +95,18 @@ export function pluralize(
   let locale: string;
 
   if (typeof singularOrForms === "string") {
-    // Signature: pluralize(n, singular) or pluralize(n, singular, plural)
     const plural = typeof pluralOrOpts === "string" ? pluralOrOpts : `${singularOrForms}s`;
     forms = { one: singularOrForms, other: plural };
     locale = defaultLocale();
   } else {
-    // Signature: pluralize(n, forms, opts?)
     forms = singularOrForms;
     locale = (pluralOrOpts as PluralizeOpts | undefined)?.locale ?? defaultLocale();
-    void maybeOpts; // unused — consumed above
+    void maybeOpts;
   }
 
   const rules = new Intl.PluralRules(locale);
   const cat = rules.select(count);
 
-  // Fall back: exact category → other (universal catch-all) → one → any
   const word =
     forms[cat as PluralCategory] ??
     forms.other ??
