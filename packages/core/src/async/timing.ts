@@ -9,7 +9,15 @@
  * await sleep(1000); // waits 1 second
  * ```
  */
-export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+// ── Debounce ──
+
+/** Options for {@link debounce}. */
+export interface DebounceOpts {
+  /** Fire immediately on the first call, then debounce subsequent calls. */
+  leading?: boolean;
+}
 
 /**
  * Creates a debounced version of `fn` that delays invocation until `ms`
@@ -18,6 +26,7 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * @typeParam T - The function type.
  * @param fn - The function to debounce.
  * @param ms - The debounce window in milliseconds.
+ * @param opts - See {@link DebounceOpts}.
  * @returns A debounced version of `fn`.
  *
  * @example
@@ -29,12 +38,31 @@ export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export function debounce<T extends (...a: any[]) => void>(
   fn: T,
   ms: number,
+  opts?: DebounceOpts,
 ): (...args: Parameters<T>) => void {
-  let t: ReturnType<typeof setTimeout>;
+  const leading = opts?.leading ?? false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let hasLed = false;
+
   return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
+    if (leading && !hasLed) {
+      hasLed = true;
+      fn(...args);
+    }
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      hasLed = false;
+      fn(...args);
+    }, ms);
   };
+}
+
+// ── Throttle ──
+
+/** Options for {@link throttle}. */
+export interface ThrottleOpts {
+  /** Fire one final call after the throttle window ends with the most recent args. */
+  trailing?: boolean;
 }
 
 /**
@@ -44,6 +72,7 @@ export function debounce<T extends (...a: any[]) => void>(
  * @typeParam T - The function type.
  * @param fn - The function to throttle.
  * @param ms - The minimum interval between invocations in milliseconds.
+ * @param opts - See {@link ThrottleOpts}.
  * @returns A throttled version of `fn`.
  *
  * @example
@@ -55,13 +84,27 @@ export function debounce<T extends (...a: any[]) => void>(
 export function throttle<T extends (...a: any[]) => void>(
   fn: T,
   ms: number,
+  opts?: ThrottleOpts,
 ): (...args: Parameters<T>) => void {
+  const trailing = opts?.trailing ?? false;
   let last = 0;
+  let trailingTimer: ReturnType<typeof setTimeout> | undefined;
+
   return (...args) => {
     const now = Date.now();
+
     if (now - last >= ms) {
       last = now;
       fn(...args);
+    } else if (trailing) {
+      clearTimeout(trailingTimer);
+      trailingTimer = setTimeout(
+        () => {
+          last = Date.now();
+          fn(...args);
+        },
+        ms - (now - last),
+      );
     }
   };
 }
