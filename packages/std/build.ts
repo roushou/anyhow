@@ -12,6 +12,7 @@ const modules = [
   "random",
   "option",
   "safe",
+  "data",
 ];
 
 // Clean dist first
