@@ -87,6 +87,57 @@ export function duration(ms: number, opts?: DurationOpts): string {
   return parts.join(" ");
 }
 
+// ── durationMs ──
+
+/**
+ * Format a millisecond duration as a compact string with no spaces ("1h2m3s").
+ * Zero-value units are omitted unless the duration is `0`.
+ *
+ * @param ms - The duration in milliseconds.
+ * @returns A compact duration string.
+ *
+ * @example
+ * ```ts
+ * durationMs(3_661_000); // "1h1m1s"
+ * durationMs(500);      // "500ms"
+ * ```
+ */
+export function durationMs(ms: number): string {
+  if (ms < 0) ms = -ms;
+  if (ms === 0) return "0ms";
+  const parts: string[] = [];
+  let remaining = ms;
+  for (const { unit, ms: bp } of BREAKPOINTS) {
+    if (remaining >= bp || (unit === "ms" && parts.length === 0)) {
+      const count = unit === "ms" ? Math.round(remaining) : Math.floor(remaining / bp);
+      if (count > 0) {
+        parts.push(`${count}${unit}`);
+        remaining -= count * bp;
+      }
+    }
+  }
+  return parts.join("");
+}
+
+// ── percentage ──
+
+/**
+ * Formats a ratio as a percentage string (e.g. `0.42` → `"42%"`).
+ *
+ * @param value - The ratio (e.g. `0.42` for 42%).
+ * @param decimals - Number of decimal places (default: `0`).
+ * @returns A percentage string.
+ *
+ * @example
+ * ```ts
+ * percentage(0.42);     // "42%"
+ * percentage(0.123, 1); // "12.3%"
+ * ```
+ */
+export function percentage(value: number, decimals = 0): string {
+  return `${(value * 100).toFixed(decimals)}%`;
+}
+
 // ── ordinal ──
 
 /**
@@ -99,9 +150,6 @@ export function duration(ms: number, opts?: DurationOpts): string {
  * ```ts
  * ordinal(1);  // "1st"
  * ordinal(2);  // "2nd"
- * ordinal(3);  // "3rd"
- * ordinal(4);  // "4th"
- * ordinal(11); // "11th"
  * ordinal(21); // "21st"
  * ```
  */
@@ -126,9 +174,8 @@ const COMPACT_SUFFIXES = ["", "K", "M", "B", "T"];
  *
  * @example
  * ```ts
- * compact(1_234);      // "1.2K"
- * compact(1_234_567);  // "1.2M"
- * compact(0);          // "0"
+ * compact(1_234);     // "1.2K"
+ * compact(1_234_567); // "1.2M"
  * ```
  */
 export function compact(n: number): string {

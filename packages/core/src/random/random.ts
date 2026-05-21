@@ -6,8 +6,6 @@
  *
  * @param seed - A 32-bit integer seed.
  * @returns A function `() => number` that advances the PRNG state and returns a float in `[0, 1)`.
- *
- * @see {@link https://gist.github.com/tommyettinger/46a874533244883189143505d203312c}
  */
 function mulberry32(seed: number): () => number {
   let state = seed | 0;
@@ -20,18 +18,15 @@ function mulberry32(seed: number): () => number {
 }
 
 /**
- * A seeded pseudorandom number generator with convenience methods for common
- * randomization tasks.
+ * A seeded pseudorandom number generator with convenience methods.
  *
- * Create a deterministic instance via {@link createRandom}, or use the pre-built
- * auto-seeded {@link random} singleton.
+ * Create a deterministic instance via {@link createRandom}, or use the
+ * pre-built auto-seeded {@link random} singleton.
  *
  * @example
  * ```ts
- * import { createRandom } from "@anyhow/core/random";
  * const rng = createRandom(42);
  * rng.int(1, 6); // 5
- * rng.shuffle(["a", "b", "c"]); // ["c", "a", "b"]
  * ```
  */
 export class Random {
@@ -51,7 +46,6 @@ export class Random {
    * @example
    * ```ts
    * random.int(1, 6); // 4
-   * random.int(0, 1); // 0 | 1
    * ```
    */
   int(min: number, max: number): number {
@@ -67,11 +61,11 @@ export class Random {
    *
    * @example
    * ```ts
-   * random.float(); // 0.4302…
+   * random.float();       // 0.4302…
    * random.float(10, 20); // 14.753…
    * ```
    */
-  float(min: number = 0, max: number = 1): number {
+  float(min = 0, max = 1): number {
     return this.#next() * (max - min) + min;
   }
 
@@ -90,7 +84,7 @@ export class Random {
   }
 
   /**
-   * Returns a random element from a non-empty array.
+   * Returns a random element from a non-empty array. Throws if empty.
    *
    * @typeParam T - The element type.
    * @param items - The array to pick from.
@@ -108,8 +102,8 @@ export class Random {
   }
 
   /**
-   * Returns a new array with the elements of `items` randomly reordered using
-   * the Fisher-Yates shuffle. The input array is not mutated.
+   * Returns a new array with the elements of `items` randomly reordered
+   * using the Fisher-Yates shuffle. The input array is not mutated.
    *
    * @typeParam T - The element type.
    * @param items - The array to shuffle.
@@ -137,7 +131,7 @@ export class Random {
    *
    * @typeParam T - The element type.
    * @param items - The array of items to select from.
-   * @param weights - The weight for each item. Must be the same length as `items`.
+   * @param weights - The weight for each item. Must match `items` length.
    * @returns A randomly selected element.
    * @throws If `items` and `weights` have different lengths.
    *
@@ -147,10 +141,9 @@ export class Random {
    * ```
    */
   weighted<T>(items: readonly T[], weights: readonly number[]): T {
-    if (items.length !== weights.length) {
+    if (items.length !== weights.length)
       throw new Error("items and weights must have the same length");
-    }
-    const total = weights.reduce((sum, w) => sum + w, 0);
+    const total = weights.reduce((s, w) => s + w, 0);
     let r = this.#next() * total;
     for (let i = 0; i < items.length; i++) {
       r -= weights[i]!;
@@ -158,20 +151,81 @@ export class Random {
     }
     return items[items.length - 1]!;
   }
+
+  /**
+   * Returns `n` random elements from the array without replacement.
+   * If `n >= items.length`, returns a shuffled copy of the entire array.
+   *
+   * @typeParam T - The element type.
+   * @param items - The array to sample from.
+   * @param n - The number of elements to pick.
+   * @returns A new array with `n` random elements.
+   *
+   * @example
+   * ```ts
+   * random.sample([1, 2, 3, 4, 5], 3); // [3, 1, 5]
+   * ```
+   */
+  sample<T>(items: readonly T[], n: number): T[] {
+    if (n <= 0) return [];
+    if (n >= items.length) return this.shuffle(items);
+    const result: T[] = [];
+    const pool = [...items];
+    for (let i = 0; i < n; i++) {
+      const j = Math.floor(this.#next() * pool.length);
+      result.push(pool.splice(j, 1)[0]!);
+    }
+    return result;
+  }
+
+  /**
+   * Returns a normally-distributed random number using the Box-Muller transform.
+   *
+   * @param mean - The mean (default: `0`).
+   * @param stddev - The standard deviation (default: `1`).
+   * @returns A normally-distributed number.
+   *
+   * @example
+   * ```ts
+   * random.gaussian();       // mean 0, stddev 1
+   * random.gaussian(100, 15); // IQ-like distribution
+   * ```
+   */
+  gaussian(mean = 0, stddev = 1): number {
+    const u1 = this.#next() || 1e-10;
+    const u2 = this.#next();
+    const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    return z * stddev + mean;
+  }
+
+  /**
+   * Returns a random UUID v4 string.
+   *
+   * Uses the seeded PRNG for deterministic output — same seed produces
+   * the same UUID sequence.
+   *
+   * @returns A UUID v4 string (e.g. `"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"`).
+   *
+   * @example
+   * ```ts
+   * random.uuid(); // "a3f1b2c0-1234-4abc-9def-0123456789ab"
+   * ```
+   */
+  uuid(): string {
+    const hex = () => Math.floor(this.#next() * 16).toString(16);
+    return `${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}-${hex()}${hex()}${hex()}${hex()}-4${hex()}${hex()}${hex()}-${(8 + Math.floor(this.#next() * 4)).toString(16)}${hex()}${hex()}${hex()}-${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}`;
+  }
 }
 
 /**
  * Creates a new {@link Random} instance with the given seed.
- *
- * Same seed always produces the same sequence — useful for deterministic
- * generation in tests, procedural content, or reproducible simulations.
+ * Same seed always produces the same sequence.
  *
  * @param seed - A 32-bit integer seed.
  * @returns A new `Random` instance.
  *
  * @example
  * ```ts
- * import { createRandom } from "@anyhow/core/random";
  * const a = createRandom(123);
  * const b = createRandom(123);
  * a.int(0, 100) === b.int(0, 100); // true
@@ -183,15 +237,12 @@ export function createRandom(seed: number): Random {
 
 /**
  * An auto-seeded {@link Random} instance.
- *
- * Seeded from `Date.now()` and `Math.random()` at import time — no setup
- * required. Use when reproducibility is not needed.
+ * Use when reproducibility is not needed.
  *
  * @example
  * ```ts
  * import { random } from "@anyhow/core/random";
  * random.int(1, 6); // 4
- * random.shuffle(["a", "b"]); // ["b", "a"]
  * ```
  */
 export const random: Random = new Random((Date.now() * Math.random() * 2147483647) | 0);
