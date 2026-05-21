@@ -76,6 +76,12 @@
       "import": "./dist/collections/index.js",
       "require": "./dist/collections/index.cjs",
       "types": "./dist/collections/index.d.ts"
+    },
+    "./fs": {
+      "import": "./dist/fs/index.js",
+      "require": "./dist/fs/index.cjs",
+      "types": "./dist/fs/index.d.ts",
+      "browser": "./dist/fs/browser.js"
     }
   },
   "publishConfig": {

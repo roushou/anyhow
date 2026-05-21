@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir, rm, stat, readdir } from "node:fs/promises";
 import { join, relative, dirname } from "node:path";
-import { safe } from "@anyhow/std/safe";
-import type { Result } from "@anyhow/std/result";
+import { safe } from "../safe/safe.js";
+import type { Result } from "../result/result.js";
 
 /**
  * Reads a file as UTF-8 text.

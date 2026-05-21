@@ -14,7 +14,7 @@ import {
   walk,
 } from "./fs.js";
 
-const testDir = join(import.meta.dirname, "..", ".test-tmp");
+const testDir = join(import.meta.dirname, "..", "..", ".test-tmp");
 
 afterAll(async () => {
   await rm(testDir, { recursive: true, force: true });

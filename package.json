@@ -17,7 +17,7 @@
     "check": "bun run lint && bun run format:check && bun run typecheck",
     "changeset:add": "bun changeset add",
     "release": "bun run build:all && bun changeset publish",
-    "build:all": "bun run --filter '@anyhow/std' build && bun run --filter '@anyhow/fs' build && bun run --filter '@anyhow/schema' build"
+    "build:all": "bun run --filter '@anyhow/std' build && bun run --filter '@anyhow/schema' build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

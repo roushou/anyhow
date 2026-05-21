@@ -14,6 +14,7 @@ const modules = [
   "safe",
   "data",
   "collections",
+  "fs",
 ];
 
 // Clean dist first
@@ -49,3 +50,10 @@ for (const mod of modules) {
   await rename(`${tmpdir}/index.js`, `${outdir}/index.cjs`);
   await rm(tmpdir, { recursive: true, force: true });
 }
+
+// Build browser stub for the fs module
+await Bun.build({
+  entrypoints: ["./src/fs/browser.ts"],
+  outdir: "./dist/fs",
+  format: "esm",
+});
