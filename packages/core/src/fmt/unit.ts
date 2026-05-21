@@ -1,41 +1,22 @@
 // ── filesize ──
 
 interface FilesizeOpts {
-  /** Use base-2 units (KiB, MiB, …) instead of base-10 (KB, MB, …). */
   binary?: boolean;
-  /** Number of decimal places.  Defaults to `1`. */
   decimals?: number;
 }
 
 const DECIMAL = ["B", "KB", "MB", "GB", "TB", "PB", "EB"] as const;
 const BINARY = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"] as const;
 
-/**
- * Format a byte count as a human-readable string.
- *
- * ```ts
- * filesize(1_500_000);                 // "1.5 MB"
- * filesize(1_500_000, { binary: true }); // "1.4 MiB"
- * filesize(42);                         // "42 B"
- * filesize(0);                          // "0 B"
- * ```
- */
 export function filesize(bytes: number, opts?: FilesizeOpts): string {
   const { binary = false, decimals = 1 } = opts ?? {};
   const units = binary ? BINARY : DECIMAL;
   const base = binary ? 1024 : 1000;
-
   if (bytes < 0) bytes = -bytes;
-  if (bytes === 0) return `0 B`;
-
+  if (bytes === 0) return "0 B";
   let i = 0;
   let v = bytes;
-  while (v >= base && i < units.length - 1) {
-    v /= base;
-    i++;
-  }
-
-  // Round to the requested number of decimals, trimming trailing zeros
+  while (v >= base && i < units.length - 1) { v /= base; i++; }
   const rounded = parseFloat(v.toFixed(decimals));
   return `${rounded} ${units[i]}`;
 }
@@ -43,7 +24,6 @@ export function filesize(bytes: number, opts?: FilesizeOpts): string {
 // ── duration ──
 
 interface DurationOpts {
-  /** Maximum number of unit parts to show.  Defaults to `Infinity`. */
   maxParts?: number;
 }
 
@@ -55,25 +35,12 @@ const BREAKPOINTS: { unit: string; ms: number }[] = [
   { unit: "ms", ms: 1 },
 ];
 
-/**
- * Format a millisecond duration as a human-readable string.
- *
- * ```ts
- * duration(3_661_000);              // "1h 1m 1s"
- * duration(3_661_000, { maxParts: 2 }); // "1h 1m"
- * duration(500);                    // "500ms"
- * duration(0);                      // "0ms"
- * ```
- */
 export function duration(ms: number, opts?: DurationOpts): string {
   const { maxParts = Infinity } = opts ?? {};
-
   if (ms < 0) ms = -ms;
   if (ms === 0) return "0ms";
-
   const parts: string[] = [];
   let remaining = ms;
-
   for (const { unit, ms: bp } of BREAKPOINTS) {
     if (parts.length >= maxParts) break;
     if (remaining >= bp || (unit === "ms" && parts.length === 0)) {
@@ -84,6 +51,32 @@ export function duration(ms: number, opts?: DurationOpts): string {
       }
     }
   }
-
   return parts.join(" ");
+}
+
+// ── ordinal ──
+
+/** Formats a number as an ordinal (1st, 2nd, 3rd, 4th, …). */
+export function ordinal(n: number): string {
+  const j = n % 10;
+  const k = n % 100;
+  if (j === 1 && k !== 11) return `${n}st`;
+  if (j === 2 && k !== 12) return `${n}nd`;
+  if (j === 3 && k !== 13) return `${n}rd`;
+  return `${n}th`;
+}
+
+// ── compact ──
+
+const COMPACT_SUFFIXES = ["", "K", "M", "B", "T"];
+
+/** Formats a number in compact notation (1.2K, 3.4M, …). */
+export function compact(n: number): string {
+  if (n === 0) return "0";
+  const sign = n < 0 ? "-" : "";
+  let v = Math.abs(n);
+  let i = 0;
+  while (v >= 1000 && i < COMPACT_SUFFIXES.length - 1) { v /= 1000; i++; }
+  const rounded = Math.round(v * 10) / 10;
+  return `${sign}${rounded}${COMPACT_SUFFIXES[i]}`;
 }
