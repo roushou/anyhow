@@ -1,7 +1,7 @@
 # anyhow
 
 [![CI](https://github.com/roushou/anyhow/actions/workflows/ci.yml/badge.svg)](https://github.com/roushou/anyhow/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@anyhow/core?color=blue)](https://www.npmjs.com/package/@anyhow/core)
+![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
 [![license](https://img.shields.io/github/license/roushou/anyhow)](./LICENSE)
 
 A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
@@ -9,7 +9,7 @@ A batteries-included TypeScript utility toolkit featuring type-safe error handli
 ## Installation
 
 ```bash
-bun add @anyhow/core
+bun add @anyhow/std
 bun add @anyhow/schema
 bun add @anyhow/fs
 ```
@@ -22,8 +22,8 @@ A class-based discriminated union for type-safe error handling. Methods chain
 like Rust — no standalone functions needed.
 
 ```ts
-import { ok, err, Result, Pipeline, pipeline } from "@anyhow/core/result";
-import type { Result as R } from "@anyhow/core/result";
+import { ok, err, Result, Pipeline, pipeline } from "@anyhow/std/result";
+import type { Result as R } from "@anyhow/std/result";
 
 function divide(a: number, b: number): R<number, string> {
   if (b === 0) return err("division by zero");
@@ -79,7 +79,7 @@ orderPipe.describe(); // ["parse", "validate", "save"]
 
 // ── Stepper (state machine for wizards / checkouts) ──
 
-import { Stepper } from "@anyhow/core/result";
+import { Stepper } from "@anyhow/std/result";
 
 const checkout = new Stepper<"cart" | "ship" | "pay", CartData, string>()
   .step("cart", validateCart)
@@ -97,8 +97,8 @@ A class-based discriminated union for optional values. `Some<T>` carries a value
 `None` represents absence. Methods chain like Rust.
 
 ```ts
-import { some, none, Option } from "@anyhow/core/option";
-import type { Option as O } from "@anyhow/core/option";
+import { some, none, Option } from "@anyhow/std/option";
+import type { Option as O } from "@anyhow/std/option";
 
 const opt = some(42);
 
@@ -164,7 +164,7 @@ import {
   assertDefined,
   assertNever,
   invariant,
-} from "@anyhow/core/guard";
+} from "@anyhow/std/guard";
 
 // Type guards
 const data: unknown = { name: "Alice", scores: [1, 2, 3] };
@@ -203,7 +203,7 @@ invariant(limit > 0, "limit must be positive");
 Primitives for timing, retries, concurrency, and memoization.
 
 ```ts
-import { sleep, debounce, throttle, retry, concurrent, memoizeAsync } from "@anyhow/core/async";
+import { sleep, debounce, throttle, retry, concurrent, memoizeAsync } from "@anyhow/std/async";
 
 // Debounce rapid calls
 const onChange = debounce((query: string) => search(query), 300);
@@ -237,7 +237,7 @@ missing env vars) in {@link Result} or {@link Option}.
 {@link Result.fromAsync} — use either API.
 
 ```ts
-import { safe } from "@anyhow/core/safe";
+import { safe } from "@anyhow/std/safe";
 
 // Wrap any throwy function
 const parsed = safe.sync(() => JSON.parse('{"name":"Alice"}'));
@@ -271,7 +271,7 @@ import {
   slugify,
   stripIndent,
   template,
-} from "@anyhow/core/string";
+} from "@anyhow/std/string";
 
 // Case conversion
 camelCase("hello-world"); // "helloWorld"
@@ -307,7 +307,7 @@ import {
   date,
   relativeTime,
   list,
-} from "@anyhow/core/fmt";
+} from "@anyhow/std/fmt";
 
 // Strings
 truncate("hello world", 8); // "hello w…"
@@ -353,7 +353,7 @@ import {
   reduce,
   forEach,
   groupBy,
-} from "@anyhow/core/iter";
+} from "@anyhow/std/iter";
 
 map([1, 2, 3], (n) => n * 2); // [2, 4, 6]
 filter([1, 2, 3, 4], (n) => n % 2 === 0); // [2, 4]
@@ -370,7 +370,7 @@ groupBy([1, 2, 3, 4, 5], (n) => (n % 2 === 0 ? "even" : "odd"));
 Interpolation, statistics, and numeric utilities.
 
 ```ts
-import { clamp, lerp, normalize, mapRange, roundTo, sum, average, median } from "@anyhow/core/math";
+import { clamp, lerp, normalize, mapRange, roundTo, sum, average, median } from "@anyhow/std/math";
 
 clamp(150, 0, 100); // 100
 lerp(0, 100, 0.5); // 50
@@ -388,7 +388,7 @@ median([1, 5, 2, 4, 3]); // 3
 Seeded PRNG (Mulberry32) with shuffle, pick, weighted choice, and a drop-in auto-seeded singleton.
 
 ```ts
-import { random, createRandom } from "@anyhow/core/random";
+import { random, createRandom } from "@anyhow/std/random";
 
 // Drop-in use (auto-seeded)
 random.int(1, 6); // 4
@@ -408,7 +408,7 @@ rng.int(1, 10); // always the same for seed 42
 An LRU cache with optional TTL, and a sync memoization helper.
 
 ```ts
-import { LRU, memoizeSync } from "@anyhow/core/cache";
+import { LRU, memoizeSync } from "@anyhow/std/cache";
 
 const cache = new LRU<string, User>(256, 60_000); // max 256 entries, 1 min TTL
 
@@ -440,7 +440,7 @@ const fib = memoizeSync(
 
 ### @anyhow/schema
 
-Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/core/result` and `@anyhow/core/safe`.
+Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/std/result` and `@anyhow/std/safe`.
 
 ```ts
 import { s, type Infer } from "@anyhow/schema";

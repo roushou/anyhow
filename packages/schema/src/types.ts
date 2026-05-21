@@ -18,13 +18,13 @@ export type ValidationError = {
 
 /**
  * A runtime schema that can parse `unknown` data into `T`, returning a
- * {@link Result} from `@anyhow/core`.
+ * {@link Result} from `@anyhow/std`.
  *
  * @typeParam T - The TypeScript type this schema validates.
  */
 export interface Schema<T> {
   /** Parses `data`, returning `Ok(T)` or `Err(ValidationError)`. */
-  parse(data: unknown): import("@anyhow/core/result").Result<T, ValidationError>;
+  parse(data: unknown): import("@anyhow/std/result").Result<T, ValidationError>;
 
   /** Returns a schema that also accepts `undefined`. */
   optional(): Schema<T | undefined>;

@@ -26,6 +26,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anyhow/core": "workspace:*"
+    "@anyhow/std": "workspace:*"
   }
 }
