@@ -15,6 +15,7 @@ const modules = [
   "data",
   "collections",
   "fs",
+  "env",
 ];
 
 // Clean dist first
@@ -51,9 +52,16 @@ for (const mod of modules) {
   await rm(tmpdir, { recursive: true, force: true });
 }
 
-// Build browser stub for the fs module
-await Bun.build({
-  entrypoints: ["./src/fs/browser.ts"],
-  outdir: "./dist/fs",
-  format: "esm",
-});
+// Build browser stubs for modules that have a browser.ts entrypoint
+// Check if browser.ts exists in each module's source directory
+import { existsSync } from "node:fs";
+for (const mod of modules) {
+  const browserEntry = `./src/${mod}/browser.ts`;
+  if (existsSync(browserEntry)) {
+    await Bun.build({
+      entrypoints: [browserEntry],
+      outdir: `./dist/${mod}`,
+      format: "esm",
+    });
+  }
+}

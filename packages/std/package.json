@@ -82,6 +82,12 @@
       "require": "./dist/fs/index.cjs",
       "types": "./dist/fs/index.d.ts",
       "browser": "./dist/fs/browser.js"
+    },
+    "./env": {
+      "import": "./dist/env/index.js",
+      "require": "./dist/env/index.cjs",
+      "types": "./dist/env/index.d.ts",
+      "browser": "./dist/env/browser.js"
     }
   },
   "publishConfig": {
