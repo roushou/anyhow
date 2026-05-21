@@ -71,6 +71,11 @@
       "import": "./dist/data/index.js",
       "require": "./dist/data/index.cjs",
       "types": "./dist/data/index.d.ts"
+    },
+    "./collections": {
+      "import": "./dist/collections/index.js",
+      "require": "./dist/collections/index.cjs",
+      "types": "./dist/collections/index.d.ts"
     }
   },
   "publishConfig": {

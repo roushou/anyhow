@@ -13,6 +13,7 @@ const modules = [
   "option",
   "safe",
   "data",
+  "collections",
 ];
 
 // Clean dist first
