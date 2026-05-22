@@ -88,6 +88,11 @@
       "require": "./dist/env/index.cjs",
       "types": "./dist/env/index.d.ts",
       "browser": "./dist/env/browser.js"
+    },
+    "./http": {
+      "import": "./dist/http/index.js",
+      "require": "./dist/http/index.cjs",
+      "types": "./dist/http/index.d.ts"
     }
   },
   "publishConfig": {

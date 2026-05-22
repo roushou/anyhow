@@ -16,6 +16,7 @@ const modules = [
   "fs",
   "env",
   "schema",
+  "http",
 ];
 
 // Clean dist first
