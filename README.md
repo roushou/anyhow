@@ -225,7 +225,15 @@ invariant(limit > 0, "limit must be positive");
 Primitives for timing, retries, concurrency, and memoization.
 
 ```ts
-import { sleep, debounce, throttle, retry, concurrent, memoizeAsync } from "@anyhow/std/async";
+import {
+  sleep,
+  debounce,
+  throttle,
+  retry,
+  concurrent,
+  Semaphore,
+  memoizeAsync,
+} from "@anyhow/std/async";
 
 // Debounce rapid calls (fire immediately on first call, then debounce)
 const onChange = debounce((query: string) => search(query), 300, { leading: true });
@@ -248,6 +256,12 @@ const results = await concurrent(
   [fn1, fn2, fn3, fn4, fn5],
   2, // only 2 at a time
   { ordered: false }, // results in completion order
+);
+
+// Semaphore — flexible concurrency limit for any async work
+const api = new Semaphore(5);
+const pages = await Promise.all(
+  urls.map((url) => api.acquire(() => fetch(url).then((r) => r.json()))),
 );
 
 // Memoize an expensive async function with a custom key resolver
