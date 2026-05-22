@@ -300,6 +300,124 @@ export function* cycle<T>(iter: Iterable<T>): Generator<T> {
   }
 }
 
+/**
+ * Lazily yields `value` repeatedly, either forever or `times` times.
+ *
+ * @typeParam T - The value type.
+ * @param value - The value to repeat.
+ * @param times - Optional number of times to yield. If omitted, repeats forever.
+ * @returns A generator that yields `value` repeatedly.
+ *
+ * @example
+ * ```ts
+ * [...repeat(0, 3)]; // [0, 0, 0]
+ * [...take(repeat("x"), 2)]; // ["x", "x"]
+ * ```
+ */
+export function* repeat<T>(value: T, times?: number): Generator<T> {
+  if (times !== undefined) {
+    for (let i = 0; i < times; i++) yield value;
+  } else {
+    while (true) yield value;
+  }
+}
+
+/**
+ * Lazily inserts a separator between elements of the source iterable.
+ *
+ * @typeParam T - The element type.
+ * @param iter - The source iterable.
+ * @param separator - The separator value to insert between elements.
+ * @returns A generator yielding elements with separators between them.
+ *
+ * @example
+ * ```ts
+ * [...intersperse([1, 2, 3], 0)]; // [1, 0, 2, 0, 3]
+ * [...intersperse([42], 0)]; // [42]
+ * [...intersperse([], 0)]; // []
+ * ```
+ */
+export function* intersperse<T>(iter: Iterable<T>, separator: T): Generator<T> {
+  let first = true;
+  for (const item of iter) {
+    if (first) {
+      first = false;
+    } else {
+      yield separator;
+    }
+    yield item;
+  }
+}
+
+/**
+ * Lazily alternates elements from two iterables, stopping at the shorter one.
+ *
+ * @typeParam A - The first iterable's element type.
+ * @typeParam B - The second iterable's element type.
+ * @param a - The first iterable.
+ * @param b - The second iterable.
+ * @returns A generator yielding elements from `a` and `b` in alternation.
+ *
+ * @example
+ * ```ts
+ * [...interleave([1, 3], [2, 4])]; // [1, 2, 3, 4]
+ * [...interleave([1, 3, 5], [2, 4])]; // [1, 2, 3, 4]
+ * ```
+ */
+export function* interleave<A, B>(a: Iterable<A>, b: Iterable<B>): Generator<A | B> {
+  const ia = a[Symbol.iterator]();
+  const ib = b[Symbol.iterator]();
+  while (true) {
+    const na = ia.next();
+    const nb = ib.next();
+    if (na.done || nb.done) break;
+    yield na.value;
+    yield nb.value;
+  }
+}
+
+/**
+ * Lazily flattens nested iterables by one level.
+ *
+ * @typeParam T - The inner element type.
+ * @param iter - The source iterable of iterables.
+ * @returns A generator yielding the inner elements in order.
+ *
+ * @example
+ * ```ts
+ * [...flatten([[1, 2], [3, 4]])]; // [1, 2, 3, 4]
+ * [...flatten([["a"], [], ["b", "c"]])]; // ["a", "b", "c"]
+ * ```
+ */
+export function* flatten<T>(iter: Iterable<Iterable<T>>): Generator<T> {
+  for (const inner of iter) yield* inner;
+}
+
+/**
+ * Lazily yields sliding windows of `size` elements over the iterable.
+ *
+ * @typeParam T - The element type.
+ * @param iter - The source iterable.
+ * @param size - The window size. Must be > 0.
+ * @returns A generator yielding arrays of at most `size` elements.
+ *
+ * @example
+ * ```ts
+ * [...windows([1, 2, 3, 4], 2)]; // [[1, 2], [2, 3], [3, 4]]
+ * [...windows([1, 2], 3)]; // []
+ * [...windows([1, 2, 3], 0)]; // []
+ * ```
+ */
+export function* windows<T>(iter: Iterable<T>, size: number): Generator<T[]> {
+  if (size <= 0) return;
+  const window: T[] = [];
+  for (const item of iter) {
+    window.push(item);
+    if (window.length > size) window.shift();
+    if (window.length === size) yield [...window];
+  }
+}
+
 // ── terminal (eager) ──
 
 /**
@@ -542,4 +660,58 @@ export function partition<T>(
     else rest.push(item);
   }
   return { matching, rest };
+}
+
+/**
+ * Returns the element with the minimum key value, or `undefined` if empty.
+ *
+ * @typeParam T - The element type.
+ * @param iter - The source iterable.
+ * @param key - A function extracting a numeric key from each element.
+ * @returns The element with the smallest key, or `undefined`.
+ *
+ * @example
+ * ```ts
+ * minBy([{n: 3}, {n: 1}, {n: 2}], x => x.n); // {n: 1}
+ * minBy([], x => x); // undefined
+ * ```
+ */
+export function minBy<T>(iter: Iterable<T>, key: (item: T) => number): T | undefined {
+  let best: T | undefined;
+  let bestKey = Infinity;
+  for (const item of iter) {
+    const k = key(item);
+    if (k < bestKey) {
+      bestKey = k;
+      best = item;
+    }
+  }
+  return best;
+}
+
+/**
+ * Returns the element with the maximum key value, or `undefined` if empty.
+ *
+ * @typeParam T - The element type.
+ * @param iter - The source iterable.
+ * @param key - A function extracting a numeric key from each element.
+ * @returns The element with the largest key, or `undefined`.
+ *
+ * @example
+ * ```ts
+ * maxBy([{n: 3}, {n: 1}, {n: 2}], x => x.n); // {n: 3}
+ * maxBy([], x => x); // undefined
+ * ```
+ */
+export function maxBy<T>(iter: Iterable<T>, key: (item: T) => number): T | undefined {
+  let best: T | undefined;
+  let bestKey = -Infinity;
+  for (const item of iter) {
+    const k = key(item);
+    if (k > bestKey) {
+      bestKey = k;
+      best = item;
+    }
+  }
+  return best;
 }

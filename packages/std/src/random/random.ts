@@ -215,6 +215,67 @@ export class Random {
     const hex = () => Math.floor(this.#next() * 16).toString(16);
     return `${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}-${hex()}${hex()}${hex()}${hex()}-4${hex()}${hex()}${hex()}-${(8 + Math.floor(this.#next() * 4)).toString(16)}${hex()}${hex()}${hex()}-${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}${hex()}`;
   }
+
+  /**
+   * Returns a random hex string of the given byte length using the seeded PRNG.
+   * Each byte produces two hex characters.
+   *
+   * @param bytes - The number of random bytes (each yields two hex chars).
+   * @returns A lowercase hex string of length `2 * bytes`.
+   *
+   * @example
+   * ```ts
+   * random.randomHex(4); // "a3f1b2c0"
+   * ```
+   */
+  randomHex(bytes: number): string {
+    let result = "";
+    for (let i = 0; i < bytes; i++) {
+      const byte = Math.floor(this.#next() * 256);
+      result += byte.toString(16).padStart(2, "0");
+    }
+    return result;
+  }
+
+  /**
+   * Returns a random hex color string like `"#a3f1b2"` using the seeded PRNG.
+   *
+   * @returns A hex color string.
+   *
+   * @example
+   * ```ts
+   * random.randomColor(); // "#ff8800"
+   * ```
+   */
+  randomColor(): string {
+    const r = Math.floor(this.#next() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    const g = Math.floor(this.#next() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    const b = Math.floor(this.#next() * 256)
+      .toString(16)
+      .padStart(2, "0");
+    return `#${r}${g}${b}`;
+  }
+
+  /**
+   * Returns an exponentially-distributed random number using inverse transform
+   * sampling.
+   *
+   * @param lambda - The rate parameter (default: `1`). Higher values produce smaller numbers.
+   * @returns An exponentially-distributed number with mean `1 / lambda`.
+   *
+   * @example
+   * ```ts
+   * random.exponential(2); // ~0.3 (mean = 0.5)
+   * ```
+   */
+  exponential(lambda = 1): number {
+    const u = this.#next() || 1e-10;
+    return -Math.log(u) / lambda;
+  }
 }
 
 /**

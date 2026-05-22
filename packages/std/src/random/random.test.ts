@@ -168,3 +168,89 @@ describe("Random.weighted", () => {
     expect(rng.weighted(["only"], [0.5])).toBe("only");
   });
 });
+
+describe("Random.randomHex", () => {
+  it("returns a hex string with the correct byte length", () => {
+    const rng = createRandom(100);
+    expect(rng.randomHex(4).length).toBe(8);
+    expect(rng.randomHex(0).length).toBe(0);
+    expect(rng.randomHex(8).length).toBe(16);
+  });
+
+  it("returns only lowercase hex characters", () => {
+    const rng = createRandom(101);
+    for (let i = 0; i < 20; i++) {
+      expect(/^[0-9a-f]+$/.test(rng.randomHex(8))).toBe(true);
+    }
+  });
+
+  it("is deterministic (same seed, same output)", () => {
+    const a = createRandom(200);
+    const b = createRandom(200);
+    expect(a.randomHex(4)).toBe(b.randomHex(4));
+  });
+
+  it("produces different outputs for different seeds", () => {
+    const a = createRandom(201);
+    const b = createRandom(202);
+    expect(a.randomHex(4)).not.toBe(b.randomHex(4));
+  });
+});
+
+describe("Random.randomColor", () => {
+  it("returns a hex color string", () => {
+    const rng = createRandom(300);
+    const color = rng.randomColor();
+    expect(color).toMatch(/^#[0-9a-f]{6}$/);
+  });
+
+  it("is deterministic", () => {
+    const a = createRandom(301);
+    const b = createRandom(301);
+    expect(a.randomColor()).toBe(b.randomColor());
+  });
+
+  it("produces different colors for different seeds", () => {
+    const a = createRandom(302);
+    const b = createRandom(303);
+    expect(a.randomColor()).not.toBe(b.randomColor());
+  });
+});
+
+describe("Random.exponential", () => {
+  it("returns a non-negative number", () => {
+    const rng = createRandom(400);
+    for (let i = 0; i < 200; i++) {
+      expect(rng.exponential()).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("produces smaller values with higher lambda", () => {
+    const rng = createRandom(401);
+    // With lambda=10, values should generally be smaller than with lambda=1
+    let smallSum = 0;
+    let largeSum = 0;
+    const trials = 200;
+    for (let i = 0; i < trials; i++) {
+      smallSum += rng.exponential(10);
+      largeSum += rng.exponential(1);
+    }
+    // Average should be roughly 1/lambda: 0.1 vs 1.0
+    const smallAvg = smallSum / trials;
+    const largeAvg = largeSum / trials;
+    expect(smallAvg).toBeLessThan(largeAvg);
+  });
+
+  it("is deterministic", () => {
+    const a = createRandom(402);
+    const b = createRandom(402);
+    expect(a.exponential(2)).toBe(b.exponential(2));
+  });
+
+  it("default lambda is 1", () => {
+    const rng = createRandom(403);
+    const vals = Array.from({ length: 50 }, () => rng.exponential());
+    // All values should be non-negative
+    expect(vals.every((v) => v >= 0)).toBe(true);
+  });
+});

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { duration, filesize, durationHuman } from "./unit.js";
+import { duration, filesize, durationHuman, scientific, engineering } from "./unit.js";
 
 // ── filesize ──
 
@@ -118,4 +118,27 @@ describe("durationHuman", () => {
   it("formats hours only", () => expect(durationHuman(7_200_000)).toBe("2 hours"));
   it("formats days", () => expect(durationHuman(90_000_000)).toBe("1 day, 1 hour"));
   it("handles negative values", () => expect(durationHuman(-5_000)).toBe("5 seconds"));
+});
+
+describe("scientific", () => {
+  it("formats a positive integer", () => expect(scientific(12300)).toBe("1.23e+4"));
+  it("formats a small number with decimals", () => expect(scientific(0.00123, 2)).toBe("1.23e-3"));
+  it("formats zero", () => expect(scientific(0)).toBe("0e+0"));
+  it("formats zero with decimals", () => expect(scientific(0, 3)).toBe("0.000e+0"));
+  it("formats a negative number", () => expect(scientific(-456000)).toBe("-4.56e+5"));
+  it("formats a number between 0 and 1", () => expect(scientific(0.5)).toBe("5e-1"));
+  it("formats with decimals", () => expect(scientific(123456, 1)).toBe("1.2e+5"));
+});
+
+describe("engineering", () => {
+  it("formats with exponent as multiple of 3", () => expect(engineering(12300)).toBe("12.3e+3"));
+  it("formats a small number with decimals", () => expect(engineering(0.00123, 1)).toBe("1.2e-3"));
+  it("formats zero", () => expect(engineering(0)).toBe("0e+0"));
+  it("formats zero with decimals", () => expect(engineering(0, 3)).toBe("0.000e+0"));
+  it("formats a negative number", () => expect(engineering(-45600000)).toBe("-45.6e+6"));
+  it("keeps exponent as multiple of 3 for large numbers", () => {
+    // 1.5e6 → exponent 6 (multiple of 3)
+    expect(engineering(1_500_000)).toBe("1.5e+6");
+  });
+  it("formats a number like 1 keeping exponent 0", () => expect(engineering(42)).toBe("42e+0"));
 });

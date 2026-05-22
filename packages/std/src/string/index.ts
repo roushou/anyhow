@@ -13,4 +13,10 @@ export {
   words,
   capitalize,
   randomString,
+  decapitalize,
+  reverse,
+  padStart,
+  padEnd,
+  wrap,
+  byteLength,
 } from "./string.js";

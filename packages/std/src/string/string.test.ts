@@ -9,6 +9,12 @@ import {
   template,
   capitalize,
   randomString,
+  decapitalize,
+  reverse,
+  padStart,
+  padEnd,
+  wrap,
+  byteLength,
 } from "./string.js";
 
 describe("camelCase", () => {
@@ -112,5 +118,67 @@ describe("randomString", () => {
   });
   it("produces different strings on successive calls", () => {
     expect(randomString(16)).not.toBe(randomString(16));
+  });
+});
+
+describe("decapitalize", () => {
+  it("lowercases the first character", () => expect(decapitalize("Hello")).toBe("hello"));
+  it("leaves the rest of the string untouched", () => expect(decapitalize("HELLO")).toBe("hELLO"));
+  it("handles already-decapitalized input", () => expect(decapitalize("hello")).toBe("hello"));
+  it("handles empty string", () => expect(decapitalize("")).toBe(""));
+  it("handles single character", () => expect(decapitalize("A")).toBe("a"));
+});
+
+describe("reverse", () => {
+  it("reverses a string", () => expect(reverse("hello")).toBe("olleh"));
+  it("handles empty string", () => expect(reverse("")).toBe(""));
+  it("handles single character", () => expect(reverse("a")).toBe("a"));
+  it("handles palindrome", () => expect(reverse("racecar")).toBe("racecar"));
+  it("handles unicode characters", () => expect(reverse("a😊b")).toBe("b😊a"));
+});
+
+describe("padStart", () => {
+  it("pads to the given length", () => expect(padStart("42", 5, "0")).toBe("00042"));
+  it("defaults to space padding", () => expect(padStart("a", 3)).toBe("  a"));
+  it("returns the original when already long enough", () =>
+    expect(padStart("hello", 3)).toBe("hello"));
+  it("handles empty string", () => expect(padStart("", 3, "*")).toBe("***"));
+});
+
+describe("padEnd", () => {
+  it("pads to the given length", () => expect(padEnd("42", 5, "-")).toBe("42---"));
+  it("defaults to space padding", () => expect(padEnd("a", 3)).toBe("a  "));
+  it("returns the original when already long enough", () =>
+    expect(padEnd("hello", 3)).toBe("hello"));
+  it("handles empty string", () => expect(padEnd("", 3, "*")).toBe("***"));
+});
+
+describe("wrap", () => {
+  it("wraps text at word boundaries", () =>
+    expect(wrap("hello world foo", 9)).toBe("hello\nworld foo"));
+  it("does not wrap when text fits", () => expect(wrap("hello world", 15)).toBe("hello world"));
+  it("splits long words that exceed width", () =>
+    expect(wrap("abcdefghij", 4)).toBe("abcd\nefgh\nij"));
+  it("handles multiple spaces between words", () => expect(wrap("a  b  c", 3)).toBe("a b\nc"));
+  it("handles empty string", () => expect(wrap("", 10)).toBe(""));
+  it("handles whitespace-only string", () => expect(wrap("   ", 10)).toBe(""));
+  it("wraps mixed short and long words", () =>
+    expect(wrap("short looooongword here", 8)).toBe("short\nlooooong\nword\nhere"));
+});
+
+describe("byteLength", () => {
+  it("returns the correct byte length for ASCII", () => expect(byteLength("hello")).toBe(5));
+  it("returns 0 for empty string", () => expect(byteLength("")).toBe(0));
+  it("counts multi-byte UTF-8 characters correctly", () => {
+    // 你好 = 6 bytes (3 per Chinese character)
+    expect(byteLength("你好")).toBe(6);
+  });
+  it("handles emoji", () => {
+    // 😊 is 4 bytes in UTF-8
+    expect(byteLength("😊")).toBe(4);
+  });
+  it("handles mixed content", () => {
+    // "a你" = 1 (ASCII) + 3 (Chinese) = 4
+    expect(byteLength("a你")).toBe(4);
   });
 });

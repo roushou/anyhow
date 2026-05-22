@@ -12,6 +12,11 @@ export {
   skipWhile,
   scan,
   cycle,
+  repeat,
+  intersperse,
+  interleave,
+  flatten,
+  windows,
   first,
   last,
   count,
@@ -23,4 +28,6 @@ export {
   groupBy,
   sortBy,
   partition,
+  minBy,
+  maxBy,
 } from "./iterators.js";

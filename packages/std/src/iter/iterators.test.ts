@@ -8,15 +8,22 @@ import {
   find,
   first,
   flatMap,
+  flatten,
   forEach,
   groupBy,
+  interleave,
+  intersperse,
   last,
   map,
+  maxBy,
+  minBy,
   reduce,
+  repeat,
   skip,
   some,
   take,
   unique,
+  windows,
   zip,
 } from "./iterators.js";
 
@@ -277,6 +284,160 @@ describe("groupBy", () => {
 
 // ── composition ──
 
+describe("repeat", () => {
+  it("yields the value the given number of times", () => {
+    expect([...repeat("x", 3)]).toEqual(["x", "x", "x"]);
+  });
+  it("returns empty when times is 0", () => {
+    expect([...repeat(42, 0)]).toEqual([]);
+  });
+  it("repeats infinitely when times is omitted", () => {
+    expect([...take(repeat(7), 5)]).toEqual([7, 7, 7, 7, 7]);
+  });
+});
+
+describe("intersperse", () => {
+  it("inserts separator between elements", () => {
+    expect([...intersperse([1, 2, 3], 0)]).toEqual([1, 0, 2, 0, 3]);
+  });
+  it("returns just the element for a single-element iterable", () => {
+    expect([...intersperse([42], 0)]).toEqual([42]);
+  });
+  it("returns empty for an empty iterable", () => {
+    expect([...intersperse([], 0)]).toEqual([]);
+  });
+  it("works with strings", () => {
+    expect([...intersperse(["a", "b", "c"], "-")]).toEqual(["a", "-", "b", "-", "c"]);
+  });
+});
+
+describe("interleave", () => {
+  it("alternates elements from equal-length iterables", () => {
+    expect([...interleave([1, 3], [2, 4])]).toEqual([1, 2, 3, 4]);
+  });
+  it("stops at the shorter iterable (first shorter)", () => {
+    expect([...interleave([1, 3, 5], [2, 4])]).toEqual([1, 2, 3, 4]);
+  });
+  it("stops at the shorter iterable (second shorter)", () => {
+    expect([...interleave([1, 3], [2, 4, 6])]).toEqual([1, 2, 3, 4]);
+  });
+  it("returns empty when first is empty", () => {
+    expect([...interleave([], [1, 2])]).toEqual([]);
+  });
+  it("returns empty when second is empty", () => {
+    expect([...interleave([1, 2], [])]).toEqual([]);
+  });
+  it("works with heterogeneous types", () => {
+    expect([...interleave(["a", "b"], [1, 2])]).toEqual(["a", 1, "b", 2]);
+  });
+});
+
+describe("flatten", () => {
+  it("flattens nested arrays by one level", () => {
+    expect([
+      ...flatten([
+        [1, 2],
+        [3, 4],
+      ]),
+    ]).toEqual([1, 2, 3, 4]);
+  });
+  it("skips empty inner iterables", () => {
+    expect([...flatten([["a"], [], ["b", "c"]])]).toEqual(["a", "b", "c"]);
+  });
+  it("returns empty for an empty outer iterable", () => {
+    expect([...flatten([])]).toEqual([]);
+  });
+  it("returns empty when all inner iterables are empty", () => {
+    expect([...flatten([[], [], []])]).toEqual([]);
+  });
+});
+
+describe("windows", () => {
+  it("yields sliding windows", () => {
+    expect([...windows([1, 2, 3, 4], 2)]).toEqual([
+      [1, 2],
+      [2, 3],
+      [3, 4],
+    ]);
+  });
+  it("returns a single window when size equals length", () => {
+    expect([...windows([1, 2, 3], 3)]).toEqual([[1, 2, 3]]);
+  });
+  it("returns empty when size is larger than length", () => {
+    expect([...windows([1, 2], 3)]).toEqual([]);
+  });
+  it("returns empty when size is 0", () => {
+    expect([...windows([1, 2, 3], 0)]).toEqual([]);
+  });
+  it("returns empty when size is negative", () => {
+    expect([...windows([1, 2, 3], -1)]).toEqual([]);
+  });
+  it("returns empty for an empty iterable", () => {
+    expect([...windows([], 2)]).toEqual([]);
+  });
+  it("handles size 1", () => {
+    expect([...windows([1, 2, 3], 1)]).toEqual([[1], [2], [3]]);
+  });
+});
+
+describe("minBy", () => {
+  it("returns the element with the minimum key", () => {
+    expect(minBy([{ n: 3 }, { n: 1 }, { n: 2 }], (x) => x.n)).toEqual({ n: 1 });
+  });
+  it("returns the first minimum when there are ties", () => {
+    expect(
+      minBy(
+        [
+          { n: 1, id: "a" },
+          { n: 1, id: "b" },
+        ],
+        (x) => x.n,
+      ),
+    ).toEqual({
+      n: 1,
+      id: "a",
+    });
+  });
+  it("returns undefined for an empty iterable", () => {
+    expect(minBy([], (x: { n: number }) => x.n)).toBeUndefined();
+  });
+  it("returns the only element for a single-element iterable", () => {
+    expect(minBy([{ n: 5 }], (x) => x.n)).toEqual({ n: 5 });
+  });
+  it("works with negative keys", () => {
+    expect(minBy([{ n: -5 }, { n: 3 }, { n: -1 }], (x) => x.n)).toEqual({ n: -5 });
+  });
+});
+
+describe("maxBy", () => {
+  it("returns the element with the maximum key", () => {
+    expect(maxBy([{ n: 3 }, { n: 1 }, { n: 2 }], (x) => x.n)).toEqual({ n: 3 });
+  });
+  it("returns the first maximum when there are ties", () => {
+    expect(
+      maxBy(
+        [
+          { n: 3, id: "a" },
+          { n: 3, id: "b" },
+        ],
+        (x) => x.n,
+      ),
+    ).toEqual({
+      n: 3,
+      id: "a",
+    });
+  });
+  it("returns undefined for an empty iterable", () => {
+    expect(maxBy([], (x: { n: number }) => x.n)).toBeUndefined();
+  });
+  it("returns the only element for a single-element iterable", () => {
+    expect(maxBy([{ n: 5 }], (x) => x.n)).toEqual({ n: 5 });
+  });
+  it("works with negative keys", () => {
+    expect(maxBy([{ n: -5 }, { n: -3 }, { n: -1 }], (x) => x.n)).toEqual({ n: -1 });
+  });
+});
+
 describe("composition", () => {
   it("pipelines map → filter → take", () => {
     const result = [
@@ -302,5 +463,13 @@ describe("composition", () => {
 
   it("pipelines filter → first", () => {
     expect(first(filter([1, 2, 3, 4], (n) => n > 2))).toBe(3);
+  });
+
+  it("pipelines repeat → take", () => {
+    expect([...take(repeat("!", undefined), 3)]).toEqual(["!", "!", "!"]);
+  });
+
+  it("pipelines intersperse → take", () => {
+    expect([...take(intersperse(repeat(1, 10), 0), 5)]).toEqual([1, 0, 1, 0, 1]);
   });
 });

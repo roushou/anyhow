@@ -232,3 +232,55 @@ export function durationHuman(ms: number): string {
 
   return parts.join(", ");
 }
+
+// ── scientific / engineering ──
+
+/**
+ * Formats a number in scientific notation (e.g. `"1.23e+4"`).
+ *
+ * @param value - The number to format.
+ * @param decimals - Number of decimal places for the mantissa (default: as many as needed).
+ * @returns The formatted string.
+ *
+ * @example
+ * ```ts
+ * scientific(12300);       // "1.23e+4"
+ * scientific(0.00123, 2);  // "1.23e-3"
+ * scientific(0);           // "0e+0"
+ * ```
+ */
+export function scientific(value: number, decimals?: number): string {
+  if (value === 0) return decimals !== undefined ? `0.${"0".repeat(decimals)}e+0` : "0e+0";
+  const exp = Math.floor(Math.log10(Math.abs(value)));
+  const mantissa = value / Math.pow(10, exp);
+  const m = decimals !== undefined ? mantissa.toFixed(decimals) : String(mantissa);
+  const e = exp >= 0 ? `e+${exp}` : `e${exp}`;
+  return `${m}${e}`;
+}
+
+/**
+ * Formats a number in engineering notation where the exponent is always a
+ * multiple of 3 (e.g. `"12.3e+3"`).
+ *
+ * @param value - The number to format.
+ * @param decimals - Number of decimal places for the mantissa (default: as many as needed).
+ * @returns The formatted string.
+ *
+ * @example
+ * ```ts
+ * engineering(12300);       // "12.3e+3"
+ * engineering(0.00123, 1);  // "1.2e-3"
+ * engineering(0);           // "0e+0"
+ * ```
+ */
+export function engineering(value: number, decimals?: number): string {
+  if (value === 0) return decimals !== undefined ? `0.${"0".repeat(decimals)}e+0` : "0e+0";
+  const rawExp = Math.floor(Math.log10(Math.abs(value)));
+  // Round exponent down to the nearest multiple of 3
+  const remainder = ((rawExp % 3) + 3) % 3;
+  const exp = rawExp - remainder;
+  const mantissa = value / Math.pow(10, exp);
+  const m = decimals !== undefined ? mantissa.toFixed(decimals) : String(mantissa);
+  const e = exp >= 0 ? `e+${exp}` : `e${exp}`;
+  return `${m}${e}`;
+}

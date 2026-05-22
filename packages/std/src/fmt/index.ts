@@ -8,4 +8,6 @@ export {
   ordinal,
   compact,
   durationHuman,
+  scientific,
+  engineering,
 } from "./unit.js";

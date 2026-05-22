@@ -143,3 +143,130 @@ export const randomString = (length: number): string => {
   }
   return result;
 };
+
+/**
+ * Lowercases the first character of a string, leaving the rest unchanged.
+ *
+ * @param str - The input string.
+ * @returns The string with the first character lowercased.
+ *
+ * @example
+ * ```ts
+ * decapitalize("Hello"); // "hello"
+ * decapitalize("HELLO"); // "hELLO"
+ * decapitalize(""); // ""
+ * ```
+ */
+export const decapitalize = (str: string): string => str.charAt(0).toLowerCase() + str.slice(1);
+
+/**
+ * Reverses the string.
+ *
+ * @param str - The input string.
+ * @returns The reversed string.
+ *
+ * @example
+ * ```ts
+ * reverse("hello"); // "olleh"
+ * reverse(""); // ""
+ * ```
+ */
+export const reverse = (str: string): string => [...str].reverse().join("");
+
+/**
+ * Pads the start of a string. Thin wrapper around `String.prototype.padStart`.
+ *
+ * @param str - The input string.
+ * @param length - The target length.
+ * @param padString - The string to pad with (default: `" "`).
+ * @returns The padded string.
+ *
+ * @example
+ * ```ts
+ * padStart("42", 5, "0"); // "00042"
+ * ```
+ */
+export const padStart = (str: string, length: number, padString?: string): string =>
+  str.padStart(length, padString);
+
+/**
+ * Pads the end of a string. Thin wrapper around `String.prototype.padEnd`.
+ *
+ * @param str - The input string.
+ * @param length - The target length.
+ * @param padString - The string to pad with (default: `" "`).
+ * @returns The padded string.
+ *
+ * @example
+ * ```ts
+ * padEnd("42", 5, "-"); // "42---"
+ * ```
+ */
+export const padEnd = (str: string, length: number, padString?: string): string =>
+  str.padEnd(length, padString);
+
+/**
+ * Wraps text at the given width, breaking at word boundaries where possible.
+ * Words longer than the width are split mid-word.
+ *
+ * @param str - The input string.
+ * @param width - The maximum line width.
+ * @returns The wrapped string with lines joined by `"\n"`.
+ *
+ * @example
+ * ```ts
+ * wrap("hello world foo", 9); // "hello\nworld foo"
+ * wrap("abcdefghij", 4); // "abcd\nefgh\nij"
+ * ```
+ */
+export const wrap = (str: string, width: number): string => {
+  const words = str.split(/\s+/);
+  if (words.length === 0 || words[0] === "") return "";
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    if (current.length === 0) {
+      // First word on a new line
+      if (word.length > width) {
+        let remaining = word;
+        while (remaining.length > width) {
+          lines.push(remaining.slice(0, width));
+          remaining = remaining.slice(width);
+        }
+        current = remaining;
+      } else {
+        current = word;
+      }
+    } else if (current.length + 1 + word.length <= width) {
+      current += " " + word;
+    } else {
+      lines.push(current);
+      if (word.length > width) {
+        let remaining = word;
+        while (remaining.length > width) {
+          lines.push(remaining.slice(0, width));
+          remaining = remaining.slice(width);
+        }
+        current = remaining;
+      } else {
+        current = word;
+      }
+    }
+  }
+  if (current.length > 0) lines.push(current);
+  return lines.join("\n");
+};
+
+/**
+ * Returns the UTF-8 byte length of a string.
+ *
+ * @param str - The input string.
+ * @returns The number of bytes in the UTF-8 encoding.
+ *
+ * @example
+ * ```ts
+ * byteLength("hello"); // 5
+ * byteLength("你好"); // 6
+ * ```
+ */
+export const byteLength = (str: string): number => new TextEncoder().encode(str).length;
