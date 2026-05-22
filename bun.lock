@@ -12,29 +12,20 @@
         "typescript": "^6",
       },
     },
-    "packages/fs": {
-      "name": "@anyhow/fs",
-      "version": "0.1.5",
-      "dependencies": {
-        "@anyhow/std": "workspace:*",
-      },
-    },
-    "packages/schema": {
-      "name": "@anyhow/schema",
-      "version": "0.1.5",
+    "packages/cli": {
+      "name": "@anyhow/cli",
+      "version": "0.1.0",
       "dependencies": {
         "@anyhow/std": "workspace:*",
       },
     },
     "packages/std": {
       "name": "@anyhow/std",
-      "version": "0.3.0",
+      "version": "0.1.0",
     },
   },
   "packages": {
-    "@anyhow/fs": ["@anyhow/fs@workspace:packages/fs"],
-
-    "@anyhow/schema": ["@anyhow/schema@workspace:packages/schema"],
+    "@anyhow/cli": ["@anyhow/cli@workspace:packages/cli"],
 
     "@anyhow/std": ["@anyhow/std@workspace:packages/std"],
 

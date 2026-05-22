@@ -10,6 +10,7 @@ A batteries-included TypeScript utility toolkit featuring type-safe error handli
 
 ```bash
 bun add @anyhow/std
+bun add @anyhow/cli
 ```
 
 ## Modules
@@ -572,7 +573,7 @@ import {
 const text = await readText("./file.txt");
 if (text.ok) console.log(text.value);
 
-const config = await readJson<AppConfig>("./config.json");
+const config = await readJson<CliConfig>("./config.json");
 if (!config.ok) {
   console.error("Bad config:", config.error);
   process.exit(1);
@@ -659,6 +660,37 @@ s.instanceof(Date); // instanceof check
 const Admin = User.extend({ role: s.string() }); // add fields
 const Public = User.omit(["age"]); // remove fields
 const Subset = User.pick(["name"]); // keep only these fields
+```
+
+### CLI
+
+Declarative CLI framework — define commands as plain objects with full type inference.
+
+```bash
+bun add @anyhow/cli
+```
+
+```ts
+import { defineCommand, defineCli } from "@anyhow/cli";
+
+const deploy = defineCommand({
+  name: "deploy",
+  description: "Deploy to environment",
+  arguments: { env: { type: "string", required: true, description: "Target environment" } },
+  options: { force: { type: "boolean", short: "f", description: "Skip confirmation" } },
+  async action({ args, options }) {
+    // args.env is string, options.force is boolean
+    console.log(`Deploying to ${args.env}`);
+  },
+});
+
+const cli = defineCli({
+  name: "mycli",
+  description: "A sample CLI",
+  commands: [deploy],
+});
+
+await cli.run(process.argv.slice(2));
 ```
 
 ## Development
