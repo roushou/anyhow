@@ -98,6 +98,11 @@
       "import": "./dist/date/index.js",
       "require": "./dist/date/index.cjs",
       "types": "./dist/date/index.d.ts"
+    },
+    "./bytes": {
+      "import": "./dist/bytes/index.js",
+      "require": "./dist/bytes/index.cjs",
+      "types": "./dist/bytes/index.d.ts"
     }
   },
   "publishConfig": {

@@ -18,6 +18,7 @@ const modules = [
   "schema",
   "http",
   "date",
+  "bytes",
 ];
 
 // Clean dist first

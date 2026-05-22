@@ -693,6 +693,48 @@ const ts = toUnix(new Date()); // seconds
 const d = fromUnix(1704067200); // Date
 ```
 
+### Bytes
+
+Hex, Base64, and UTF-8 encoding/decoding. Zero dependencies, works everywhere
+`TextEncoder`/`TextDecoder` are available (browser, Node, Bun, Deno).
+
+```ts
+import {
+  toHex,
+  fromHex,
+  toBase64,
+  fromBase64,
+  toBase64Url,
+  fromBase64Url,
+  toUTF8,
+  fromUTF8,
+} from "@anyhow/std/bytes";
+
+// Hex
+toHex(new Uint8Array([0, 255, 16])); // "00ff10"
+fromHex("00ff10"); // Uint8Array [0, 255, 16]
+fromHex("0x00ff"); // 0x prefix is stripped
+
+// Standard Base64 (with +/ and = padding)
+toBase64(toUTF8("hello")); // "aGVsbG8="
+fromBase64("aGVsbG8="); // Uint8Array [104, 101, ...]
+
+// URL-safe Base64 (with -_ and no padding) — safe in URLs, JWTs, etc.
+toBase64Url(new Uint8Array([255])); // "_w" (vs "/w==" in standard)
+toBase64Url(crypto.getRandomValues(new Uint8Array(32))); // "dGhpcyBpc..."
+
+// UTF-8
+const bytes = toUTF8("Hello, 世界!"); // Uint8Array
+fromUTF8(bytes); // "Hello, 世界!"
+
+// All to* functions accept Uint8Array, ArrayBuffer, or ArrayBufferView
+const hash = await crypto.subtle.digest("SHA-256", toUTF8("data"));
+toHex(hash); // works with ArrayBuffer directly
+
+// fromHex / fromBase64 / fromBase64Url throw on invalid input
+fromHex("xyz"); // throws
+```
+
 ### FS
 
 Safe filesystem operations that return {@link Result} instead of throwing.
