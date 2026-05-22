@@ -754,7 +754,8 @@ import {
   cursorHide,
   cursorShow,
   link,
-  Spinner, SPINNER_FRAMES,
+  Spinner,
+  SPINNER_FRAMES,
 } from "@anyhow/std/term";
 
 // Chainable style builder
@@ -806,6 +807,33 @@ const result = await spinner.run(() => fetchData());
 
 // Custom frames and interval
 const dots = new Spinner({ text: "Thinking", frames: SPINNER_FRAMES.dots, interval: 80 });
+```
+
+### Semver
+
+SemVer parsing, comparison, range matching (caret, tilde, wildcards, operators),
+and version bumping.
+
+```ts
+import { semver } from "@anyhow/std/semver";
+
+const v = semver("1.2.3");
+v.major; // 1
+v.lt("2.0.0"); // true (accepts strings)
+v.satisfies("^1.0.0"); // true
+const next = v.bump("minor"); // new SemVerObj
+next.toString(); // "1.3.0"
+next.bump("patch").toString(); // "1.3.1" — chains
+
+// Static helpers
+semver.valid("1.2.3"); // true
+semver.coerce("v1.2"); // SemVerObj("1.2.0")
+semver.sort(["2.0.0", "1.0.0"]); // ["1.0.0", "2.0.0"]
+semver.max(["1.0.0", "2.0.0"]); // "2.0.0"
+semver.diff("1.0.0", "1.0.1"); // "patch"
+
+// Low-level functional API still available
+import { parse, compare, satisfies, bump } from "@anyhow/std/semver";
 ```
 
 ### FS

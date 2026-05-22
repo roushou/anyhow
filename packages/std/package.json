@@ -108,6 +108,11 @@
       "import": "./dist/term/index.js",
       "require": "./dist/term/index.cjs",
       "types": "./dist/term/index.d.ts"
+    },
+    "./semver": {
+      "import": "./dist/semver/index.js",
+      "require": "./dist/semver/index.cjs",
+      "types": "./dist/semver/index.d.ts"
     }
   },
   "publishConfig": {

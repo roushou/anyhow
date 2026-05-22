@@ -20,6 +20,7 @@ const modules = [
   "date",
   "bytes",
   "term",
+  "semver",
 ];
 
 // Clean dist first
