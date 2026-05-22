@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir, rm, stat, readdir } from "node:fs/promises";
 import { join, relative, dirname } from "node:path";
-import { safe } from "../safe/safe.js";
+import { ResultStatic as R } from "../result/static.js";
 import type { Result } from "../result/result.js";
 
 /**
@@ -16,7 +16,7 @@ import type { Result } from "../result/result.js";
  * ```
  */
 export function readText(path: string): Promise<Result<string>> {
-  return safe.async(() => readFile(path, "utf-8"));
+  return R.fromAsync(() => readFile(path, "utf-8"));
 }
 
 /**
@@ -34,7 +34,7 @@ export function readText(path: string): Promise<Result<string>> {
 export async function readJson<T = unknown>(path: string): Promise<Result<T>> {
   const text = await readText(path);
   if (!text.ok) return text;
-  return safe.json<T>(text.value);
+  return R.json<T>(text.value);
 }
 
 /**
@@ -50,8 +50,8 @@ export async function readJson<T = unknown>(path: string): Promise<Result<T>> {
  * ```
  */
 export async function writeText(path: string, content: string): Promise<Result<void>> {
-  await safe.async(() => mkdir(dirname(path), { recursive: true }).then(() => {}));
-  return safe.async(() => writeFile(path, content, "utf-8"));
+  await R.fromAsync(() => mkdir(dirname(path), { recursive: true }).then(() => {}));
+  return R.fromAsync(() => writeFile(path, content, "utf-8"));
 }
 
 /**
@@ -72,7 +72,7 @@ export async function writeJson(
   data: unknown,
   space?: string | number,
 ): Promise<Result<void>> {
-  const json = safe.jsonStringify(data, space);
+  const json = R.jsonStringify(data, space);
   if (!json.ok) return json;
   return writeText(path, json.value);
 }
@@ -89,7 +89,7 @@ export async function writeJson(
  * ```
  */
 export function ensureDir(path: string): Promise<Result<void>> {
-  return safe.async(() => mkdir(path, { recursive: true }).then(() => {}));
+  return R.fromAsync(() => mkdir(path, { recursive: true }).then(() => {}));
 }
 
 /**
@@ -104,7 +104,7 @@ export function ensureDir(path: string): Promise<Result<void>> {
  * ```
  */
 export function remove(path: string): Promise<Result<void>> {
-  return safe.async(() => rm(path, { recursive: true, force: true }));
+  return R.fromAsync(() => rm(path, { recursive: true, force: true }));
 }
 
 /**
@@ -148,7 +148,7 @@ export async function exists(path: string): Promise<boolean> {
 export async function tmpDir(prefix = "anyhow-"): Promise<Result<string>> {
   const { mkdtemp } = await import("node:fs/promises");
   const { tmpdir } = await import("node:os");
-  return safe.async(() => mkdtemp(join(tmpdir(), prefix)));
+  return R.fromAsync(() => mkdtemp(join(tmpdir(), prefix)));
 }
 
 /**
@@ -167,7 +167,7 @@ export async function tmpDir(prefix = "anyhow-"): Promise<Result<string>> {
  * ```
  */
 export async function glob(pattern: string): Promise<Result<string[]>> {
-  return safe.async(async () => {
+  return R.fromAsync(async () => {
     // Handle absolute paths
     const isAbsolute = pattern.startsWith("/");
     const parts = pattern.split("/");

@@ -3,6 +3,7 @@ import { ok, err, type Result } from "./result.js";
 import { ResultStatic as R } from "./static.js";
 import { pipeline } from "./pipeline.js";
 import { Stepper } from "./stepper.js";
+import { isObject, hasProperty, isString, isNumber } from "../guard/index.js";
 
 // ── Constructors ──
 
@@ -390,6 +391,122 @@ describe("Pipeline", () => {
     const r = a.chain(b).run("5");
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value).toBe(10);
+  });
+});
+
+// ── Result.json ──
+
+describe("Result.json", () => {
+  it("returns ok with parsed value for valid JSON", () => {
+    const result = R.json<{ name: string }>('{"name":"Alice"}');
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value.name).toBe("Alice");
+  });
+
+  it("returns ok with arrays", () => {
+    const result = R.json<number[]>("[1,2,3]");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toEqual([1, 2, 3]);
+  });
+
+  it("returns err for invalid JSON", () => {
+    const result = R.json("{bad");
+    expect(result.ok).toBe(false);
+  });
+
+  it("passes validation when validator matches", () => {
+    const result = R.json(
+      '{"name":"Alice","age":30}',
+      (v): v is { name: string; age: number } =>
+        isObject(v) && hasProperty(v, "name", isString) && hasProperty(v, "age", isNumber),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.name).toBe("Alice");
+      expect(result.value.age).toBe(30);
+    }
+  });
+
+  it("fails validation when validator rejects", () => {
+    const result = R.json(
+      '{"name":"Alice"}',
+      (v): v is { name: string; age: number } => isObject(v) && hasProperty(v, "age", isNumber),
+    );
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ── Result.jsonStringify ──
+
+describe("Result.jsonStringify", () => {
+  it("returns ok with JSON string on success", () => {
+    const result = R.jsonStringify({ name: "Alice" });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(JSON.parse(result.value)).toEqual({ name: "Alice" });
+  });
+
+  it("respects the space parameter", () => {
+    const result = R.jsonStringify({ a: 1 }, 2);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe('{\n  "a": 1\n}');
+  });
+
+  it("returns err for circular references", () => {
+    const obj: Record<string, unknown> = {};
+    obj.self = obj;
+    const result = R.jsonStringify(obj);
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ── Result.parseInt ──
+
+describe("Result.parseInt", () => {
+  it("returns ok with the parsed integer", () => {
+    const result = R.parseInt("42");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(42);
+  });
+
+  it("respects radix", () => {
+    const result = R.parseInt("ff", 16);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(255);
+  });
+
+  it("returns err for non-numeric input", () => {
+    const result = R.parseInt("hello");
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ── Result.parseFloat ──
+
+describe("Result.parseFloat", () => {
+  it("returns ok with the parsed float", () => {
+    const result = R.parseFloat("3.14");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe(3.14);
+  });
+
+  it("returns err for non-numeric input", () => {
+    const result = R.parseFloat("hello");
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ── Result.decodeURIComponent ──
+
+describe("Result.decodeURIComponent", () => {
+  it("returns ok with the decoded string", () => {
+    const result = R.decodeURIComponent("hello%20world");
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.value).toBe("hello world");
+  });
+
+  it("returns err for malformed input", () => {
+    const result = R.decodeURIComponent("%ZZ");
+    expect(result.ok).toBe(false);
   });
 });
 

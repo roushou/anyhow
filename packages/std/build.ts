@@ -11,7 +11,6 @@ const modules = [
   "string",
   "random",
   "option",
-  "safe",
   "data",
   "collections",
   "fs",

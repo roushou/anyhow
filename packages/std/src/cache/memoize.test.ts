@@ -1,5 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
-import { memoizeSync } from "./memoize.js";
+import { memoizeSync } from "../async/memoize-sync.js";
 
 describe("memoizeSync", () => {
   it("caches results", () => {

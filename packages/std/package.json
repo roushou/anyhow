@@ -62,11 +62,6 @@
       "require": "./dist/option/index.cjs",
       "types": "./dist/option/index.d.ts"
     },
-    "./safe": {
-      "import": "./dist/safe/index.js",
-      "require": "./dist/safe/index.cjs",
-      "types": "./dist/safe/index.d.ts"
-    },
     "./data": {
       "import": "./dist/data/index.js",
       "require": "./dist/data/index.cjs",

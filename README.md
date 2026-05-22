@@ -60,6 +60,11 @@ divide(10, 0)
 Result.from(() => JSON.parse(text)); // wrap throwy sync
 Result.fromAsync(() => fetch("/api")); // wrap throwy async
 Result.fromNullable(env.PORT, new Error("…")); // nullable → Result
+Result.json('{"name":"Alice"}'); // safe JSON parse → Result
+Result.jsonStringify({ name: "Alice" }, 2); // safe stringify
+Result.parseInt("42"); // safe parseInt → Result
+Result.parseFloat("3.14"); // safe parseFloat → Result
+Result.decodeURIComponent("hello%20world"); // safe URI decode
 
 Result.all([ok(1), ok(2), ok(3)]); // Ok([1, 2, 3])
 Result.partition([ok(1), err("a"), ok(2)]); // { ok: [1,2], err: ["a"] }
@@ -250,39 +255,6 @@ const memoized = memoizeAsync(fetchUser, {
   ttlMs: 60_000,
   resolver: (userId: string) => userId, // use userId as key directly
 });
-```
-
-### Safe
-
-Wraps unsafe JavaScript operations (throwy functions, `NaN`-returning parsers,
-missing env vars) in {@link Result} or {@link Option}.
-
-`safe.sync` and `safe.async` delegate to {@link Result.from} and
-{@link Result.fromAsync} — use either API.
-
-```ts
-import { safe } from "@anyhow/std/safe";
-
-// Wrap any throwy function
-const parsed = safe.sync(() => JSON.parse('{"name":"Alice"}'));
-const data = await safe.async(() => fetch("/api").then((r) => r.json()));
-
-// JSON helpers
-safe.json('{"name":"Alice"}'); // Result<unknown>
-// With a schema (from @anyhow/std/schema):
-const User = s.object({ name: s.string() });
-const user = safe.json('{"name":"Alice"}', User.parse); // Result<{ name: string }>
-safe.jsonStringify({ name: "Alice" }); // Result<string>
-
-// Parse without NaN
-safe.parseInt("42"); // { ok: true, value: 42 }
-safe.parseFloat("3.14"); // { ok: true, value: 3.14 }
-
-// Safe URI decoding
-safe.decodeURIComponent("hello%20world"); // { ok: true, value: "hello world" }
-
-// Environment variables (Option — missing isn't an error)
-safe.env("API_KEY"); // { some: true, value: "sk-abc123" }
 ```
 
 ### String

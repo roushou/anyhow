@@ -53,10 +53,13 @@ Should conform to the Result pattern (or offer a safe variant).
 
 Missing `leading` option for `debounce` and `trailing` option for `throttle`.
 
-### 9. `safe.json` doesn't integrate with `@anyhow/std/schema`
+### 9. ~~`safe.json` doesn't integrate with `@anyhow/std/schema`~~ — MERGED INTO RESULT
 
-Currently accepts a raw type guard, but should accept a `Schema` for richer validation
-with proper error messages.
+~~Currently accepts a raw type guard, but should accept a `Schema` for richer validation
+with proper error messages.~~
+
+**Fix**: `safe` module merged into `Result`. `Result.json(text, validator)` accepts
+`Schema.parse` (which returns a `Result`) for first-class schema integration.
 
 ---
 
@@ -410,16 +413,6 @@ export type { MaybePromise<T> }
 export type { Fn, AsyncFn, Predicate, Guard }
 export type { Entries, Keys, Values }
 export type { UnionToIntersection }
-```
-
-### `safe` namespace expansion
-
-```ts
-safe.boolean(text)           // "true"/"false" → Result<boolean>
-safe.url(text)               // new URL() → Result<URL>
-safe.date(text)              // Date.parse → Result<Date> (no NaN)
-safe.regex(pattern, flags?)  // new RegExp() → Result<RegExp>
-safe.promise(promise)        // Promise → Promise<Result<T>>
 ```
 
 ### LRU improvements
