@@ -93,6 +93,11 @@
       "import": "./dist/http/index.js",
       "require": "./dist/http/index.cjs",
       "types": "./dist/http/index.d.ts"
+    },
+    "./date": {
+      "import": "./dist/date/index.js",
+      "require": "./dist/date/index.cjs",
+      "types": "./dist/date/index.d.ts"
     }
   },
   "publishConfig": {

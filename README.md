@@ -603,6 +603,82 @@ const fib = memoizeSync(
 );
 ```
 
+### Date
+
+Date arithmetic, comparison, boundaries, and queries. Zero-dependency date math
+that fills the gap between `new Date()` and `Intl` formatting (which lives in `@anyhow/std/fmt`).
+
+```ts
+import {
+  addDays,
+  subDays,
+  addMonths,
+  addYears,
+  differenceInDays,
+  differenceInMonths,
+  isBefore,
+  isAfter,
+  isSameDay,
+  isToday,
+  isPast,
+  isFuture,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  startOfMonth,
+  daysInMonth,
+  isLeapYear,
+  getQuarter,
+  dateRange,
+  clampDate,
+  minDate,
+  maxDate,
+  fromUnix,
+  toUnix,
+} from "@anyhow/std/date";
+
+// Arithmetic — always returns a new Date
+const nextWeek = addDays(new Date(), 7);
+const lastMonth = subMonths(new Date(), 1);
+
+// Feb 29 + 1 year correctly clamps to Feb 28 on non-leap years
+const nextBirthday = addYears(new Date("2024-02-29"), 1); // 2025-02-28
+
+// Differences
+const age = differenceInYears(new Date(), new Date("1990-05-15"));
+const daysUntil = differenceInDays(new Date("2025-01-01"), new Date());
+
+// Comparisons
+isBefore(new Date("2024-01-01"), new Date("2024-06-15")); // true
+isToday(someDate);
+isPast(deadline);
+isWeekend(new Date("2024-01-06")); // true (Saturday)
+isLeapYear(new Date("2024-01-01")); // true
+
+// Boundaries
+startOfDay(new Date()); // today at 00:00:00.000
+endOfMonth(new Date("2024-03-15")); // 2024-03-31T23:59:59.999
+startOfWeek(new Date("2024-01-03")); // Monday Jan 1 (ISO week)
+
+// Queries
+daysInMonth(new Date("2024-02-01")); // 29 (leap year)
+getQuarter(new Date("2024-07-01")); // 3
+dayOfYear(new Date("2024-12-31")); // 366
+
+// Ranges
+for (const d of dateRange(new Date("2024-01-01"), new Date("2024-01-07"))) {
+  console.log(d); // Jan 1, Jan 2, ..., Jan 7
+}
+
+// Clamping & min/max
+const safe = clampDate(userDate, new Date("2024-01-01"), new Date("2024-12-31"));
+const earliest = minDate([d1, d2, d3]);
+
+// Unix timestamps
+const ts = toUnix(new Date()); // seconds
+const d = fromUnix(1704067200); // Date
+```
+
 ### FS
 
 Safe filesystem operations that return {@link Result} instead of throwing.

@@ -17,6 +17,7 @@ const modules = [
   "env",
   "schema",
   "http",
+  "date",
 ];
 
 // Clean dist first
