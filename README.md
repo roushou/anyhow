@@ -276,6 +276,14 @@ import {
   escapeRegExp,
   lines,
   words,
+  capitalize,
+  randomString,
+  decapitalize,
+  reverse,
+  padStart,
+  padEnd,
+  wrap,
+  byteLength,
 } from "@anyhow/std/string";
 
 // Case conversion
@@ -307,6 +315,20 @@ escapeRegExp("1 + 1 = 2?"); // "1 \\+ 1 = 2\\?"
 // Split into lines or words
 lines("a\nb\nc"); // ["a", "b", "c"]
 words("hello  world"); // ["hello", "world"]
+
+// Case manipulation
+capitalize("hello"); // "Hello"
+decapitalize("Hello"); // "hello"
+
+// Padding and wrapping
+padStart("42", 5, "0"); // "00042"
+padEnd("42", 5, "0"); // "42000"
+wrap("hello world", 5); // ["hello", "world"]
+
+// Other utilities
+reverse("hello"); // "olleh"
+byteLength("hello"); // 5
+randomString(8); // "a3f1b2c0"
 ```
 
 ### Fmt
@@ -329,6 +351,9 @@ import {
   ordinal,
   compact,
   percentage,
+  durationHuman,
+  scientific,
+  engineering,
 } from "@anyhow/std/fmt";
 
 // Strings
@@ -357,6 +382,9 @@ compact(1_234_567); // "1.2M"
 percentage(0.857, 2); // "85.70%"
 percentage(0.5); // "50%"
 durationMs(450); // "450ms"
+durationHuman(3_661_000); // "1 hour 1 minute 1 second"
+scientific(1_234_567); // "1.234567e6"
+engineering(1_234_567); // "1.234567M"
 ```
 
 ### Iter
@@ -374,6 +402,11 @@ import {
   skipWhile,
   scan,
   cycle,
+  repeat,
+  intersperse,
+  interleave,
+  flatten,
+  windows,
   enumerate,
   unique,
   zip,
@@ -389,6 +422,8 @@ import {
   groupBy,
   sortBy,
   partition,
+  minBy,
+  maxBy,
 } from "@anyhow/std/iter";
 
 map([1, 2, 3], (n) => n * 2); // [2, 4, 6]
@@ -410,13 +445,29 @@ scan([1, 2, 3], (acc, n) => acc + n, 0); // [1, 3, 6]
 // Cycling
 cycle(["a", "b"], 5); // ["a", "b", "a", "b", "a"]
 
+// Repeating a value
+repeat(42, 3); // [42, 42, 42]
+
+// Interleaving
+intersperse([1, 2, 3], 0); // [1, 0, 2, 0, 3]
+interleave([1, 3], [2, 4]); // [1, 2, 3, 4]
+
+// Flattening and windows
+flatten([
+  [1, 2],
+  [3, 4],
+]); // [1, 2, 3, 4]
+windows([1, 2, 3, 4], 2); // [[1, 2], [2, 3], [3, 4]]
+
 // Sorting
 sortBy([3, 1, 4, 1, 5]); // [1, 1, 3, 4, 5]
 sortBy(["cat", "elephant", "dog"], (s) => s.length); // ["cat", "dog", "elephant"]
 
-// Partition
+// Partition and extremum
 partition([1, 2, 3, 4], (n) => n % 2 === 0);
 // { matching: [2, 4], nonMatching: [1, 3] }
+minBy(["cat", "elephant", "dog"], (s) => s.length); // "cat"
+maxBy(["cat", "elephant", "dog"], (s) => s.length); // "elephant"
 ```
 
 ### Math
@@ -505,6 +556,9 @@ random.int(1, 6); // 4
 random.float(0, 1); // 0.573…
 random.bool(); // true
 random.pick(["a", "b", "c"]); // "b"
+random.randomHex(4); // "a3f1b2c0"
+random.randomColor(); // "#a3f1b2"
+random.exponential(); // 0.573…
 random.shuffle([1, 2, 3]); // [3, 1, 2]
 random.weighted(["a", "b"], [0.9, 0.1]); // "a" most of the time
 random.gaussian(100, 15); // normally-distributed (mean 100, stddev 15)

@@ -39,19 +39,27 @@ anyhow/
     │   ├── package.json   # Subpath exports map
     │   ├── build.ts       # Dual ESM/CJS build script
     │   └── src/
-    │       ├── result/    # Result<T, E> type + methods + static combinators
+    │       ├── result/    # Result<T, E> type + methods + Pipeline + Stepper
     │       ├── option/    # Option<T> type + methods + static combinators
     │       ├── guard/     # Runtime type guards + assertions
     │       ├── async/     # sleep, debounce, throttle, retry, concurrent, memoize
-    │       ├── safe/      # Wraps throwy operations in Result
     │       ├── fmt/       # Human-readable formatting (strings, units, Intl wrappers)
     │       ├── iter/      # Lazy iterator combinators over Iterable
     │       ├── math/      # Interpolation + statistics + number theory
     │       ├── cache/     # LRU cache + memoization helpers
     │       ├── string/    # Case conversion, slugify, template, HTML escaping
-    │       └── random/    # Seeded PRNG with shuffle, pick, gaussian, uuid
-    ├── schema/            # @anyhow/schema
-    └── fs/                # @anyhow/fs
+    │       ├── random/    # Seeded PRNG with shuffle, pick, gaussian, uuid
+    │       ├── schema/    # Runtime schema validation (Result-returning)
+    │       ├── fs/        # Safe filesystem operations returning Result
+    │       ├── env/       # Environment variable access
+    │       ├── http/      # HTTP client helpers
+    │       ├── data/      # Data transformation utilities
+    │       └── collections/ # Immutable data structures
+    └── cli/               # @anyhow/cli
+        ├── package.json
+        ├── build.ts
+        └── src/
+            └── cli/      # Declarative CLI framework
 ```
 
 ## File conventions
