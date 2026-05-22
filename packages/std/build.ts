@@ -19,6 +19,7 @@ const modules = [
   "http",
   "date",
   "bytes",
+  "term",
 ];
 
 // Clean dist first

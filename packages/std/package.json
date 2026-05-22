@@ -103,6 +103,11 @@
       "import": "./dist/bytes/index.js",
       "require": "./dist/bytes/index.cjs",
       "types": "./dist/bytes/index.d.ts"
+    },
+    "./term": {
+      "import": "./dist/term/index.js",
+      "require": "./dist/term/index.cjs",
+      "types": "./dist/term/index.d.ts"
     }
   },
   "publishConfig": {

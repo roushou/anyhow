@@ -1,60 +1,15 @@
 import { lines, padStart, padEnd } from "@anyhow/std/string";
+import { style, stripAnsi } from "@anyhow/std/term";
 
-// ── ANSI styles ──
+// ── ANSI styles (re-export from @anyhow/std/term) ──
 
-/**
- * Wraps text in bold ANSI escape codes.
- *
- * @param str - The text to bold.
- * @returns The bold-formatted string.
- *
- * @example
- * ```ts
- * bold("Error:"); // "\x1b[1mError:\x1b[22m"
- * ```
- */
-export const bold = (str: string): string => `\x1b[1m${str}\x1b[22m`;
-
-/**
- * Wraps text in dim ANSI escape codes.
- */
-export const dim = (str: string): string => `\x1b[2m${str}\x1b[22m`;
-
-/**
- * Wraps text in red ANSI escape codes.
- */
-export const red = (str: string): string => `\x1b[31m${str}\x1b[39m`;
-
-/**
- * Wraps text in green ANSI escape codes.
- */
-export const green = (str: string): string => `\x1b[32m${str}\x1b[39m`;
-
-/**
- * Wraps text in blue ANSI escape codes.
- */
-export const blue = (str: string): string => `\x1b[34m${str}\x1b[39m`;
-
-/**
- * Wraps text in yellow ANSI escape codes.
- */
-export const yellow = (str: string): string => `\x1b[33m${str}\x1b[39m`;
-
-/**
- * Strips all ANSI escape sequences from a string.
- *
- * @param str - The string to clean.
- * @returns The string with ANSI escapes removed.
- *
- * @example
- * ```ts
- * stripAnsi("\x1b[31merror\x1b[39m"); // "error"
- * ```
- */
-// eslint-disable-next-line no-control-regex
-const STRIP_ANSI_RE = /\u001b\[\d+m/g;
-
-export const stripAnsi = (str: string): string => str.replace(STRIP_ANSI_RE, "");
+export const bold = style.bold;
+export const dim = style.dim;
+export const red = style.red;
+export const green = style.green;
+export const blue = style.blue;
+export const yellow = style.yellow;
+export { stripAnsi };
 
 // ── Layout helpers ──
 

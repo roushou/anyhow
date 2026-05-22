@@ -735,6 +735,79 @@ toHex(hash); // works with ArrayBuffer directly
 fromHex("xyz"); // throws
 ```
 
+### Term
+
+ANSI styling, word wrapping, columns, progress bars, cursor controls, and
+hyperlink helpers for terminal output. Used by `@anyhow/cli` internally.
+
+```ts
+import {
+  style,
+  stripAnsi,
+  supportsColor,
+  wordWrap,
+  columns,
+  progress,
+  clearScreen,
+  clearLine,
+  cursorTo,
+  cursorHide,
+  cursorShow,
+  link,
+  Spinner, SPINNER_FRAMES,
+} from "@anyhow/std/term";
+
+// Chainable style builder
+style.red("error"); // "\x1b[31merror\x1b[39m"
+style.bold.red("critical"); // "\x1b[1;31mcritical\x1b[22;39m"
+style.bgBlue.white("info"); // blue background, white text
+style.rgb(255, 128, 0)("custom"); // 24-bit true color
+style.hex("#ff8800")("custom"); // hex-based true color
+
+// Save reusable styles
+const err = style.bold.red;
+const ok = style.green;
+
+// Strip ANSI codes
+stripAnsi("\x1b[31merror\x1b[39m"); // "error"
+
+// Color support detection (respects NO_COLOR, FORCE_COLOR, TTY, CI)
+if (supportsColor()) console.log(style.green("✓"));
+
+// ANSI-aware word wrapping (preserves colors across line breaks)
+wordWrap(style.red("long message"), 20);
+wordWrap(style.red("long message"), 20, { indent: 2 });
+
+// Columns like `ls` output
+console.log(columns(["index.ts", "README.md", "pkg.json"], 40));
+
+// Stateless progress bar
+for (let i = 0; i <= 100; i++) {
+  process.stdout.write(`\r${progress(i / 100, 30)}`);
+  await sleep(50);
+}
+progress(0.5, 20, { left: "Loading", right: "50/100", style: "dot" });
+
+// Cursor controls
+process.stdout.write(clearScreen());
+process.stdout.write(clearLine());
+
+// OSC 8 hyperlinks (clickable in modern terminals)
+console.log(link("View docs", "https://example.com"));
+
+// Spinner with start/stop or run pattern
+const spinner = new Spinner("Installing dependencies...");
+spinner.start();
+await doWork();
+spinner.stop("✓ Installed");
+
+// Or use run() to auto-stop (even on error)
+const result = await spinner.run(() => fetchData());
+
+// Custom frames and interval
+const dots = new Spinner({ text: "Thinking", frames: SPINNER_FRAMES.dots, interval: 80 });
+```
+
 ### FS
 
 Safe filesystem operations that return {@link Result} instead of throwing.
