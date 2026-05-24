@@ -4,7 +4,7 @@
 ![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
 [![license](https://img.shields.io/github/license/roushou/anyhow)](./LICENSE)
 
-A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, branded types, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
+A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, branded types, function composition, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
 
 ## Installation
 
@@ -250,6 +250,38 @@ type B = BrandOf<UserId>; // "UserId"
 ```
 
 Branded types are used as a primitive by `@anyhow/std/schema` via `s.brand()`.
+
+### Pipe
+
+Function composition helpers for building clean pipelines.
+
+```ts
+import { pipe, compose, flow } from "@anyhow/std/pipe";
+
+// Pipe a value through functions left-to-right
+const result = pipe(
+  5,
+  (n) => n + 3,
+  (n) => n * 2,
+  (n) => `val: ${n}`,
+);
+// "val: 16"
+
+// Compose functions right-to-left into a reusable function
+const addBrackets = compose(
+  (s: string) => `[${s}]`,
+  (s: string) => s.toUpperCase(),
+);
+addBrackets("hello"); // "[HELLO]"
+
+// Flow functions left-to-right into a reusable function
+const process = flow(
+  (s: string) => s.trim(),
+  (s: string) => s.toLowerCase(),
+  (s: string) => `[${s}]`,
+);
+process("  Hello  "); // "[hello]"
+```
 
 ### Async
 
