@@ -128,6 +128,11 @@
       "import": "./dist/log/index.js",
       "require": "./dist/log/index.cjs",
       "types": "./dist/log/index.d.ts"
+    },
+    "./text": {
+      "import": "./dist/text/index.js",
+      "require": "./dist/text/index.cjs",
+      "types": "./dist/text/index.d.ts"
     }
   },
   "publishConfig": {

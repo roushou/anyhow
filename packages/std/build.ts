@@ -24,6 +24,7 @@ const modules = [
   "brand",
   "pipe",
   "log",
+  "text",
 ];
 
 // Clean dist first
