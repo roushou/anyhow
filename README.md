@@ -1,7 +1,7 @@
 # anyhow
 
 [![CI](https://github.com/roushou/anyhow/actions/workflows/ci.yml/badge.svg)](https://github.com/roushou/anyhow/actions/workflows/ci.yml)
-![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
+[![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
 [![license](https://img.shields.io/github/license/roushou/anyhow)](./LICENSE)
 
 A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, branded types, function composition, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
