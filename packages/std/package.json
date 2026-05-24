@@ -133,6 +133,11 @@
       "import": "./dist/text/index.js",
       "require": "./dist/text/index.cjs",
       "types": "./dist/text/index.d.ts"
+    },
+    "./encoding": {
+      "import": "./dist/encoding/index.js",
+      "require": "./dist/encoding/index.cjs",
+      "types": "./dist/encoding/index.d.ts"
     }
   },
   "publishConfig": {

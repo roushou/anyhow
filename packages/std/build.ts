@@ -25,6 +25,7 @@ const modules = [
   "pipe",
   "log",
   "text",
+  "encoding",
 ];
 
 // Clean dist first
