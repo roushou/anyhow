@@ -143,6 +143,11 @@
       "import": "./dist/event/index.js",
       "require": "./dist/event/index.cjs",
       "types": "./dist/event/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "require": "./dist/config/index.cjs",
+      "types": "./dist/config/index.d.ts"
     }
   },
   "publishConfig": {
