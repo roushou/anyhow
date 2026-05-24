@@ -294,16 +294,25 @@ import {
   throttle,
   retry,
   Backoff,
-  concurrent,
+  timeout,
+  TimeoutError,
+  Deferred,
+  RateLimiter,
   Semaphore,
+  concurrent,
   memoizeAsync,
 } from "@anyhow/std/async";
 
 // Debounce rapid calls (fire immediately on first call, then debounce)
-const onChange = debounce((query: string) => search(query), 300, { leading: true });
+const save = debounce(flushToDisk, 300, { leading: true });
+save();
+save.flush(); // force pending call immediately
+save.cancel(); // cancel pending call
 
 // Throttle to at most one call per interval (fire trailing call at end)
 const onScroll = throttle(() => updatePosition(), 100, { trailing: true });
+onScroll.flush(); // force pending trailing call immediately
+onScroll.cancel(); // cancel pending trailing call
 
 // Retry with configurable backoff, returns a Result
 const result = await retry(() => fetch("/api").then((r) => r.json()), {
@@ -341,6 +350,20 @@ const api = new Semaphore(5);
 const pages = await Promise.all(
   urls.map((url) => api.acquire(() => fetch(url).then((r) => r.json()))),
 );
+
+// Rate limiter — token bucket, limits calls over time
+const limiter = new RateLimiter({ limit: 100, window: 1000 }); // 100 calls/sec
+await limiter.acquire(); // waits if bucket is empty
+const result = limiter.tryAcquire(); // Result<void, Error> — doesn't wait
+
+// Timeout — wrap any promise with a deadline
+const data = await timeout(fetch("/api/slow"), 5_000); // Result<T, Error>
+if (data.ok) console.log(data.value);
+
+// Deferred — externally resolvable promise
+const d = new Deferred<string>();
+emitter.once("message", (msg) => d.resolve(msg));
+const msg = await d.promise;
 
 // Memoize an expensive async function with a custom key resolver
 const memoized = memoizeAsync(fetchUser, {
