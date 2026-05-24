@@ -138,6 +138,11 @@
       "import": "./dist/encoding/index.js",
       "require": "./dist/encoding/index.cjs",
       "types": "./dist/encoding/index.d.ts"
+    },
+    "./event": {
+      "import": "./dist/event/index.js",
+      "require": "./dist/event/index.cjs",
+      "types": "./dist/event/index.d.ts"
     }
   },
   "publishConfig": {

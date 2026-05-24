@@ -26,6 +26,7 @@ const modules = [
   "log",
   "text",
   "encoding",
+  "event",
 ];
 
 // Clean dist first
