@@ -4,7 +4,7 @@
 ![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
 [![license](https://img.shields.io/github/license/roushou/anyhow)](./LICENSE)
 
-A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
+A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, branded types, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
 
 ## Installation
 
@@ -219,6 +219,37 @@ function area(s: Shape): number {
 // Invariant checks (strippable for production)
 invariant(limit > 0, "limit must be positive");
 ```
+
+### Brand
+
+Compile-time nominal (branded) types for type-safe domain modeling. Zero runtime cost — brands are erased at compile time.
+
+```ts
+import { type Brand, type Unbrand, type BrandOf, brand } from "@anyhow/std/brand";
+
+// Create distinct types from the same base type
+type UserId = Brand<string, "UserId">;
+type OrderId = Brand<string, "OrderId">;
+
+const uid: UserId = brand("usr_1");
+const oid: OrderId = brand("ord_1");
+// uid === oid; // Type error — UserId !== OrderId
+
+// Works with any base type
+type Meters = Brand<number, "Meters">;
+type Feet = Brand<number, "Feet">;
+
+const m: Meters = brand(100);
+const f: Feet = brand(328);
+
+// Extract the underlying type
+type Raw = Unbrand<UserId>; // string
+
+// Extract the brand
+type B = BrandOf<UserId>; // "UserId"
+```
+
+Branded types are used as a primitive by `@anyhow/std/schema` via `s.brand()`.
 
 ### Async
 

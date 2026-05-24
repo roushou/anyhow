@@ -21,6 +21,7 @@ const modules = [
   "bytes",
   "term",
   "semver",
+  "brand",
 ];
 
 // Clean dist first

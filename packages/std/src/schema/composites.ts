@@ -425,27 +425,28 @@ export function coerce<T>(schema_: Schema<T>, fn: (v: unknown) => unknown): Sche
 
 // ── brand ──
 
-declare const brandSym: unique symbol;
-type Branded<T, B> = T & { [brandSym]: B };
+import type { Brand } from "../brand/brand.js";
 
 /**
  * Returns a schema that brands the output type without changing validation.
  *
  * Useful for nominal typing — `UserId` vs `string`, `Meters` vs `number`.
  *
+ * Built on {@link Brand} from `@anyhow/std/brand`.
+ *
  * @typeParam T - The base type.
  * @typeParam B - The brand (a string literal).
  * @param schema - The schema to brand.
  * @param _brand - The brand string (unused at runtime, only for type inference).
- * @returns A schema whose output type is `T & { [brand]: B }`.
+ * @returns A schema whose output type is `Brand<T, B>`.
  *
  * @example
  * ```ts
  * const UserId = s.brand(s.string(), "UserId");
- * type UserId = Infer<typeof UserId>; // string & { [brand]: "UserId" }
+ * type UserId = Infer<typeof UserId>; // Brand<string, "UserId">
  * const id: UserId = UserId.parse("abc-123");
  * ```
  */
-export function brand<T, B extends string>(schema_: Schema<T>, _brand: B): Schema<Branded<T, B>> {
+export function brand<T, B extends string>(schema_: Schema<T>, _brand: B): Schema<Brand<T, B>> {
   return schema_ as any;
 }

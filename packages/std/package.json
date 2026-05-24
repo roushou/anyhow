@@ -113,6 +113,11 @@
       "import": "./dist/semver/index.js",
       "require": "./dist/semver/index.cjs",
       "types": "./dist/semver/index.d.ts"
+    },
+    "./brand": {
+      "import": "./dist/brand/index.js",
+      "require": "./dist/brand/index.cjs",
+      "types": "./dist/brand/index.d.ts"
     }
   },
   "publishConfig": {
