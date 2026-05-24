@@ -261,6 +261,7 @@ import {
   debounce,
   throttle,
   retry,
+  Backoff,
   concurrent,
   Semaphore,
   memoizeAsync,
@@ -272,15 +273,29 @@ const onChange = debounce((query: string) => search(query), 300, { leading: true
 // Throttle to at most one call per interval (fire trailing call at end)
 const onScroll = throttle(() => updatePosition(), 100, { trailing: true });
 
-// Retry with exponential backoff, returns a Result
+// Retry with configurable backoff, returns a Result
 const result = await retry(() => fetch("/api").then((r) => r.json()), {
   attempts: 5,
-  backoff: 200, // starts at 200ms, then 400ms, 800ms, 1600ms
-  shouldRetry: (e) => e instanceof TypeError || (e as any).status === 429, // only retry certain errors
+  backoff: 200,
+  shouldRetry: (e) => e instanceof TypeError || (e as any).status === 429,
   onRetry: (e, i) => console.warn(`Attempt ${i} failed:`, e),
-  signal: AbortSignal.timeout(10_000), // give up after 10s total
+  signal: AbortSignal.timeout(10_000),
 });
-if (result.ok) console.log(result.value);
+
+// Full control with a BackoffStrategy
+const user = await retry(() => fetchUser(id), {
+  attempts: 5,
+  backoff: Backoff.exponentialWithJitter({ initial: 100, max: 30_000 }),
+  shouldRetry: (e) => e instanceof NetworkError,
+  onRetry: (e, i) => log.warn({ attempt: i, error: e }),
+});
+
+// Available strategies
+Backoff.constant(500);
+Backoff.linear({ initial: 100, step: 200 });
+Backoff.exponential({ initial: 100, max: 30_000 });
+Backoff.exponentialWithJitter({ initial: 100, max: 30_000 });
+Backoff.custom((attempt) => (attempt + 1) * 500);
 
 // Run promises with a concurrency limit
 const results = await concurrent(

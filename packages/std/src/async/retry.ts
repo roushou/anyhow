@@ -1,5 +1,6 @@
 import { sleep } from "./timing.js";
 import { ok, err, type Result } from "../result/result.js";
+import type { BackoffStrategy } from "./backoff.js";
 
 /**
  * Options for {@link retry}.
@@ -7,8 +8,15 @@ import { ok, err, type Result } from "../result/result.js";
 export interface RetryOpts {
   /** Maximum number of attempts (default: `3`). */
   attempts?: number;
-  /** Initial delay in milliseconds, doubles each attempt (default: `300`). */
-  backoff?: number;
+  /**
+   * Delay strategy between retries.
+   *
+   * Pass a `number` for exponential backoff (`delay * 2^attempt`),
+   * or a {@link BackoffStrategy} for full control.
+   *
+   * Default: `300` (exponential starting at 300ms).
+   */
+  backoff?: number | BackoffStrategy;
   /**
    * Called before each retry. Return `false` to stop retrying immediately
    * (the current error is returned as `Err`). Return `true` to continue.
@@ -31,11 +39,7 @@ export interface RetryOpts {
 }
 
 /**
- * Retries an async function on failure with exponential backoff.
- *
- * Each retry waits `backoff * 2^i` milliseconds before the next attempt,
- * where `i` is the attempt index (0-based). The first retry waits `backoff` ms,
- * the second waits `backoff * 2` ms, etc.
+ * Retries an async function on failure with configurable backoff.
  *
  * Returns a {@link Result} — `Ok(value)` on success or `Err(error)` if
  * all attempts are exhausted (or `shouldRetry` returned `false`, or the
@@ -48,11 +52,19 @@ export interface RetryOpts {
  *
  * @example
  * ```ts
+ * // Shorthand: number = exponential backoff
  * const result = await retry(() => fetch("/api").then(r => r.json()), {
  *   attempts: 5,
  *   backoff: 200,
  * });
- * if (result.ok) console.log(result.value);
+ *
+ * // Full control with a BackoffStrategy
+ * const result = await retry(() => fetchUser(id), {
+ *   attempts: 5,
+ *   backoff: Backoff.exponentialWithJitter({ initial: 100, max: 30_000 }),
+ *   shouldRetry: (e) => e instanceof NetworkError,
+ *   onRetry: (e, i) => log.warn({ attempt: i, error: e }),
+ * });
  * ```
  */
 export async function retry<T>(
@@ -74,7 +86,9 @@ export async function retry<T>(
       if (i === attempts - 1) break;
       if (shouldRetry && !shouldRetry(e)) break;
 
-      await sleep(backoff * 2 ** i);
+      // Compute delay: number → exponential, function → delegate
+      const delay = typeof backoff === "number" ? backoff * 2 ** i : backoff(i);
+      await sleep(delay);
 
       // Check abort signal after the delay
       if (signal?.aborted) {
