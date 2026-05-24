@@ -1,8 +1,4 @@
 export {
-  camelCase,
-  pascalCase,
-  snakeCase,
-  kebabCase,
   slugify,
   stripIndent,
   template,
@@ -20,3 +16,7 @@ export {
   wrap,
   byteLength,
 } from "./string.js";
+
+export { camelCase, pascalCase, snakeCase, kebabCase } from "./case.js";
+
+export type { CamelCase, PascalCase, SnakeCase, KebabCase, ScreamingSnakeCase } from "./case.js";

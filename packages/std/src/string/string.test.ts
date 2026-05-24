@@ -1,9 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import {
-  camelCase,
-  pascalCase,
-  snakeCase,
-  kebabCase,
   slugify,
   stripIndent,
   template,
@@ -16,37 +12,6 @@ import {
   wrap,
   byteLength,
 } from "./string.js";
-
-describe("camelCase", () => {
-  it("converts hyphenated to camelCase", () => expect(camelCase("hello-world")).toBe("helloWorld"));
-  it("returns already camelCase unchanged", () =>
-    expect(camelCase("helloWorld")).toBe("helloWorld"));
-  it("lowercases the first word of PascalCase input", () =>
-    expect(camelCase("HelloWorld")).toBe("helloWorld"));
-  it("handles empty string", () => expect(camelCase("")).toBe(""));
-});
-
-describe("pascalCase", () => {
-  it("converts hyphenated to PascalCase", () =>
-    expect(pascalCase("hello-world")).toBe("HelloWorld"));
-  it("title-cases already camelCase input", () =>
-    expect(pascalCase("helloWorld")).toBe("HelloWorld"));
-  it("handles empty string", () => expect(pascalCase("")).toBe(""));
-});
-
-describe("snakeCase", () => {
-  it("converts camelCase to snake_case", () => expect(snakeCase("helloWorld")).toBe("hello_world"));
-  it("converts PascalCase to snake_case", () =>
-    expect(snakeCase("HelloWorld")).toBe("hello_world"));
-  it("handles empty string", () => expect(snakeCase("")).toBe(""));
-});
-
-describe("kebabCase", () => {
-  it("converts camelCase to kebab-case", () => expect(kebabCase("helloWorld")).toBe("hello-world"));
-  it("converts PascalCase to kebab-case", () =>
-    expect(kebabCase("HelloWorld")).toBe("hello-world"));
-  it("handles empty string", () => expect(kebabCase("")).toBe(""));
-});
 
 describe("slugify", () => {
   it("lowercases and replaces spaces with hyphens", () =>
