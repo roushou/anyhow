@@ -123,6 +123,11 @@
       "import": "./dist/pipe/index.js",
       "require": "./dist/pipe/index.cjs",
       "types": "./dist/pipe/index.d.ts"
+    },
+    "./log": {
+      "import": "./dist/log/index.js",
+      "require": "./dist/log/index.cjs",
+      "types": "./dist/log/index.d.ts"
     }
   },
   "publishConfig": {
