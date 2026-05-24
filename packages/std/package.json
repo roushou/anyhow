@@ -148,6 +148,11 @@
       "import": "./dist/config/index.js",
       "require": "./dist/config/index.cjs",
       "types": "./dist/config/index.d.ts"
+    },
+    "./codec": {
+      "import": "./dist/codec/index.js",
+      "require": "./dist/codec/index.cjs",
+      "types": "./dist/codec/index.d.ts"
     }
   },
   "publishConfig": {
