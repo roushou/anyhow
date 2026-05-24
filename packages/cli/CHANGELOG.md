@@ -1,5 +1,16 @@
 # @anyhow/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- d7635c6: ## "@anyhow/std": minor
+
+### Patch Changes
+
+- Updated dependencies [d7635c6]
+  - @anyhow/std@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes
