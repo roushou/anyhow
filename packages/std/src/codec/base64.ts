@@ -1,4 +1,4 @@
-import { ok, err, type Result } from "../result/result.js";
+import { err, type Result } from "../result/result.js";
 import type { Codec, CodecError } from "./codec.js";
 import { toBase64, fromBase64 } from "../encoding/safe.js";
 

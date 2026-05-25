@@ -1,4 +1,3 @@
-import { lines, padStart, padEnd } from "@anyhow/std/string";
 import { style, stripAnsi } from "@anyhow/std/term";
 
 // ── ANSI styles (re-export from @anyhow/std/term) ──
@@ -38,7 +37,7 @@ export function table(rows: string[][]): string {
   return rows
     .map((row) =>
       row
-        .map((cell, i) => padEnd(cell, (widths[i] ?? 0) + cell.length - stripAnsi(cell).length))
+        .map((cell, i) => cell.padEnd((widths[i] ?? 0) + cell.length - stripAnsi(cell).length))
         .join("  "),
     )
     .join("\n");
@@ -57,8 +56,9 @@ export function table(rows: string[][]): string {
  * ```
  */
 export function indent(text: string, spaces: number): string {
-  return lines(text)
-    .map((line) => padStart(line, line.length + spaces))
+  return text
+    .split("\n")
+    .map((line) => line.padStart(line.length + spaces))
     .join("\n");
 }
 
