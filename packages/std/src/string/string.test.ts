@@ -6,9 +6,6 @@ import {
   capitalize,
   randomString,
   decapitalize,
-  reverse,
-  padStart,
-  padEnd,
   wrap,
   byteLength,
 } from "./string.js";
@@ -92,30 +89,6 @@ describe("decapitalize", () => {
   it("handles already-decapitalized input", () => expect(decapitalize("hello")).toBe("hello"));
   it("handles empty string", () => expect(decapitalize("")).toBe(""));
   it("handles single character", () => expect(decapitalize("A")).toBe("a"));
-});
-
-describe("reverse", () => {
-  it("reverses a string", () => expect(reverse("hello")).toBe("olleh"));
-  it("handles empty string", () => expect(reverse("")).toBe(""));
-  it("handles single character", () => expect(reverse("a")).toBe("a"));
-  it("handles palindrome", () => expect(reverse("racecar")).toBe("racecar"));
-  it("handles unicode characters", () => expect(reverse("a😊b")).toBe("b😊a"));
-});
-
-describe("padStart", () => {
-  it("pads to the given length", () => expect(padStart("42", 5, "0")).toBe("00042"));
-  it("defaults to space padding", () => expect(padStart("a", 3)).toBe("  a"));
-  it("returns the original when already long enough", () =>
-    expect(padStart("hello", 3)).toBe("hello"));
-  it("handles empty string", () => expect(padStart("", 3, "*")).toBe("***"));
-});
-
-describe("padEnd", () => {
-  it("pads to the given length", () => expect(padEnd("42", 5, "-")).toBe("42---"));
-  it("defaults to space padding", () => expect(padEnd("a", 3)).toBe("a  "));
-  it("returns the original when already long enough", () =>
-    expect(padEnd("hello", 3)).toBe("hello"));
-  it("handles empty string", () => expect(padEnd("", 3, "*")).toBe("***"));
 });
 
 describe("wrap", () => {

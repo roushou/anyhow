@@ -1,8 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import {
-  groupBy,
   keyBy,
-  sortBy,
   uniqBy,
   range,
   zipObject,
@@ -11,43 +9,6 @@ import {
   intersection,
   union,
 } from "./array.js";
-
-describe("groupBy", () => {
-  it("groups elements by key", () => {
-    const arr = [
-      { type: "a", n: 1 },
-      { type: "b", n: 2 },
-      { type: "a", n: 3 },
-    ];
-    const result = groupBy(arr, (item) => item.type);
-    expect(result).toEqual({
-      a: [
-        { type: "a", n: 1 },
-        { type: "a", n: 3 },
-      ],
-      b: [{ type: "b", n: 2 }],
-    });
-  });
-
-  it("returns an empty object for an empty array", () => {
-    expect(groupBy([], (x: { id: string }) => x.id)).toEqual({});
-  });
-
-  it("handles numeric keys", () => {
-    const arr = [1, 2, 3, 4];
-    expect(groupBy(arr, (n) => (n % 2 === 0 ? "even" : "odd"))).toEqual({
-      odd: [1, 3],
-      even: [2, 4],
-    });
-  });
-
-  it("preserves the original array", () => {
-    const arr = [{ type: "a", n: 1 }];
-    const copy = [...arr];
-    groupBy(arr, (item) => item.type);
-    expect(arr).toEqual(copy);
-  });
-});
 
 describe("keyBy", () => {
   it("indexes elements by key", () => {
@@ -82,47 +43,6 @@ describe("keyBy", () => {
     const copy = [...arr];
     keyBy(arr, (item) => item.id);
     expect(arr).toEqual(copy);
-  });
-});
-
-describe("sortBy", () => {
-  it("sorts numbers by key", () => {
-    const arr = [{ n: 3 }, { n: 1 }, { n: 2 }];
-    expect(sortBy(arr, (item) => item.n)).toEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);
-  });
-
-  it("sorts strings by key", () => {
-    const arr = ["cherry", "apple", "banana"];
-    expect(sortBy(arr, (s) => s)).toEqual(["apple", "banana", "cherry"]);
-  });
-
-  it("sorts by string length", () => {
-    const arr = ["apple", "banana", "cherry"];
-    // "apple" (5), then the tie at 6: "banana" before "cherry" (stable sort)
-    expect(sortBy(arr, (s) => s.length)).toEqual(["apple", "banana", "cherry"]);
-  });
-
-  it("handles an empty array", () => {
-    expect(sortBy([], (x: { n: number }) => x.n)).toEqual([]);
-  });
-
-  it("handles a single element", () => {
-    expect(sortBy([{ n: 1 }], (item) => item.n)).toEqual([{ n: 1 }]);
-  });
-
-  it("does not mutate the input", () => {
-    const arr = [{ n: 3 }, { n: 1 }, { n: 2 }];
-    const copy = [...arr];
-    sortBy(arr, (item) => item.n);
-    expect(arr).toEqual(copy);
-  });
-
-  it("is stable for equal keys (preserves original order)", () => {
-    const arr = [
-      { n: 1, tag: "first" },
-      { n: 1, tag: "second" },
-    ];
-    expect(sortBy(arr, (item) => item.n)).toEqual(arr);
   });
 });
 

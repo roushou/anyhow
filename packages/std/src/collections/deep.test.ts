@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { deepMerge, deepClone, deepEqual } from "./deep.js";
+import { deepMerge, deepEqual } from "./deep.js";
 
 describe("deepMerge", () => {
   it("merges two flat objects", () => {
@@ -43,91 +43,6 @@ describe("deepMerge", () => {
   it("handles deep nesting", () => {
     const result = deepMerge({ a: { b: { c: 1 } } }, { a: { b: { d: 2 } } } as any);
     expect(result).toEqual({ a: { b: { c: 1, d: 2 } } });
-  });
-});
-
-describe("deepClone", () => {
-  it("clones primitive values as-is", () => {
-    expect(deepClone(42)).toBe(42);
-    expect(deepClone("hello")).toBe("hello");
-    expect(deepClone(true)).toBe(true);
-    expect(deepClone(null)).toBe(null);
-    expect(deepClone(undefined)).toBe(undefined);
-  });
-
-  it("clones a plain object", () => {
-    const original = { a: 1, b: { c: [1, 2, 3] } };
-    const cloned = deepClone(original);
-    expect(cloned).toEqual(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned.b).not.toBe(original.b);
-    expect(cloned.b.c).not.toBe(original.b.c);
-  });
-
-  it("clones an array", () => {
-    const original = [1, [2, 3], { a: 4 }];
-    const cloned = deepClone(original);
-    expect(cloned).toEqual(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned[1]).not.toBe(original[1]);
-    expect(cloned[2]).not.toBe(original[2]);
-  });
-
-  it("clones a Date", () => {
-    const original = new Date(1700000000000);
-    const cloned = deepClone(original);
-    expect(cloned).toEqual(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned.getTime()).toBe(original.getTime());
-  });
-
-  it("clones a RegExp", () => {
-    const original = /hello/gi;
-    const cloned = deepClone(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned.source).toBe(original.source);
-    expect(cloned.flags).toBe(original.flags);
-  });
-
-  it("clones a Map", () => {
-    const original = new Map([
-      ["a", 1],
-      ["b", { nested: true }],
-    ] as any);
-    const cloned = deepClone(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned.get("a")).toBe(1);
-    expect(cloned.get("b") as any).toEqual({ nested: true });
-    expect(cloned.get("b")).not.toBe(original.get("b"));
-  });
-
-  it("clones a Set", () => {
-    const original = new Set([1, { a: 2 }, 3]);
-    const cloned = deepClone(original);
-    expect(cloned).not.toBe(original);
-    expect(cloned.has(1)).toBe(true);
-    expect(cloned.has(3)).toBe(true);
-    const [, clonedObj] = [...cloned];
-    expect(clonedObj).toEqual({ a: 2 });
-  });
-
-  it("handles circular references", () => {
-    const obj: Record<string, unknown> = { a: 1 };
-    obj.self = obj;
-    const cloned = deepClone(obj);
-    expect(cloned.a).toBe(1);
-    expect(cloned.self).toBe(cloned);
-    expect(cloned.self).not.toBe(obj);
-  });
-
-  it("handles nested circular references", () => {
-    const child: Record<string, unknown> = { name: "child" };
-    const parent: Record<string, unknown> = { name: "parent", child };
-    child.parent = parent;
-    const cloned = deepClone(parent) as any;
-    expect(cloned.name).toBe("parent");
-    expect(cloned.child.name).toBe("child");
-    expect(cloned.child.parent).toBe(cloned);
   });
 });
 
@@ -257,9 +172,6 @@ describe("deepEqual", () => {
     const a: Record<string, unknown> = { name: "a" };
     a.self = a;
     const b: Record<string, unknown> = { name: "a", self: { name: "a" } };
-    // a is circular (a.self === a), b is finite-depth (b.self is a plain object).
-    // They are not structurally equal because a.self.self... → a forever,
-    // whereas b.self.self is undefined.
     expect(deepEqual(a, b)).toBe(false);
   });
 });

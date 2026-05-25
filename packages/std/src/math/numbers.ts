@@ -1,46 +1,4 @@
 /**
- * Returns `true` if `n` is even.
- *
- * @param n - The number to check.
- * @returns `true` if `n` is an even integer.
- *
- * @example
- * ```ts
- * isEven(2); // true
- * isEven(3); // false
- * ```
- */
-export const isEven = (n: number): boolean => n % 2 === 0;
-
-/**
- * Returns `true` if `n` is odd.
- *
- * @param n - The number to check.
- * @returns `true` if `n` is an odd integer.
- *
- * @example
- * ```ts
- * isOdd(3); // true
- * isOdd(2); // false
- * ```
- */
-export const isOdd = (n: number): boolean => n % 2 !== 0;
-
-/**
- * Returns `true` if `n` is a safe integer.
- *
- * @param n - The number to check.
- * @returns `true` if `n` is an integer (not a float, not NaN, not Infinity).
- *
- * @example
- * ```ts
- * isInteger(3);   // true
- * isInteger(3.14); // false
- * ```
- */
-export const isInteger = (n: number): boolean => Number.isInteger(n);
-
-/**
  * Returns `true` if `n` is a finite number that is not an integer.
  *
  * @param n - The number to check.
@@ -53,21 +11,6 @@ export const isInteger = (n: number): boolean => Number.isInteger(n);
  * ```
  */
 export const isFloat = (n: number): boolean => Number.isFinite(n) && !Number.isInteger(n);
-
-/**
- * Returns the sign of `n` — `1` for positive, `-1` for negative, `0` for zero.
- *
- * @param n - The number.
- * @returns `1`, `-1`, or `0`.
- *
- * @example
- * ```ts
- * sign(42);  // 1
- * sign(-5);  // -1
- * sign(0);   // 0
- * ```
- */
-export const sign = (n: number): number => (n > 0 ? 1 : n < 0 ? -1 : 0);
 
 /**
  * Returns `true` if `n` is in `[min, max]` (inclusive).

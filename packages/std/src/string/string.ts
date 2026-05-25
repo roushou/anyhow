@@ -63,11 +63,6 @@ export const unescapeHtml = (str: string): string =>
 export const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /**
- * Splits a string into lines (preserving empty lines).
- */
-export const lines = (str: string): string[] => str.split("\n");
-
-/**
  * Splits a string into words on whitespace.
  */
 export const words = (str: string): string[] => str.trim().split(/\s+/).filter(Boolean);
@@ -123,52 +118,6 @@ export const randomString = (length: number): string => {
  * ```
  */
 export const decapitalize = (str: string): string => str.charAt(0).toLowerCase() + str.slice(1);
-
-/**
- * Reverses the string.
- *
- * @param str - The input string.
- * @returns The reversed string.
- *
- * @example
- * ```ts
- * reverse("hello"); // "olleh"
- * reverse(""); // ""
- * ```
- */
-export const reverse = (str: string): string => [...str].reverse().join("");
-
-/**
- * Pads the start of a string. Thin wrapper around `String.prototype.padStart`.
- *
- * @param str - The input string.
- * @param length - The target length.
- * @param padString - The string to pad with (default: `" "`).
- * @returns The padded string.
- *
- * @example
- * ```ts
- * padStart("42", 5, "0"); // "00042"
- * ```
- */
-export const padStart = (str: string, length: number, padString?: string): string =>
-  str.padStart(length, padString);
-
-/**
- * Pads the end of a string. Thin wrapper around `String.prototype.padEnd`.
- *
- * @param str - The input string.
- * @param length - The target length.
- * @param padString - The string to pad with (default: `" "`).
- * @returns The padded string.
- *
- * @example
- * ```ts
- * padEnd("42", 5, "-"); // "42---"
- * ```
- */
-export const padEnd = (str: string, length: number, padString?: string): string =>
-  str.padEnd(length, padString);
 
 /**
  * Wraps text at the given width, breaking at word boundaries where possible.

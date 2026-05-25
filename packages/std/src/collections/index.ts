@@ -1,8 +1,6 @@
 export { pick, omit, get, set } from "./object.js";
 export {
-  groupBy,
   keyBy,
-  sortBy,
   uniqBy,
   range,
   zipObject,
@@ -11,4 +9,4 @@ export {
   intersection,
   union,
 } from "./array.js";
-export { deepMerge, deepClone, deepEqual } from "./deep.js";
+export { deepMerge, deepEqual } from "./deep.js";

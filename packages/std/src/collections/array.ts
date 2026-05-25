@@ -1,36 +1,4 @@
 /**
- * Groups array elements by a key function into a plain object.
- * Unlike iter.groupBy (which returns `Map`), this returns a plain `Record`.
- *
- * @typeParam T - The array element type.
- * @typeParam K - The key type (must be a valid property key).
- * @param arr - The array to group.
- * @param key - A function that extracts the grouping key from each element.
- * @returns A plain object mapping keys to arrays of elements.
- *
- * @example
- * ```ts
- * groupBy([{ type: "a", n: 1 }, { type: "b", n: 2 }, { type: "a", n: 3 }], item => item.type);
- * // { a: [{ type: "a", n: 1 }, { type: "a", n: 3 }], b: [{ type: "b", n: 2 }] }
- * ```
- */
-export function groupBy<T, K extends PropertyKey>(
-  arr: readonly T[],
-  key: (item: T) => K,
-): Record<K, T[]> {
-  const result = {} as Record<K, T[]>;
-  for (let i = 0; i < arr.length; i++) {
-    const item = arr[i]!;
-    const k = key(item);
-    if (result[k] === undefined) {
-      result[k] = [];
-    }
-    result[k]!.push(item);
-  }
-  return result;
-}
-
-/**
  * Indexes array elements by a key function into a plain object.
  * When multiple elements share the same key, the last one wins.
  *
@@ -56,33 +24,6 @@ export function keyBy<T, K extends PropertyKey>(
     result[key(item)] = item;
   }
   return result;
-}
-
-/**
- * Sorts an array by a key function that returns a comparable value (`number` or `string`).
- * Uses `<` / `>` comparison. Does not mutate the input array.
- *
- * @typeParam T - The array element type.
- * @param arr - The array to sort.
- * @param key - A function that extracts a sortable value from each element.
- * @returns A new sorted array.
- *
- * @example
- * ```ts
- * sortBy([{ n: 3 }, { n: 1 }, { n: 2 }], item => item.n); // [{ n: 1 }, { n: 2 }, { n: 3 }]
- * sortBy(["apple", "banana", "cherry"], s => s.length); // ["apple", "cherry", "banana"]
- * ```
- */
-export function sortBy<T>(arr: readonly T[], key: (item: T) => number | string): T[] {
-  const copy = arr.slice();
-  copy.sort((a: T, b: T) => {
-    const ka = key(a);
-    const kb = key(b);
-    if (ka < kb) return -1;
-    if (ka > kb) return 1;
-    return 0;
-  });
-  return copy;
 }
 
 /**
