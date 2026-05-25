@@ -62,10 +62,10 @@
       "require": "./dist/option/index.cjs",
       "types": "./dist/option/index.d.ts"
     },
-    "./data": {
-      "import": "./dist/data/index.js",
-      "require": "./dist/data/index.cjs",
-      "types": "./dist/data/index.d.ts"
+    "./struct": {
+      "import": "./dist/struct/index.js",
+      "require": "./dist/struct/index.cjs",
+      "types": "./dist/struct/index.d.ts"
     },
     "./collections": {
       "import": "./dist/collections/index.js",

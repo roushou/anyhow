@@ -11,7 +11,7 @@ const modules = [
   "string",
   "random",
   "option",
-  "data",
+  "struct",
   "collections",
   "fs",
   "env",
