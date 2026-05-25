@@ -57,7 +57,7 @@ export class Spinner {
     this.#text = o.text ?? "";
     this.#frames = o.frames ?? SPINNER_FRAMES.dots;
     this.#interval = o.interval ?? 80;
-    this.#stream = o.stream ?? (process.stderr as NodeJS.WriteStream);
+    this.#stream = o.stream ?? getDefaultStream();
   }
 
   /**
@@ -137,4 +137,19 @@ export class Spinner {
     const line = this.#text ? `${frame} ${this.#text}` : frame;
     this.#stream.write(`${clearLine()}${line}`);
   }
+}
+
+// ── Browser-safe stream ──
+
+/** Returns `process.stderr` when available, or a no-op stream in the browser. */
+function getDefaultStream(): NodeJS.WriteStream {
+  if (typeof process !== "undefined" && process.stderr) {
+    return process.stderr as NodeJS.WriteStream;
+  }
+  // No-op stream for browser environments
+  return {
+    write(_s: string) {
+      return true;
+    },
+  } as unknown as NodeJS.WriteStream;
 }

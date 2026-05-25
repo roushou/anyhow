@@ -287,6 +287,7 @@ function loadEnvSource(source: EnvSource): Record<string, unknown> {
 }
 
 function loadArgsSource(): Record<string, unknown> {
+  if (typeof process === "undefined") return {};
   const result: Record<string, unknown> = {};
   const args = process.argv.slice(2);
 
