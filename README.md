@@ -11,6 +11,7 @@ A batteries-included TypeScript utility toolkit featuring type-safe error handli
 ```bash
 bun add @anyhow/std
 bun add @anyhow/cli
+bun add @anyhow/svelte
 ```
 
 ## Modules
@@ -1048,6 +1049,253 @@ s.instanceof(Date); // instanceof check
 const Admin = User.extend({ role: s.string() }); // add fields
 const Public = User.omit(["age"]); // remove fields
 const Subset = User.pick(["name"]); // keep only these fields
+```
+
+### Svelte
+
+SvelteKit 5 reactive primitives, composables, and form-action utilities. Builds on
+Svelte 5 runes (`$state`, `$derived`, `$effect`) with zero dependencies on
+`@anyhow/std` — but composes seamlessly with `@anyhow/std/schema` and
+`@anyhow/std/result` via structural typing.
+
+```bash
+bun add @anyhow/svelte
+```
+
+Tree-shakeable subpath imports:
+
+```ts
+import { createToggle, createAsyncState } from "@anyhow/svelte/primitives";
+import { createFormAction, safeLoad } from "@anyhow/svelte/composables";
+import { createClickOutside } from "@anyhow/svelte/actions";
+```
+
+#### Reactive primitives
+
+Standalone reactive state utilities — no imports from `@anyhow/std` needed.
+
+```ts
+import {
+  createToggle,
+  createCycle,
+  createPrevious,
+  createResetable,
+  createDebouncedState,
+  createThrottledState,
+  createPersistedState,
+  createMediaQuery,
+  createQueryParams,
+  isBrowser,
+} from "@anyhow/svelte";
+
+const open = createToggle(false);
+// open.value, open.toggle(), open.on(), open.off()
+
+const theme = createCycle(["light", "dark", "system"]);
+// theme.value, theme.next(), theme.prev(), theme.reset()
+
+let count = $state(0);
+const prev = createPrevious(() => count);
+// prev.current — tracks the previous value
+
+const name = createResetable("Alice");
+// name.value = "Bob"; name.reset() → "Alice"
+
+const query = createDebouncedState("", 300);
+// query.value = … — debounced writes
+
+const pos = createThrottledState({ x: 0, y: 0 }, 16);
+// pos.value = … — throttled writes
+
+// Browser storage (localStorage or sessionStorage)
+const theme = createStore({ key: "theme", initial: "light" });
+// theme.value — synced to localStorage
+const draft = createStore({ key: "draft", initial: "", storage: "session" });
+// draft.value — synced to sessionStorage (cleared on tab close)
+
+const isMobile = createMediaQuery("(max-width: 767px)");
+// isMobile.current — reactive boolean
+
+const params = createQueryParams({ page: "1", sort: "name" });
+// params.value — synced to URL search params
+
+if (isBrowser()) {
+  // SSR-safe guard
+}
+
+// Async operations
+const user = createAsyncState(async (id: string) => {
+  const res = await fetch(`/api/users/${id}`);
+  return res.json();
+});
+// user.execute("abc"), user.loading, user.data, user.error, user.reset()
+
+// Undo/redo
+const history = createUndoRedo("Hello");
+// history.push("World"), history.undo(), history.redo()
+// history.canUndo, history.canRedo
+
+// Online status
+const net = createOnline();
+// net.online — reactive boolean
+
+// Managed interval (auto-cleanup)
+const poll = createInterval(() => fetch("/api/status"), 5000);
+// poll.stop(), poll.start(), poll.running
+
+// Scroll position
+const scroll = createScrollPosition();
+// scroll.x, scroll.y, scroll.isScrolling
+
+// Responsive breakpoints
+const bp = createBreakpoints({ sm: 640, md: 768, lg: 1024 });
+// bp.current — "sm" | "md" | "lg" | undefined
+
+// Clipboard
+const clipboard = createCopyToClipboard();
+// clipboard.copy("text"), clipboard.copied, clipboard.error, clipboard.reset()
+
+// Managed timeout
+const toast = createTimeout(() => (show = false), 3000);
+// toast.start(), toast.cancel(), toast.running
+
+// Focus tracking
+const focus = createActiveElement();
+// focus.element — the currently focused DOM element
+
+// Async polling (no overlapping calls)
+const poll = createPolling(() => fetch("/api/status").then((r) => r.json()), 5000);
+// poll.start(), poll.stop(), poll.data, poll.error, poll.running
+
+// Window size
+const size = createWindowSize();
+// size.width, size.height — reactive innerWidth/innerHeight
+
+// URL hash (client-side routing, tab state)
+const route = createHash();
+// route.hash, route.hash = "settings" — reactive location.hash
+
+// User idle detection
+const idle = createIdle(60_000);
+// idle.idle — true after 60s of inactivity
+
+// Animation frame loop (auto-cleanup)
+const loop = createRaf((time) => {
+  angle = (time / 1000) % 360;
+});
+// loop.start(), loop.stop(), loop.running
+
+// OS color scheme
+const cs = createColorScheme();
+// cs.scheme — "light" | "dark"
+
+// Page visibility (tab switch detection)
+const vis = createVisibility();
+// vis.visible — false when tab is hidden
+```
+
+#### Svelte actions (`use:` directives)
+
+```ts
+import {
+  createClickOutside,
+  createElementSize,
+  createIntersectionObserver,
+  createLongPress,
+} from "@anyhow/svelte";
+
+// Click outside detection
+// <div use:clickOutside={() => (open = false)}>…</div>
+
+// Reactive element dimensions
+const size = createElementSize();
+// <div use:size.action>{size.width} × {size.height}</div>
+
+// Intersection observer (lazy loading, scroll-spy)
+const obs = createIntersectionObserver({ threshold: 0.5 });
+// <div use:obs.action>{#if obs.isIntersecting}Visible!{/if}</div>
+
+// Long press (touch / mouse)
+// <button use:longPress={{ duration: 800, handler: () => deleteItem() }}>Hold to delete</button>
+```
+
+#### Form actions
+
+Four paths, escalating from bare-bones to full `@anyhow/std` `Result` integration:
+
+```ts
+import { createFormAction } from "@anyhow/svelte";
+
+// Path A — simple action (no validation)
+// Return type: FormActionSimple<T>
+const form = createFormAction(async (fd) => {
+  const name = fd.get("name");
+  return await api.submit(name);
+});
+// <form method="POST" use:enhance={form.enhance}>
+// {form.pending}, {form.data}, {form.error}
+
+// Path B — inline validation
+// Return type: FormActionWithValidation<T>
+const form = createFormAction({
+  validate: (fd) => {
+    const email = fd.get("email");
+    if (!email) return "Email required";
+    return { email: String(email) };
+  },
+  action: async (data) => await api.login(data.email),
+});
+// {form.validationError}
+
+// Path C — schema (any `.parse()` lib: Zod, Valibot, etc.)
+// Return type: FormActionWithSchema<T>
+const form = createFormAction({
+  schema: zodSchema,
+  action: async (data) => await api.login(data),
+});
+// {form.validationErrors} — structured errors
+
+// Path D — schema + Result (first-party @anyhow/std integration)
+// Return type: FormActionStateWithResult<T, E>
+import { s } from "@anyhow/std/schema";
+import { ok, err } from "@anyhow/std/result";
+
+const loginSchema = s.object({ email: s.string(), password: s.string() });
+
+const form = createFormAction({
+  schema: loginSchema,
+  action: async (data) => {
+    const user = await api.login(data);
+    return ok(user);
+  },
+});
+// {#if form.result?.ok}
+//   Welcome, {form.result.value.name}
+// {:else if form.result}
+//   Error: {form.result.error}
+// {/if}
+// form.validationErrors — ValidationError[] with .path, .message
+```
+
+#### Load / actions safety
+
+```ts
+import { safeLoad, safeActions } from "@anyhow/svelte";
+
+// Catches errors in load functions and returns _loadError
+export const load = safeLoad(async (event) => {
+  const user = await db.user.findUnique({ where: { id: event.params.id } });
+  if (!user) throw new Error("Not found");
+  return { user };
+});
+// data._loadError available in +page.svelte
+
+// Catches errors in form actions and returns _actionError
+export const actions = safeActions({
+  default: async (event) => {
+    // throws are caught → form._actionError
+  },
+});
 ```
 
 ### CLI

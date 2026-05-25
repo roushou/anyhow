@@ -7,17 +7,17 @@
   "type": "module",
   "scripts": {
     "build": "bun run --filter '*' build",
-    "test": "bun test",
+    "test": "bun run --filter '@anyhow/std' test && bun run --filter '@anyhow/cli' test && bun run --filter '@anyhow/svelte' test",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "typecheck": "bun run build && bun run --filter '*' typecheck",
     "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist",
-    "check": "bun run lint && bun run format:check && bun run typecheck",
+    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test",
     "changeset:add": "bun changeset add",
     "release": "bun run build:all && bun changeset publish",
-    "build:all": "bun run --filter '@anyhow/std' build"
+    "build:all": "bun run --filter '@anyhow/std' build && bun run --filter '@anyhow/svelte' build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

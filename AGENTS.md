@@ -21,6 +21,7 @@ anyhow is a **zero-dependency, TypeScript-first utility toolkit**. Every functio
 | Linting                   | oxlint                                        |
 | Formatting                | oxfmt                                         |
 | Testing                   | `bun test` (built-in)                         |
+| Testing (Svelte)          | `vitest` + `@testing-library/svelte`          |
 | Build                     | `bun build` (ESM + CJS) via custom `build.ts` |
 | CI                        | GitHub Actions (`oven-sh/setup-bun@v2`)       |
 
@@ -60,6 +61,17 @@ anyhow/
         ├── build.ts
         └── src/
             └── cli/      # Declarative CLI framework
+    └── svelte/            # @anyhow/svelte
+        ├── package.json   # Subpath exports map (primitives, composables, actions)
+        ├── build.ts       # Svelte compileModule + bun build per subpath
+        └── src/
+            ├── index.d.ts         # Hand-crafted root declarations
+            ├── primitives/        # Reactive $state composables (26 exports)
+            │   └── index.d.ts     # Hand-crafted primitives declarations
+            ├── composables/       # SvelteKit form/load/action utilities (3 exports)
+            │   └── index.d.ts     # Hand-crafted composables declarations
+            └── actions/           # Svelte use: directives (4 exports)
+                └── index.d.ts     # Hand-crafted actions declarations
 ```
 
 ## File conventions
@@ -137,6 +149,15 @@ Example:
 1. Create `packages/<name>/` mirroring the structure of `packages/std/`.
 2. Add it to the root `package.json` `workspaces` array.
 3. Follow the same conventions: zero dependencies, subpath exports, dual ESM/CJS, co-located tests.
+
+### Framework packages (like `@anyhow/svelte`)
+
+Framework packages may have peer dependencies (e.g. `svelte`), use the
+framework's test runner (`vitest` + framework plugins instead of `bun test`),
+and need build-time framework tooling (`svelte/compiler` for rune
+compilation). Declarations are hand-crafted `.d.ts` files (since `tsc`
+can't emit for `.svelte.ts` files). Tests for `$effect`-based modules use
+`@testing-library/svelte` with `.svelte` wrapper components.
 
 ## Build system
 
