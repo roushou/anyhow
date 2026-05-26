@@ -40,8 +40,16 @@ export class Stepper<TStep extends string, TData, E = Error> {
   /**
    * Define a step — a function that validates or transforms the data.
    *
+   * @typeParam TStep - (Inherited) The step identifier type.
    * @param name - The step identifier.
    * @param fn - The step function. Return `Ok(data)` to proceed or `Err` to stop.
+   * @returns This `Stepper` instance for chaining.
+   *
+   * @example
+   * ```ts
+   * const checkout = new Stepper<"cart" | "pay", CartData>()
+   *   .step("cart", data => data.items.length > 0 ? ok(data) : err("empty"));
+   * ```
    */
   step(name: TStep, fn: (data: TData) => Result<TData, E>): this {
     this.steps.set(name, fn);
@@ -51,8 +59,16 @@ export class Stepper<TStep extends string, TData, E = Error> {
   /**
    * Declare which steps can follow a given step.
    *
+   * @typeParam TStep - (Inherited) The step identifier type.
    * @param from - The source step.
    * @param to - Allowed destination steps.
+   * @returns This `Stepper` instance for chaining.
+   *
+   * @example
+   * ```ts
+   * const checkout = new Stepper<"cart" | "ship", CartData>()
+   *   .after("cart", ["ship"]);
+   * ```
    */
   after(from: TStep, to: TStep[]): this {
     this.transitions.set(from, to);
@@ -62,9 +78,18 @@ export class Stepper<TStep extends string, TData, E = Error> {
   /**
    * Advance from the current state to the given step.
    *
+   * @typeParam TStep - (Inherited) The step identifier type.
    * @param current - The current step state.
    * @param next - The step to advance to.
    * @returns `Ok(newState)` on success, `Err` if the step fails.
+   *
+   * @example
+   * ```ts
+   * const state = checkout.advance(
+   *   { step: "cart", data: { items: ["book"] }, history: [] },
+   *   "ship",
+   * );
+   * ```
    */
   advance(current: StepState<TStep, TData>, next: TStep): Result<StepState<TStep, TData>, E> {
     const fn = this.steps.get(next);
@@ -80,10 +105,20 @@ export class Stepper<TStep extends string, TData, E = Error> {
   /**
    * Run a sequence of steps from a starting point.
    *
+   * @typeParam TStep - (Inherited) The step identifier type.
    * @param start - The starting step.
    * @param initialData - The initial data.
    * @param sequence - Ordered list of steps to execute.
    * @returns `Ok(finalState)` or the first `Err`.
+   *
+   * @example
+   * ```ts
+   * const result = checkout.run(
+   *   "cart",
+   *   { items: ["book"] },
+   *   ["ship", "pay"],
+   * );
+   * ```
    */
   run(start: TStep, initialData: TData, sequence: TStep[]): Result<StepState<TStep, TData>, E> {
     let state: StepState<TStep, TData> = {
@@ -104,8 +139,15 @@ export class Stepper<TStep extends string, TData, E = Error> {
   /**
    * Get the allowed next steps from a given step.
    *
+   * @typeParam TStep - (Inherited) The step identifier type.
    * @param from - The step to query.
    * @returns Array of allowed next steps, or empty if none defined.
+   *
+   * @example
+   * ```ts
+   * checkout.nextSteps("cart"); // ["ship"]
+   * checkout.nextSteps("pay");  // []
+   * ```
    */
   nextSteps(from: TStep): TStep[] {
     return this.transitions.get(from) ?? [];

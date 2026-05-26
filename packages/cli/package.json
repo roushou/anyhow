@@ -1,6 +1,7 @@
 {
   "name": "@anyhow/cli",
   "version": "0.3.0",
+  "description": "Declarative CLI framework with full type inference — define commands as plain objects.",
   "repository": {
     "type": "git",
     "url": "https://github.com/roushou/anyhow",

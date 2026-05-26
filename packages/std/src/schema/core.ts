@@ -2,7 +2,20 @@ import type { Result } from "../result/result.js";
 import { ok, err } from "../result/result.js";
 import type { Schema, ValidationError } from "./types.js";
 
-/** Creates a {@link ValidationError} at the given path. */
+/**
+ * Creates a {@link ValidationError} at the given path.
+ *
+ * @param path - The dot-separated path to the failing field.
+ * @param expected - What the schema expected (e.g. `"string"`, `"number"`).
+ * @param received - The actual value received.
+ * @returns A structured `ValidationError`.
+ *
+ * @example
+ * ```ts
+ * fail("user.name", "string", 42);
+ * // { path: "user.name", message: "Expected string at user.name", expected: "string", received: "42" }
+ * ```
+ */
 export function fail(path: string, expected: string, received: unknown): ValidationError {
   return {
     path,
@@ -12,7 +25,20 @@ export function fail(path: string, expected: string, received: unknown): Validat
   };
 }
 
-/** Adds a segment to a dot-separated path. */
+/**
+ * Adds a segment to a dot-separated path.
+ *
+ * @param base - The existing path (empty string for root).
+ * @param segment - The segment to append (string key or array index number).
+ * @returns The joined path.
+ *
+ * @example
+ * ```ts
+ * joinPath("user", "name");   // "user.name"
+ * joinPath("", "items");      // "items"
+ * joinPath("items", 0);       // "items.0"
+ * ```
+ */
 export function joinPath(base: string, segment: string | number): string {
   return base ? `${base}.${segment}` : String(segment);
 }
@@ -24,6 +50,17 @@ export function joinPath(base: string, segment: string | number): string {
  * @typeParam T - The TypeScript type this schema validates.
  * @param parse - A function that validates `unknown` data.
  * @returns A schema with modifier methods.
+ *
+ * @example
+ * ```ts
+ * const nonEmptyString = createSchema<string>((data, path) => {
+ *   if (typeof data === "string" && data.length > 0) return ok(data);
+ *   return err(fail(path, "non-empty string", data));
+ * });
+ *
+ * nonEmptyString.parse("hello"); // { ok: true, value: "hello" }
+ * nonEmptyString.parse("");      // { ok: false, ... }
+ * ```
  */
 export function createSchema<T>(
   parse: (data: unknown, path: string) => Result<T, ValidationError>,

@@ -126,7 +126,26 @@ export const ResultStatic = {
   ok,
   err,
 
-  /** Wraps a synchronous function that may throw. */
+  /**
+   * Wraps a synchronous function that may throw, returning a {@link Result}
+   * instead of propagating the exception.
+   *
+   * If `fn` throws, the error is wrapped in `Err` — non-`Error` values are
+   * converted to `Error` via `String(e)`.
+   *
+   * @typeParam T - The return type of `fn`.
+   * @param fn - A synchronous function that may throw.
+   * @returns `Ok(fn())` on success, `Err(error)` if `fn` throws.
+   *
+   * @example
+   * ```ts
+   * const result = Result.from(() => JSON.parse('{"name":"Alice"}'));
+   * // { ok: true, value: { name: "Alice" } }
+   *
+   * const err = Result.from(() => JSON.parse("invalid"));
+   * // { ok: false, error: SyntaxError }
+   * ```
+   */
   from<T>(fn: () => T): Result<T> {
     try {
       return ok(fn());
@@ -135,7 +154,24 @@ export const ResultStatic = {
     }
   },
 
-  /** Wraps an async function that may throw. */
+  /**
+   * Wraps an async function that may throw, returning a `Promise<`{@link Result}`>`
+   * instead of rejecting the promise.
+   *
+   * If `fn` throws (or its returned promise rejects), the error is wrapped in
+   * `Err` — non-`Error` values are converted to `Error` via `String(e)`.
+   *
+   * @typeParam T - The resolved type of the promise returned by `fn`.
+   * @param fn - An async function that may throw or reject.
+   * @returns A promise that resolves to `Ok(value)` on success, or `Err(error)`
+   *   if `fn` throws or rejects.
+   *
+   * @example
+   * ```ts
+   * const result = await Result.fromAsync(() => fetch("https://api.example.com"));
+   * // { ok: true, value: Response } or { ok: false, error: Error }
+   * ```
+   */
   async fromAsync<T>(fn: () => Promise<T>): Promise<Result<T>> {
     try {
       return ok(await fn());
@@ -144,12 +180,48 @@ export const ResultStatic = {
     }
   },
 
-  /** Converts a nullable value to a Result. */
+  /**
+   * Converts a nullable value to a {@link Result}, returning `Ok` for non-null-ish
+   * values and `Err` with the provided error otherwise.
+   *
+   * @typeParam T - The non-nullable value type.
+   * @param value - The value to test (may be `null` or `undefined`).
+   * @param error - The error to use if `value` is `null` or `undefined`.
+   * @returns `Ok(value)` if `value != null`, otherwise `Err(error)`.
+   *
+   * @example
+   * ```ts
+   * Result.fromNullable("hello", new Error("missing"));
+   * // { ok: true, value: "hello" }
+   *
+   * Result.fromNullable(null, new Error("missing"));
+   * // { ok: false, error: Error("missing") }
+   * ```
+   */
   fromNullable<T>(value: T | null | undefined, error: Error): Result<T, Error> {
     return value != null ? ok(value) : err(error);
   },
 
-  /** Combines an array of Results. Returns Ok(values) or the first Err. */
+  /**
+   * Combines an array of {@link Result}s into a single `Result`.
+   *
+   * Returns `Ok(array_of_values)` if every result is `Ok`, otherwise returns
+   * the first `Err` encountered (short-circuiting).
+   *
+   * @typeParam T - The ok value type.
+   * @typeParam E - The error type.
+   * @param results - An array of `Result<T, E>` to combine.
+   * @returns `Ok(T[])` if all results are `Ok`, otherwise the first `Err(E)`.
+   *
+   * @example
+   * ```ts
+   * Result.all([ok(1), ok(2), ok(3)]);
+   * // { ok: true, value: [1, 2, 3] }
+   *
+   * Result.all([ok(1), err("fail"), ok(3)]);
+   * // { ok: false, error: "fail" }
+   * ```
+   */
   all<T, E>(results: Result<T, E>[]): Result<T[], E> {
     const values: T[] = [];
     for (const r of results) {
@@ -159,7 +231,24 @@ export const ResultStatic = {
     return ok(values);
   },
 
-  /** Partitions Results into ok and err arrays. */
+  /**
+   * Partitions an array of {@link Result}s into separate `ok` and `err` arrays.
+   *
+   * Unlike {@link Result.all}, this never short-circuits — every result is
+   * visited and sorted into the appropriate bucket.
+   *
+   * @typeParam T - The ok value type.
+   * @typeParam E - The error type.
+   * @param results - An array of `Result<T, E>` to partition.
+   * @returns An object `{ ok: T[], err: E[] }` with successes and failures
+   *   separated.
+   *
+   * @example
+   * ```ts
+   * const { ok, err } = Result.partition([ok(1), err("fail"), ok(3)]);
+   * // ok: [1, 3], err: ["fail"]
+   * ```
+   */
   partition<T, E>(results: Result<T, E>[]): { ok: T[]; err: E[] } {
     const o: T[] = [];
     const e: E[] = [];
@@ -170,7 +259,27 @@ export const ResultStatic = {
     return { ok: o, err: e };
   },
 
-  /** Returns the first successful Result, or all errors. */
+  /**
+   * Returns the first successful {@link Result} from an array, or an `Err`
+   * containing all collected errors if none succeeded.
+   *
+   * Iterates through results in order, returning the first `Ok` immediately.
+   * If every result is `Err`, returns `Err` with an array of every error.
+   *
+   * @typeParam T - The ok value type.
+   * @typeParam E - The error type.
+   * @param results - An array of `Result<T, E>` to search.
+   * @returns The first `Ok(T)` found, or `Err(E[])` if all results failed.
+   *
+   * @example
+   * ```ts
+   * Result.any([err("a"), ok(2), err("c")]);
+   * // { ok: true, value: 2 }
+   *
+   * Result.any([err("a"), err("b")]);
+   * // { ok: false, error: ["a", "b"] }
+   * ```
+   */
   any<T, E>(results: Result<T, E>[]): Result<T, E[]> {
     const errors: E[] = [];
     for (const r of results) {

@@ -22,6 +22,11 @@ export class Semaphore {
    * Creates a semaphore with `permits` concurrent slots.
    *
    * @param permits - Maximum number of concurrent acquisitions.
+   *
+   * @example
+   * ```ts
+   * const sem = new Semaphore(3);
+   * ```
    */
   constructor(permits: number) {
     if (!Number.isInteger(permits) || permits < 1) {
@@ -34,6 +39,12 @@ export class Semaphore {
 
   /**
    * The total number of permits this semaphore was created with.
+   *
+   * @example
+   * ```ts
+   * const sem = new Semaphore(3);
+   * console.log(sem.permits); // 3
+   * ```
    */
   get permits(): number {
     return this.#permits;
@@ -41,6 +52,12 @@ export class Semaphore {
 
   /**
    * The number of permits currently available (not acquired).
+   *
+   * @example
+   * ```ts
+   * const sem = new Semaphore(3);
+   * console.log(sem.available); // 3
+   * ```
    */
   get available(): number {
     return this.#available;

@@ -49,6 +49,12 @@ export class RateLimiter {
    * Acquires a token, waiting asynchronously if none are available.
    *
    * @returns A promise that resolves when a token is acquired.
+   *
+   * @example
+   * ```ts
+   * const limiter = new RateLimiter({ limit: 10, window: 1000 });
+   * await limiter.acquire();
+   * ```
    */
   async acquire(): Promise<void> {
     this.#refill();
@@ -66,6 +72,15 @@ export class RateLimiter {
    * Tries to acquire a token immediately without waiting.
    *
    * @returns `Ok(undefined)` if a token was available, `Err(error)` otherwise.
+   *
+   * @example
+   * ```ts
+   * const limiter = new RateLimiter({ limit: 10, window: 1000 });
+   * const result = limiter.tryAcquire();
+   * if (result.ok) {
+   *   // token acquired
+   * }
+   * ```
    */
   tryAcquire(): Result<void, Error> {
     this.#refill();
@@ -76,7 +91,15 @@ export class RateLimiter {
     return err(new Error("Rate limit exceeded — no tokens available"));
   }
 
-  /** The number of tokens currently available. */
+  /**
+   * The number of tokens currently available.
+   *
+   * @example
+   * ```ts
+   * const limiter = new RateLimiter({ limit: 10, window: 1000 });
+   * console.log(limiter.available); // 10
+   * ```
+   */
   get available(): number {
     this.#refill();
     return this.#tokens;

@@ -1,6 +1,7 @@
 {
   "name": "@anyhow/svelte",
   "version": "0.0.1",
+  "description": "Svelte 5 reactive primitives, composables, and form-action utilities.",
   "repository": {
     "type": "git",
     "url": "https://github.com/roushou/anyhow",

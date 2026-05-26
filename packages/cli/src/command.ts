@@ -49,7 +49,7 @@ export interface CliConfig {
 }
 
 /**
- * A CLI clilication produced by {@link defineCli}.
+ * A CLI application produced by {@link defineCli}.
  *
  * Provides `run()` to parse and execute a command, and `parse()` to
  * inspect the parsed result without executing.
@@ -82,7 +82,7 @@ export interface Cli {
  * ```ts
  * const deploy = defineCommand({
  *   name: "deploy",
- *   description: "Deploy the clilication",
+ * description: "Deploy the application",
  *   arguments: { env: { type: "string", required: true, description: "Target environment" } },
  *   options: { force: { type: "boolean", short: "f", description: "Skip confirmation" } },
  *   action({ args, options }) {
@@ -110,7 +110,7 @@ export function defineCommand<
 // ── defineCli ──
 
 /**
- * Declares a CLI clilication with one or more subcommands.
+ * Declares a CLI application with one or more subcommands.
  *
  * The returned {@link Cli} has `run()` and `parse()` methods:
  *
@@ -118,8 +118,8 @@ export function defineCommand<
  *   `action`, and returns a {@link Result}.
  * - `parse()` returns the parsed result without executing the action.
  *
- * @param config - The clilication configuration.
- * @returns An {@link Cli} with `run` and `parse` methods.
+ * @param config - The application configuration.
+ * @returns A {@link Cli} with `run` and `parse` methods.
  *
  * @example
  * ```ts

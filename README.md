@@ -4,7 +4,50 @@
 [![npm](https://img.shields.io/npm/v/@anyhow/std?color=blue)](https://www.npmjs.com/package/@anyhow/std)
 [![license](https://img.shields.io/github/license/roushou/anyhow)](./LICENSE)
 
-A batteries-included TypeScript utility toolkit featuring type-safe error handling, optional values, branded types, function composition, runtime guards, schema validation, async primitives, iterators, formatting, string utilities, math, random, and caching.
+A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable modules covering error handling, validation, async primitives, data transformation, terminal output, CLI framework, and Svelte 5 reactivity.
+
+## Design Principles
+
+- **Zero dependencies** — every function is implemented from scratch or uses only built-in APIs.
+- **Result-based** — functions return `Result<T, E>` instead of throwing. Errors are values you handle, not surprises you catch.
+- **Tree-shakeable** — each module is independently importable via subpath exports (`@anyhow/std/result`). Import only what you use.
+- **Rust-inspired** — naming follows Rust's stdlib conventions (`Result`, `Option`, `ok`/`err`, `some`/`none`, `map`, `andThen`, `unwrapOr`, `match`).
+- **Boring** — no magic, no implicit global state, no clever metaprogramming. Predictable code wins.
+
+## Quick Reference
+
+| Category            | Module      | Import                    | Key exports                                                                                                                          |
+| ------------------- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Core types**      | Result      | `@anyhow/std/result`      | `ok`, `err`, `Result`, `Pipeline`, `Stepper`                                                                                         |
+|                     | Option      | `@anyhow/std/option`      | `some`, `none`, `Option`                                                                                                             |
+|                     | Brand       | `@anyhow/std/brand`       | `brand`, `Brand`, `Unbrand`, `BrandOf`                                                                                               |
+|                     | Pipe        | `@anyhow/std/pipe`        | `pipe`, `compose`, `flow`                                                                                                            |
+| **Validation**      | Guard       | `@anyhow/std/guard`       | `isString`, `isObject`, `hasProperty`, `assert`, `assertDefined`, `assertNever`                                                      |
+|                     | Schema      | `@anyhow/std/schema`      | `s.string()`, `s.number()`, `s.object()`, `s.array()`, `s.union()`, `s.brand()`                                                      |
+| **Async**           | Async       | `@anyhow/std/async`       | `sleep`, `debounce`, `throttle`, `retry`, `Backoff`, `concurrent`, `RateLimiter`, `Semaphore`, `timeout`, `memoizeAsync`, `Deferred` |
+|                     | Cache       | `@anyhow/std/cache`       | `LRU`, `memoizeSync`                                                                                                                 |
+|                     | Event       | `@anyhow/std/event`       | `EventEmitter`, `createSignal`                                                                                                       |
+| **Transformation**  | Iter        | `@anyhow/std/iter`        | `map`, `filter`, `flatMap`, `take`, `chunk`, `zip`, `groupBy`, `partition`                                                           |
+|                     | Math        | `@anyhow/std/math`        | `clamp`, `lerp`, `roundTo`, `sum`, `average`, `median`, `gcd`, `lcm`, `isPrime`                                                      |
+|                     | Random      | `@anyhow/std/random`      | `random.int()`, `random.shuffle()`, `random.uuid()`, `createRandom`                                                                  |
+|                     | String      | `@anyhow/std/string`      | `camelCase`, `snakeCase`, `kebabCase`, `slugify`, `template`, `escapeHtml`                                                           |
+|                     | Fmt         | `@anyhow/std/fmt`         | `truncate`, `filesize`, `duration`, `currency`, `number`, `date`, `relativeTime`                                                     |
+|                     | Date        | `@anyhow/std/date`        | `addDays`, `differenceInDays`, `isToday`, `startOfDay`, `dateRange`, `clampDate`                                                     |
+|                     | Bytes       | `@anyhow/std/bytes`       | `toHex`, `fromHex`, `toBase64`, `fromBase64`, `toUTF8`, `fromUTF8`                                                                   |
+|                     | Encoding    | `@anyhow/std/encoding`    | `toHex`, `fromHex`, `toBase58`, `fromBase58`, `toBase32`, `ALPHABETS`                                                                |
+|                     | Codec       | `@anyhow/std/codec`       | `json`, `csv`, `csvCodec`, `base64`, `Codec`, `formData`                                                                             |
+|                     | Text        | `@anyhow/std/text`        | `levenshtein`, `fuzzyMatch`, `fuzzyFilter`, `diffLines`, `diffWords`                                                                 |
+| **Data structures** | Collections | `@anyhow/std/collections` | `keyBy`, `uniqBy`, `range`, `deepMerge`, `deepEqual`, `pick`, `omit`, `get`, `set`                                                   |
+|                     | Struct      | `@anyhow/std/struct`      | `Stack`, `Queue`, `Deque`, `PriorityQueue`, `BloomFilter`, `Trie`, `DisjointSet`                                                     |
+| **Platform / I/O**  | FS          | `@anyhow/std/fs`          | `readText`, `readJson`, `writeText`, `writeJson`, `ensureDir`, `remove`, `exists`, `glob`, `walk`                                    |
+|                     | Env         | `@anyhow/std/env`         | `env.string()`, `env.number()`, `env.bool()`, `env.url()`, `env.prefix()`, `env.check()`, `env.loadFile()`                           |
+|                     | HTTP        | `@anyhow/std/http`        | `get`, `post`, `put`, `del`, `http.create()`, `HttpClient`, `RequestBuilder`                                                         |
+|                     | Term        | `@anyhow/std/term`        | `style.red()`, `wordWrap`, `columns`, `progress`, `Spinner`, `link`                                                                  |
+|                     | Semver      | `@anyhow/std/semver`      | `semver()`, `.satisfies()`, `.bump()`, `semver.sort()`, `semver.max()`                                                               |
+|                     | Log         | `@anyhow/std/log`         | `Logger`, `prettyFormatter`, `memorySink`, `LogLevel`                                                                                |
+|                     | Config      | `@anyhow/std/config`      | `Config.load()`, `Config.file()`, `Config.env()`, `Config.args()`                                                                    |
+| **Frameworks**      | CLI         | `@anyhow/cli`             | `defineCommand`, `defineCli`                                                                                                         |
+|                     | Svelte      | `@anyhow/svelte`          | `createToggle`, `createAsyncState`, `createFormAction`, `safeLoad`, `createClickOutside`                                             |
 
 ## Installation
 
@@ -719,6 +762,25 @@ const fib = memoizeSync(
 );
 ```
 
+### Event
+
+Typed event emitters and lightweight signals for pub/sub patterns.
+
+```ts
+import { EventEmitter, createSignal } from "@anyhow/std/event";
+
+// Typed event emitter
+type AppEvents = { request: { method: string }; error: Error };
+const emitter = new EventEmitter<AppEvents>();
+emitter.on("request", ({ method }) => console.log(method));
+await emitter.emit("request", { method: "GET" });
+
+// Lightweight single-event pub/sub
+const onLogout = createSignal<string>();
+onLogout.subscribe((msg) => console.log(msg));
+await onLogout.emit("session expired");
+```
+
 ### Date
 
 Date arithmetic, comparison, boundaries, and queries. Zero-dependency date math
@@ -999,7 +1061,7 @@ for await (const entry of walk("./src")) {
 
 ### Schema
 
-Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/std/result` and `@anyhow/std/safe`.
+Runtime schema validation that returns `Result<T, ValidationError>`. Composes with `@anyhow/std/result`.
 
 ```ts
 import { s, type Infer } from "@anyhow/std/schema";
@@ -1021,10 +1083,10 @@ type User = Infer<typeof User>; // { name: string; age: number; tags: string[] }
 
 // Parse
 const result = User.parse({ name: "Alice", age: 30 });
-// { ok: true, value: { name: "Alice", age: 30, tags: [] } }
+// → Ok({ name: "Alice", age: 30, tags: [] })
 
 User.parse({ name: 42 });
-// { ok: false, error: { path: "name", expected: "string", ... } }
+// → Err({ path: "name", expected: "string", ... })
 
 // Modifiers
 s.string().optional(); // string | undefined
@@ -1049,6 +1111,269 @@ s.instanceof(Date); // instanceof check
 const Admin = User.extend({ role: s.string() }); // add fields
 const Public = User.omit(["age"]); // remove fields
 const Subset = User.pick(["name"]); // keep only these fields
+```
+
+### Collections
+
+Immutable data utilities — object accessors, array helpers, and deep operations.
+
+```ts
+import { pick, omit, get, set, deepMerge, deepEqual } from "@anyhow/std/collections";
+import {
+  keyBy,
+  uniqBy,
+  range,
+  compact,
+  difference,
+  intersection,
+  union,
+} from "@anyhow/std/collections";
+
+// Object helpers
+pick({ a: 1, b: 2, c: 3 }, ["a", "c"]); // { a: 1, c: 3 }
+omit({ a: 1, b: 2, c: 3 }, ["b"]); // { a: 1, c: 3 }
+get({ user: { name: "Alice" } }, "user.name"); // "Alice"
+
+// Array helpers
+keyBy(
+  [
+    { id: 1, name: "A" },
+    { id: 2, name: "B" },
+  ],
+  "id",
+);
+// → { "1": { id: 1, name: "A" }, "2": { id: 2, name: "B" } }
+uniqBy([{ id: 1 }, { id: 2 }, { id: 1 }], "id"); // [{ id: 1 }, { id: 2 }]
+range(0, 5); // [0, 1, 2, 3, 4]
+compact([0, 1, false, 2, null, 3]); // [1, 2, 3]
+difference([1, 2, 3], [2, 4]); // [1, 3]
+intersection([1, 2, 3], [2, 3, 4]); // [2, 3]
+union([1, 2], [2, 3]); // [1, 2, 3]
+
+// Deep operations
+deepMerge({ a: { b: 1 } }, { a: { c: 2 } }); // { a: { b: 1, c: 2 } }
+deepEqual({ a: [1, 2] }, { a: [1, 2] }); // true
+```
+
+### Struct
+
+Classic data structures — stacks, queues, bloom filters, tries, and disjoint sets.
+
+```ts
+import { Stack, Queue, BloomFilter, Trie, DisjointSet } from "@anyhow/std/struct";
+
+// Stack (LIFO)
+const stack = new Stack<number>();
+stack.push(1);
+stack.push(2);
+stack.pop(); // 2
+
+// Bloom filter (probabilistic set)
+const filter = new BloomFilter(1000, 0.01);
+filter.add("hello");
+filter.has("hello"); // true
+
+// Trie (prefix tree) for autocomplete / search
+const trie = new Trie<number>();
+trie.insert("foo", 1);
+trie.insert("bar", 2);
+trie.startsWith("fo"); // [1]
+
+// Disjoint set (union-find) for connectivity
+const ds = new DisjointSet(5);
+ds.union(0, 1);
+ds.connected(0, 1); // true
+```
+
+### Env
+
+Type-safe environment variable access. Every function returns an `EnvVar` (a lazy `Result`) that you can chain with `.default()`, `.optional()`, or batch-validate with `.check()`.
+
+```ts
+import { env } from "@anyhow/std/env";
+
+// Read with type coercion
+const host = env.string("HOST").unwrapOr("localhost");
+const port = env.number("PORT").default(3000);
+const debug = env.bool("DEBUG").optional();
+const url = env.url("API_ENDPOINT");
+const env = env.enum("NODE_ENV", ["development", "production", "test"] as const);
+const config = env.json<{ hosts: string[] }>("CLUSTER_CONFIG");
+
+// Prefixed (scoped) access
+const db = env.prefix("DB_");
+db.string("HOST"); // reads DB_HOST
+db.number("PORT"); // reads DB_PORT
+
+// Bulk validate an entire config at once
+const appConfig = env.check({
+  host: env.string("HOST"),
+  port: env.number("PORT").default(3000),
+  debug: env.bool("DEBUG").optional(),
+});
+if (appConfig.ok) console.log(appConfig.value.host);
+
+// .env file support
+env.loadFile(".env");
+
+// Security: mask sensitive keys when dumping
+env.mask("API_KEY", "DB_PASSWORD");
+env.dump(); // → { API_KEY: "***", DB_PASSWORD: "***" }
+```
+
+### HTTP
+
+Result-based HTTP client with middleware, retries, and type-safe request building.
+
+```ts
+import { get, post, put, del, http, HttpClient } from "@anyhow/std/http";
+
+// Quick one-shot requests (return Result)
+const user = await get("/users/42").json<User>();
+const created = await post("/users").json({ name: "Alice" }).json<User>();
+
+// Reusable client with shared defaults
+const api = http.create({
+  baseUrl: "https://api.example.com",
+  headers: { Authorization: "Bearer tok" },
+  timeout: 10_000,
+});
+
+const user = await api.get("/users/42").json<User>();
+const orders = await api.get("/orders").query({ limit: 50 }).json<Order[]>();
+
+// Request builder with method chaining
+const result = await api
+  .post("/users")
+  .json({ name: "Alice" })
+  .header("X-Idempotency-Key", key)
+  .signal(AbortSignal.timeout(5_000))
+  .send();
+
+if (result.ok) console.log(result.value);
+```
+
+### Log
+
+Structured, scoped logging with pluggable formatters and sinks.
+
+```ts
+import { Logger, LogLevel, prettyFormatter, memorySink } from "@anyhow/std/log";
+
+// Create a scoped logger
+const log = new Logger("app", { level: LogLevel.Debug });
+log.info("server started", { port: 3000 });
+
+// Child loggers inherit scope
+const db = log.child("db", { pool: "main" });
+db.info("connected"); // scope: "app:db", context: { pool: "main" }
+db.warn("slow query", { durationMs: 250 });
+db.error("connection lost", new Error("timeout"));
+
+// Pluggable formatters and sinks
+log.setFormatter(prettyFormatter());
+log.addSink(memorySink(100)); // keep last 100 entries
+```
+
+### Config
+
+Multi-source configuration loading with schema validation. Load from files, environment variables, and CLI args — validate with `@anyhow/std/schema`.
+
+```ts
+import { Config } from "@anyhow/std/config";
+import { s } from "@anyhow/std/schema";
+
+const AppConfig = s.object({
+  port: s.number().default(3000),
+  database: s.object({ url: s.string() }),
+  logLevel: s.enum(["debug", "info", "warn"]).default("info"),
+});
+
+const result = await Config.load(AppConfig, {
+  sources: [
+    Config.file("defaults.json"),
+    Config.file("local.json", { optional: true }),
+    Config.env("APP_"),
+    Config.args(),
+  ],
+});
+// Later sources override earlier ones
+if (result.ok) console.log(result.value.port);
+```
+
+### Text
+
+String distance metrics, fuzzy matching (fzf-style), and diff utilities.
+
+```ts
+import {
+  levenshtein,
+  levenshteinRatio,
+  fuzzyMatch,
+  fuzzyFilter,
+  diffLines,
+  diffWords,
+} from "@anyhow/std/text";
+
+// Edit distance
+levenshtein("kitten", "sitting"); // 3
+levenshteinRatio("kitten", "sitting"); // ~0.57
+
+// fzf-style fuzzy matching
+fuzzyMatch("ah", "anyhow"); // { score: ~0.55, matchedRanges: ... }
+fuzzyFilter("res", ["src/result/result.ts", "src/async/retry.ts"]);
+// → [{ item: "src/result/result.ts", score: 0.63 }, ...]
+
+// Line and word diffs (longest common subsequence)
+diffLines("hello\nworld", "hello\nWORLD\nfoo");
+// → [{ type: "equal", value: "hello" },
+//    { type: "delete", value: "world" },
+//    { type: "insert", value: "WORLD" },
+//    { type: "insert", value: "foo" }]
+```
+
+### Encoding
+
+Safe encoding/decoding returning `Result` — Hex, Base64, Base32, and Base58. Throws nothing; all errors are values.
+
+```ts
+import { toHex, fromHex, toBase58, fromBase58, toBase32, ALPHABETS } from "@anyhow/std/encoding";
+
+// Hex (safe, Result-returning)
+fromHex("00ff10"); // → Ok(Uint8Array [0, 255, 16])
+fromHex("zzz"); // → Err({ code: "invalid_format", message: ... })
+
+// Base58 (Bitcoin-style, no ambiguous characters like 0/O/I/l)
+toBase58(new Uint8Array([1, 2, 3])); // "Ldp"
+
+// Base32 with Crockford alphabet (human-friendly)
+toBase32(data, { alphabet: ALPHABETS.BASE32_CROCKFORD });
+```
+
+### Codec
+
+A codec framework for encoding/decoding between formats. Built-in codecs for JSON, CSV, FormData, Base64, and text. Compose custom codecs with `Codec.from()`.
+
+```ts
+import { json, csv, csvCodec, base64, formData, Codec } from "@anyhow/std/codec";
+
+// JSON codec
+json.decode('{"port":3000}'); // → Ok({ port: 3000 })
+json.encode({ port: 3000 }); // → '{"port":3000}'
+
+// CSV with configurable delimiter
+const tsv = csvCodec({ delimiter: "\t" });
+tsv.decode("name\tage\nAlice\t30"); // → Ok([{ name: "Alice", age: "30" }])
+csv.encode([{ name: "Alice", age: "30" }]); // → "name,age\nAlice,30"
+
+// FormData codec
+formData.decode(new FormData());
+
+// Build custom codecs
+const hex = Codec.from({
+  encode: (buf: Uint8Array) => Buffer.from(buf).toString("hex"),
+  decode: (str) => ok(Uint8Array.from(Buffer.from(str, "hex"))),
+});
 ```
 
 ### Svelte

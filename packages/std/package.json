@@ -1,6 +1,7 @@
 {
   "name": "@anyhow/std",
   "version": "0.3.0",
+  "description": "Zero-dependency TypeScript utility toolkit — 28 tree-shakeable modules for error handling, validation, async, formatting, and more.",
   "repository": {
     "type": "git",
     "url": "https://github.com/roushou/anyhow",

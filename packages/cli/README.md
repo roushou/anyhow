@@ -1,6 +1,6 @@
 # @anyhow/cli
 
-Declarative CLI framework — define commands as plain objects with full type inference.
+Declarative CLI framework — define commands as plain objects with full type inference. Built on `@anyhow/std/result` for zero-throw error handling.
 
 ```bash
 bun add @anyhow/cli
@@ -9,24 +9,24 @@ bun add @anyhow/cli
 ```ts
 import { defineCommand, defineCli } from "@anyhow/cli";
 
-const hello = defineCommand({
-  name: "hello",
-  description: "Say hello",
-  arguments: { name: { type: "string", required: true, description: "Who to greet" } },
-  options: { loud: { type: "boolean", short: "l", description: "Shout it" } },
+const deploy = defineCommand({
+  name: "deploy",
+  description: "Deploy to target environment",
+  arguments: { env: { type: "string", required: true, description: "Target environment" } },
+  options: { force: { type: "boolean", short: "f", description: "Skip confirmation" } },
   async action({ args, options }) {
-    const msg = `Hello, ${args.name}!`;
-    console.log(options.loud ? msg.toUpperCase() : msg);
+    // args.env is string, options.force is boolean — fully typed
+    console.log(`Deploying to ${args.env}`);
   },
 });
 
 const cli = defineCli({
   name: "mycli",
   description: "A sample CLI built with @anyhow/cli",
-  commands: [hello],
+  commands: [deploy],
 });
 
 await cli.run(process.argv.slice(2));
 ```
 
-See [anyhow](https://github.com/roushou/anyhow) for full documentation.
+See the [main README](https://github.com/roushou/anyhow#cli) for full documentation.
