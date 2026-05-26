@@ -433,14 +433,10 @@ import {
   escapeHtml,
   unescapeHtml,
   escapeRegExp,
-  lines,
   words,
   capitalize,
   randomString,
   decapitalize,
-  reverse,
-  padStart,
-  padEnd,
   wrap,
   byteLength,
 } from "@anyhow/std/string";
@@ -471,21 +467,17 @@ unescapeHtml("&lt;div&gt;hello&amp;goodbye&lt;/div&gt;"); // "<div>hello&goodbye
 // Escape for regex
 escapeRegExp("1 + 1 = 2?"); // "1 \\+ 1 = 2\\?"
 
-// Split into lines or words
-lines("a\nb\nc"); // ["a", "b", "c"]
+// Words
 words("hello  world"); // ["hello", "world"]
 
 // Case manipulation
 capitalize("hello"); // "Hello"
 decapitalize("Hello"); // "hello"
 
-// Padding and wrapping
-padStart("42", 5, "0"); // "00042"
-padEnd("42", 5, "0"); // "42000"
+// Wrapping
 wrap("hello world", 5); // ["hello", "world"]
 
 // Other utilities
-reverse("hello"); // "olleh"
 byteLength("hello"); // 5
 randomString(8); // "a3f1b2c0"
 ```
@@ -651,11 +643,7 @@ import {
   min,
   max,
   product,
-  isEven,
-  isOdd,
-  isInteger,
   isFloat,
-  sign,
   inRange,
   gcd,
   lcm,
@@ -686,11 +674,7 @@ max([3, 1, 4, 1, 5]); // 5
 product([2, 3, 4]); // 24
 
 // Number predicates
-isEven(4); // true
-isOdd(3); // true
-isInteger(5.0); // true
 isFloat(3.14); // true
-sign(-5); // -1
 inRange(5, 0, 10); // true
 inRange(5, 0, 10, "()"); // true (exclusive bounds)
 
