@@ -56,7 +56,7 @@ class SomeImpl<T> extends OptionBase<T> {
   }
 
   zip<U>(other: Option<U>): Option<[T, U]> {
-    return other.isSome() ? some([this.value, other.value] as [T, U]) : (none() as Option<[T, U]>);
+    return other.isSome() ? some([this.value, other.value]) : none();
   }
 
   zipWith<U, V>(other: Option<U>, fn: (t: T, u: U) => V): Option<V> {
@@ -102,11 +102,11 @@ class NoneImpl extends OptionBase<never> {
   readonly some = false as const;
 
   map<U>(_fn: (value: never) => U): Option<U> {
-    return this as unknown as Option<U>;
+    return this;
   }
 
   andThen<U>(_fn: (value: never) => Option<U>): Option<U> {
-    return this as unknown as Option<U>;
+    return this;
   }
 
   filter(_pred: (value: never) => boolean): Option<never> {
@@ -126,11 +126,11 @@ class NoneImpl extends OptionBase<never> {
   }
 
   zip<U>(_other: Option<U>): Option<[never, U]> {
-    return this as unknown as Option<[never, U]>;
+    return this;
   }
 
   zipWith<U, V>(_other: Option<U>, _fn: (t: never, u: U) => V): Option<V> {
-    return this as unknown as Option<V>;
+    return this;
   }
 
   flatten(): any {

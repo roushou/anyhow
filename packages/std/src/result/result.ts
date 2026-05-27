@@ -29,11 +29,11 @@ class OkImpl<T, E> extends ResultBase<T, E> {
   }
 
   map<U>(fn: (value: T) => U): Result<U, E> {
-    return new OkImpl<U, E>(fn(this.value)) as unknown as Result<U, E>;
+    return new OkImpl<U, E>(fn(this.value));
   }
 
   mapErr<F>(_fn: (error: E) => F): Result<T, F> {
-    return new OkImpl<T, F>(this.value) as unknown as Result<T, F>;
+    return new OkImpl<T, F>(this.value);
   }
 
   andThen<U>(fn: (value: T) => Result<U, E>): Result<U, E> {
@@ -41,7 +41,7 @@ class OkImpl<T, E> extends ResultBase<T, E> {
   }
 
   orElse<U>(_fn: (error: E) => Result<U, E>): Result<T, E> {
-    return this as unknown as Result<T, E>;
+    return this;
   }
 
   or<U>(_other: Result<U, E>): Result<T, E> {
@@ -62,13 +62,13 @@ class OkImpl<T, E> extends ResultBase<T, E> {
   }
 
   zip<U>(other: Result<U, E>): Result<[T, U], E> {
-    if (!other.ok) return other as unknown as Result<[T, U], E>;
-    return new OkImpl<[T, U], E>([this.value, other.value]) as unknown as Result<[T, U], E>;
+    if (!other.ok) return other;
+    return new OkImpl<[T, U], E>([this.value, other.value]);
   }
 
   zipWith<U, V>(other: Result<U, E>, fn: (t: T, u: U) => V): Result<V, E> {
-    if (!other.ok) return other as unknown as Result<V, E>;
-    return new OkImpl<V, E>(fn(this.value, other.value)) as unknown as Result<V, E>;
+    if (!other.ok) return other;
+    return new OkImpl<V, E>(fn(this.value, other.value));
   }
 
   unwrap(): T {
@@ -102,15 +102,15 @@ class ErrImpl<E> extends ResultBase<never, E> {
   }
 
   map<U>(_fn: (value: never) => U): Result<U, E> {
-    return this as unknown as Result<U, E>;
+    return this;
   }
 
   mapErr<F>(fn: (error: E) => F): Result<never, F> {
-    return new ErrImpl<F>(fn(this.error)) as unknown as Result<never, F>;
+    return new ErrImpl<F>(fn(this.error));
   }
 
   andThen<U>(_fn: (value: never) => Result<U, E>): Result<U, E> {
-    return this as unknown as Result<U, E>;
+    return this;
   }
 
   orElse<U>(fn: (error: E) => Result<U, E>): Result<U, E> {
@@ -135,11 +135,11 @@ class ErrImpl<E> extends ResultBase<never, E> {
   }
 
   zip<U>(_other: Result<U, E>): Result<[never, U], E> {
-    return this as unknown as Result<[never, U], E>;
+    return this;
   }
 
   zipWith<U, V>(_other: Result<U, E>, _fn: (t: never, u: U) => V): Result<V, E> {
-    return this as unknown as Result<V, E>;
+    return this;
   }
 
   unwrap(): never {
@@ -196,8 +196,7 @@ export type Result<T, E = Error> = OkImpl<T, E> | ErrImpl<E>;
  * ok<number, string>(5); // Result<number, string>
  * ```
  */
-export const ok = <T, E = never>(value: T): Result<T, E> =>
-  new OkImpl<T, E>(value) as unknown as Result<T, E>;
+export const ok = <T, E = never>(value: T): Result<T, E> => new OkImpl<T, E>(value);
 
 /**
  * Creates a failed {@link Result}.
@@ -212,5 +211,4 @@ export const ok = <T, E = never>(value: T): Result<T, E> =>
  * err(new Error("boom"));          // Result<never, Error>
  * ```
  */
-export const err = <E = unknown>(error: E): Result<never, E> =>
-  new ErrImpl<E>(error) as unknown as Result<never, E>;
+export const err = <E = unknown>(error: E): Result<never, E> => new ErrImpl<E>(error);
