@@ -9,6 +9,8 @@ abstract class ResultBase<T, E> {
   abstract tap(fn: (value: T) => void): Result<T, E>;
   abstract tapErr(fn: (error: E) => void): Result<T, E>;
   abstract flatten(): any;
+  abstract zip<U>(other: Result<U, E>): Result<[T, U], E>;
+  abstract zipWith<U, V>(other: Result<U, E>, fn: (t: T, u: U) => V): Result<V, E>;
 
   abstract unwrap(): T;
   abstract unwrapOr(fallback: T): T;
@@ -57,6 +59,16 @@ class OkImpl<T, E> extends ResultBase<T, E> {
 
   flatten(): any {
     return this.value as any;
+  }
+
+  zip<U>(other: Result<U, E>): Result<[T, U], E> {
+    if (!other.ok) return other as unknown as Result<[T, U], E>;
+    return new OkImpl<[T, U], E>([this.value, other.value]) as unknown as Result<[T, U], E>;
+  }
+
+  zipWith<U, V>(other: Result<U, E>, fn: (t: T, u: U) => V): Result<V, E> {
+    if (!other.ok) return other as unknown as Result<V, E>;
+    return new OkImpl<V, E>(fn(this.value, other.value)) as unknown as Result<V, E>;
   }
 
   unwrap(): T {
@@ -120,6 +132,14 @@ class ErrImpl<E> extends ResultBase<never, E> {
 
   flatten(): any {
     return this;
+  }
+
+  zip<U>(_other: Result<U, E>): Result<[never, U], E> {
+    return this as unknown as Result<[never, U], E>;
+  }
+
+  zipWith<U, V>(_other: Result<U, E>, _fn: (t: never, u: U) => V): Result<V, E> {
+    return this as unknown as Result<V, E>;
   }
 
   unwrap(): never {

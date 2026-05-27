@@ -178,6 +178,48 @@ describe("flatten", () => {
   });
 });
 
+// ── zip / zipWith ──
+
+describe("zip", () => {
+  it("combines two Ok values", () => {
+    const r = ok(1).zip(ok("hello"));
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toEqual([1, "hello"]);
+  });
+
+  it("returns first Err when second is Err", () => {
+    const r = ok(1).zip(err("fail"));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe("fail");
+  });
+
+  it("short-circuits on first Err", () => {
+    const r: Result<[number, string], string> = err("first").zip(ok("unused"));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe("first");
+  });
+});
+
+describe("zipWith", () => {
+  it("combines two Ok values with a function", () => {
+    const r = ok(2).zipWith(ok(3), (a, b) => a + b);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toBe(5);
+  });
+
+  it("returns Err when second is Err", () => {
+    const r = ok(1).zipWith(err("fail"), (a, b) => a + String(b));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe("fail");
+  });
+
+  it("short-circuits on first Err", () => {
+    const r = err("first").zipWith(ok(1), (a, b) => a + b);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe("first");
+  });
+});
+
 // ── Terminal ──
 
 describe("unwrap", () => {
