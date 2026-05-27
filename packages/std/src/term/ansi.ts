@@ -1,5 +1,7 @@
 // ── ANSI escape code tables ──────────────────────────────────────────────────
 
+import { Color } from "../color/color.js";
+
 const FG: Record<string, number> = {
   black: 30,
   red: 31,
@@ -78,22 +80,11 @@ function makeStyle(base?: StyleState): any {
     makeStyle({ opens: [...opens, `38;2;${r};${g};${b}`], closes: [...closes, "39"] });
 
   fn.hex = (hex: string) => {
-    const { r, g, b } = parseHex(hex);
-    return makeStyle({ opens: [...opens, `38;2;${r};${g};${b}`], closes: [...closes, "39"] });
+    const c = Color.fromHex(hex).toRgb();
+    return makeStyle({ opens: [...opens, `38;2;${c.r};${c.g};${c.b}`], closes: [...closes, "39"] });
   };
 
   return fn;
-}
-
-function parseHex(hex: string): { r: number; g: number; b: number } {
-  let h = hex.replace(/^#/, "");
-  if (h.length === 3) h = h[0]! + h[0] + h[1]! + h[1] + h[2]! + h[2];
-  if (h.length !== 6) throw new Error(`Invalid hex color: ${hex}`);
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  if (isNaN(r) || isNaN(g) || isNaN(b)) throw new Error(`Invalid hex color: ${hex}`);
-  return { r, g, b };
 }
 
 /**

@@ -154,6 +154,11 @@
       "import": "./dist/codec/index.js",
       "require": "./dist/codec/index.cjs",
       "types": "./dist/codec/index.d.ts"
+    },
+    "./color": {
+      "import": "./dist/color/index.js",
+      "require": "./dist/color/index.cjs",
+      "types": "./dist/color/index.d.ts"
     }
   },
   "publishConfig": {

@@ -36,6 +36,7 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 |                     | Bytes       | `@anyhow/std/bytes`       | `toHex`, `fromHex`, `toBase64`, `fromBase64`, `toUTF8`, `fromUTF8`                                                                   |
 |                     | Encoding    | `@anyhow/std/encoding`    | `toHex`, `fromHex`, `toBase58`, `fromBase58`, `toBase32`, `ALPHABETS`                                                                |
 |                     | Codec       | `@anyhow/std/codec`       | `json`, `csv`, `csvCodec`, `base64`, `Codec`, `formData`                                                                             |
+|                     | Color       | `@anyhow/std/color`       | `Color.fromHex()`, `.fromRgb()`, `.fromHsl()`, `.lighten()`, `.darken()`, `.contrast()`                                              |
 |                     | Text        | `@anyhow/std/text`        | `levenshtein`, `fuzzyMatch`, `fuzzyFilter`, `diffLines`, `diffWords`                                                                 |
 | **Data structures** | Collections | `@anyhow/std/collections` | `keyBy`, `uniqBy`, `range`, `deepMerge`, `deepEqual`, `pick`, `omit`, `get`, `set`                                                   |
 |                     | Struct      | `@anyhow/std/struct`      | `Stack`, `Queue`, `Deque`, `PriorityQueue`, `BloomFilter`, `Trie`, `DisjointSet`                                                     |
@@ -1314,6 +1315,37 @@ diffLines("hello\nworld", "hello\nWORLD\nfoo");
 //    { type: "delete", value: "world" },
 //    { type: "insert", value: "WORLD" },
 //    { type: "insert", value: "foo" }]
+```
+
+### Color
+
+Parse, convert, manipulate, and analyze colors — pure math, no DOM.
+
+```ts
+import { Color } from "@anyhow/std/color";
+
+// Constructors
+const brand = Color.fromHex("#3b82f6");
+const coral = Color.fromRgb(255, 127, 80);
+const pastel = Color.fromHsl(217, 91, 80);
+
+// Converters
+brand.toHex(); // "#3b82f6"
+brand.toRgb(); // { r: 59, g: 130, b: 246 }
+brand.toRgbString(); // "rgb(59,130,246)"
+brand.toHsl(); // { h: 217, s: 91, l: 60 }
+
+// Manipulation (returns new Color — immutable)
+brand.lighten(0.15); // 15% toward white
+brand.darken(0.1); // 10% toward black
+brand.saturate(0.3); // 30% more saturated
+brand.desaturate(0.5); // 50% less saturated
+brand.mix(coral, 0.5); // blend with another color
+brand.withAlpha(0.5); // set opacity
+
+// WCAG accessibility
+brand.luminance(); // 0.18 — relative luminance
+brand.contrast(Color.fromHex("#ffffff")); // 4.5 — contrast ratio
 ```
 
 ### Encoding

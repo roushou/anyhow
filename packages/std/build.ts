@@ -29,6 +29,7 @@ const modules = [
   "event",
   "config",
   "codec",
+  "color",
 ];
 
 // Clean dist first
