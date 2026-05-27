@@ -188,13 +188,13 @@ describe("zip", () => {
   });
 
   it("returns first Err when second is Err", () => {
-    const r = ok(1).zip(err("fail"));
+    const r = ok<number, string>(1).zip(err("fail"));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("fail");
   });
 
   it("short-circuits on first Err", () => {
-    const r: Result<[number, string], string> = err("first").zip(ok("unused"));
+    const r = err("first").zip(ok<number, string>(1));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("first");
   });
@@ -208,13 +208,13 @@ describe("zipWith", () => {
   });
 
   it("returns Err when second is Err", () => {
-    const r = ok(1).zipWith(err("fail"), (a, b) => a + String(b));
+    const r = ok<number, string>(1).zipWith(err("fail"), (a, b) => a + String(b));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("fail");
   });
 
   it("short-circuits on first Err", () => {
-    const r = err("first").zipWith(ok(1), (a, b) => a + b);
+    const r = err("first").zipWith(ok<number, string>(1), (a, b) => a + b);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toBe("first");
   });

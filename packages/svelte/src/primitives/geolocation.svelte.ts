@@ -55,7 +55,7 @@ export function createGeolocation(opts?: PositionOptions) {
         loading = false;
       },
       (err) => {
-        error = err;
+        error = new Error(err.message);
         loading = false;
       },
       opts,

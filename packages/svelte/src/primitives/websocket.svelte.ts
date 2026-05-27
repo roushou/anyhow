@@ -25,9 +25,7 @@
  */
 export function createWebSocket(url: string | (() => string), protocols?: string | string[]) {
   let data = $state<string | null>(null);
-  let readyState = $state<number>(
-    typeof WebSocket !== "undefined" ? WebSocket.CONNECTING : WebSocket.CLOSED,
-  );
+  let readyState = $state<number>(typeof WebSocket !== "undefined" ? WebSocket.CONNECTING : 3);
   let error = $state<Error | undefined>(undefined);
   let socket: WebSocket | null = null;
 
