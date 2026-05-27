@@ -31,3 +31,70 @@ export function createLongPress(
   node: HTMLElement,
   opts: { duration: number; handler: () => void },
 ): { destroy(): void };
+
+/** Svelte action that traps keyboard focus within a DOM node. */
+export function createFocusTrap(node: HTMLElement): { destroy(): void };
+
+/** Svelte action that auto-focuses an element on mount. */
+export function createAutoFocus(node: HTMLElement): { destroy(): void };
+
+/** Svelte action that binds keyboard shortcuts to a DOM node. */
+export function createKeydown(
+  node: HTMLElement,
+  shortcuts: Record<string, (e: KeyboardEvent) => void>,
+): { destroy(): void };
+
+/** Svelte action that moves an element to another DOM container. */
+export function createPortal(target?: HTMLElement): {
+  readonly target: HTMLElement | null;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** Svelte action that detects touch swipe gestures. */
+export function createSwipe(
+  node: HTMLElement,
+  opts: {
+    threshold?: number;
+    onSwipe: (result: {
+      direction: "left" | "right" | "up" | "down";
+      distance: number;
+      velocity: number;
+    }) => void;
+  },
+): { destroy(): void };
+
+/** Svelte action that triggers when an element enters the viewport. */
+export function createLazyLoad(opts?: {
+  onEnter?: () => void;
+  once?: boolean;
+}): {
+  readonly isIntersecting: boolean;
+  readonly entry: IntersectionObserverEntry | null;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** Svelte action that watches DOM mutations. */
+export function createMutationObserver(opts?: MutationObserverInit): {
+  readonly records: MutationRecord[];
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** Svelte action that tracks hover state. */
+export function createHover(): {
+  readonly isHovering: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** Svelte action that tracks focus state. */
+export function createFocus(): {
+  readonly focused: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** Svelte action that tracks pointer-based drag. */
+export function createDraggable(): {
+  readonly x: number;
+  readonly y: number;
+  readonly dragging: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};

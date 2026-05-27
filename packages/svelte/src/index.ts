@@ -25,11 +25,33 @@ export {
   createEventSource,
   createColorScheme,
   createVisibility,
+  createMousePosition,
+  createWebSocket,
+  createPageLeave,
+  createGeolocation,
+  createFullscreen,
+  createReducedMotion,
+  createTextSelection,
+  createPreferredLanguages,
+  createWakeLock,
+  createNetworkInformation,
+  createSpeechRecognition,
+  createNotification,
+  createPointerLock,
+  createScreenOrientation,
+  createBroadcastChannel,
 } from "./primitives/index.js";
 export { isBrowser } from "./browser.js";
 
 // ── SvelteKit composables ──
-export { createFormAction, safeLoad, safeActions } from "./composables/index.js";
+export {
+  createFormAction,
+  safeLoad,
+  safeActions,
+  createPagination,
+  createFilteredList,
+  createInfiniteScroll,
+} from "./composables/index.js";
 export type {
   FormActionSimple,
   FormActionWithValidation,
@@ -43,4 +65,14 @@ export {
   createElementSize,
   createIntersectionObserver,
   createLongPress,
+  createFocusTrap,
+  createAutoFocus,
+  createKeydown,
+  createPortal,
+  createSwipe,
+  createLazyLoad,
+  createMutationObserver,
+  createHover,
+  createFocus,
+  createDraggable,
 } from "./actions/index.js";

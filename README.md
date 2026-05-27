@@ -47,7 +47,7 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 |                     | Log         | `@anyhow/std/log`         | `Logger`, `prettyFormatter`, `memorySink`, `LogLevel`                                                                                |
 |                     | Config      | `@anyhow/std/config`      | `Config.load()`, `Config.file()`, `Config.env()`, `Config.args()`                                                                    |
 | **Frameworks**      | CLI         | `@anyhow/cli`             | `defineCommand`, `defineCli`                                                                                                         |
-|                     | Svelte      | `@anyhow/svelte`          | `createToggle`, `createAsyncState`, `createFormAction`, `safeLoad`, `createClickOutside`                                             |
+|                     | Svelte      | `@anyhow/svelte`          | `createToggle`, `createAsyncState`, `createFormAction`, `createPagination`, `safeLoad`, `createFocusTrap`, `createClickOutside`      |
 
 ## Installation
 
@@ -1375,8 +1375,8 @@ Tree-shakeable subpath imports:
 
 ```ts
 import { createToggle, createAsyncState } from "@anyhow/svelte/primitives";
-import { createFormAction, safeLoad } from "@anyhow/svelte/composables";
-import { createClickOutside } from "@anyhow/svelte/actions";
+import { createFormAction, safeLoad, createPagination } from "@anyhow/svelte/composables";
+import { createClickOutside, createFocusTrap } from "@anyhow/svelte/actions";
 ```
 
 #### Reactive primitives
@@ -1392,8 +1392,41 @@ import {
   createDebouncedState,
   createThrottledState,
   createPersistedState,
+  createStore,
   createMediaQuery,
   createQueryParams,
+  createAsyncState,
+  createUndoRedo,
+  createOnline,
+  createInterval,
+  createScrollPosition,
+  createBreakpoints,
+  createCopyToClipboard,
+  createTimeout,
+  createActiveElement,
+  createPolling,
+  createWindowSize,
+  createHash,
+  createIdle,
+  createRaf,
+  createEventSource,
+  createColorScheme,
+  createVisibility,
+  createMousePosition,
+  createWebSocket,
+  createPageLeave,
+  createGeolocation,
+  createFullscreen,
+  createReducedMotion,
+  createTextSelection,
+  createPreferredLanguages,
+  createWakeLock,
+  createNetworkInformation,
+  createSpeechRecognition,
+  createNotification,
+  createPointerLock,
+  createScreenOrientation,
+  createBroadcastChannel,
   isBrowser,
 } from "@anyhow/svelte";
 
@@ -1508,13 +1541,36 @@ const vis = createVisibility();
 ```ts
 import {
   createClickOutside,
+  createFocusTrap,
+  createAutoFocus,
+  createKeydown,
+  createPortal,
   createElementSize,
   createIntersectionObserver,
+  createLazyLoad,
   createLongPress,
+  createSwipe,
+  createMutationObserver,
+  createHover,
+  createFocus,
+  createDraggable,
 } from "@anyhow/svelte";
 
 // Click outside detection
 // <div use:clickOutside={() => (open = false)}>…</div>
+
+// Focus trap (accessibility for modals/dialogs)
+// <div use:createFocusTrap role="dialog">…</div>
+
+// Auto-focus on mount
+// <input use:createAutoFocus placeholder="Search…" />
+
+// Keyboard shortcuts
+// <div use:createKeydown={{ Escape: () => (open = false), "Control+s": save }}>…</div>
+
+// Portal (render element in document.body)
+const portal = createPortal();
+// <div use:portal.action>I'm in body</div>
 
 // Reactive element dimensions
 const size = createElementSize();
@@ -1523,6 +1579,29 @@ const size = createElementSize();
 // Intersection observer (lazy loading, scroll-spy)
 const obs = createIntersectionObserver({ threshold: 0.5 });
 // <div use:obs.action>{#if obs.isIntersecting}Visible!{/if}</div>
+
+// Lazy load (trigger callback on enter)
+const lazy = createLazyLoad({ onEnter: () => load() });
+// <div use:lazy.action>…</div>
+
+// Swipe detection
+// <div use:createSwipe={{ onSwipe: ({ direction }) => … }}>…</div>
+
+// Mutation observer
+const mut = createMutationObserver({ childList: true });
+// <div use:mut.action>…</div>
+
+// Hover state
+const hover = createHover();
+// <div use:hover.action>{hover.isHovering ? "👋" : "Hover"}</div>
+
+// Focus state
+const focus = createFocus();
+// <input use:focus.action />
+
+// Draggable
+const drag = createDraggable();
+// <div use:drag.action style="transform:translate({drag.x}px,{drag.y}px)">…</div>
 
 // Long press (touch / mouse)
 // <button use:longPress={{ duration: 800, handler: () => deleteItem() }}>Hold to delete</button>
@@ -1605,6 +1684,26 @@ export const actions = safeActions({
     // throws are caught → form._actionError
   },
 });
+```
+
+#### Data composables
+
+```ts
+import { createPagination, createFilteredList, createInfiniteScroll } from "@anyhow/svelte";
+
+// Pagination state
+const pag = createPagination({ total: 250, perPage: 20 });
+// pag.page, pag.totalPages, pag.prev(), pag.next(), pag.canPrev, pag.canNext
+
+// Filtered & sorted list
+const list = createFilteredList(allUsers, { searchFields: ["name", "email"], sortKey: "name" });
+// list.search, list.filtered, list.setSearch("ali"), list.setSort("email")
+
+// Infinite scroll (loads pages via IntersectionObserver sentinel)
+const feed = createInfiniteScroll(async (page) =>
+  fetch(`/api/posts?page=${page}`).then((r) => r.json()),
+);
+// feed.items, feed.loading, feed.hasMore, feed.loadMore(), <div use:feed.sentinel />
 ```
 
 ### CLI

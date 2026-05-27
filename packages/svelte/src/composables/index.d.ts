@@ -127,3 +127,47 @@ export function safeActions<A extends Record<string, (...args: any[]) => Promise
     ? (...args: Args) => Promise<R & { _actionError?: Error }>
     : A[K];
 };
+
+/** Reactive pagination state backed by Svelte 5 `$state`. */
+export function createPagination(opts: {
+  total: number;
+  perPage?: number;
+  page?: number;
+}): {
+  page: number;
+  perPage: number;
+  total: number;
+  readonly totalPages: number;
+  readonly canPrev: boolean;
+  readonly canNext: boolean;
+  setPage(n: number): void;
+  prev(): void;
+  next(): void;
+  reset(): void;
+};
+
+/** Reactive filtered list backed by Svelte 5 `$state`. */
+export function createFilteredList<T extends Record<string, any>>(
+  items: T[],
+  opts: { searchFields: string[]; sortKey?: string },
+): {
+  search: string;
+  readonly sortKey: string;
+  readonly sortDir: "asc" | "desc";
+  readonly filtered: T[];
+  setSearch(q: string): void;
+  setSort(key: string): void;
+};
+
+/** Reactive infinite scroll composable backed by Svelte 5 `$state`. */
+export function createInfiniteScroll<T>(
+  fetcher: (page: number) => Promise<T[]>,
+): {
+  readonly items: T[];
+  readonly loading: boolean;
+  readonly hasMore: boolean;
+  readonly error: Error | undefined;
+  loadMore(): Promise<void>;
+  reset(): void;
+  sentinel: (node: HTMLElement) => { destroy(): void };
+};

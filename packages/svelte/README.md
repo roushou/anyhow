@@ -10,16 +10,17 @@ bun add @anyhow/svelte
 
 ```ts
 import { createToggle, createAsyncState } from "@anyhow/svelte/primitives";
-import { createFormAction, safeLoad } from "@anyhow/svelte/composables";
-import { createClickOutside } from "@anyhow/svelte/actions";
+import { createFormAction, createPagination } from "@anyhow/svelte/composables";
+import { createClickOutside, createFocusTrap } from "@anyhow/svelte/actions";
 ```
 
-## Reactive primitives
+## Reactive primitives (41)
 
-26 standalone `$state`-based composables. No imports from `@anyhow/std` needed — but composes seamlessly with `@anyhow/std/schema` and `@anyhow/std/result`.
+Standalone `$state`-based composables. No imports from `@anyhow/std` needed — but composes seamlessly with `@anyhow/std/schema` and `@anyhow/std/result`.
 
 ```ts
 import {
+  // State
   createToggle, // boolean toggle
   createCycle, // cycle through values
   createPrevious, // track previous value
@@ -27,37 +28,71 @@ import {
   createDebouncedState, // debounced reactive state
   createThrottledState, // throttled reactive state
   createStore, // localStorage / sessionStorage sync
+  createUndoRedo, // undo/redo stack
+
+  // URL / Browser
   createMediaQuery, // reactive media query
   createQueryParams, // URL search params sync
-  createAsyncState, // async operation state (loading/data/error)
-  createUndoRedo, // undo/redo stack
-  createOnline, // navigator.onLine
-  createInterval, // managed setInterval
-  createTimeout, // managed setTimeout
-  createScrollPosition, // scroll tracking
-  createBreakpoints, // responsive breakpoints
-  createCopyToClipboard, // clipboard access
-  createActiveElement, // focus tracking
-  createPolling, // async polling
-  createWindowSize, // viewport dimensions
   createHash, // location.hash
-  createIdle, // user idle detection
-  createRaf, // requestAnimationFrame loop
-  createEventSource, // managed EventSource
   createColorScheme, // prefers-color-scheme
+  createReducedMotion, // prefers-reduced-motion
   createVisibility, // page visibility
   isBrowser, // SSR-safe guard
+
+  // DOM / Input
+  createMousePosition, // reactive mouse coordinates
+  createScrollPosition, // scroll tracking
+  createWindowSize, // viewport dimensions
+  createBreakpoints, // responsive breakpoints
+  createActiveElement, // focus tracking
+  createCopyToClipboard, // clipboard access
+  createTextSelection, // reactive text selection
+
+  // Async
+  createAsyncState, // async operation (loading/data/error)
+  createPolling, // async polling
+  createInterval, // managed setInterval
+  createTimeout, // managed setTimeout
+  createRaf, // requestAnimationFrame loop
+
+  // Network
+  createOnline, // navigator.onLine
+  createWebSocket, // reactive WebSocket connection
+  createEventSource, // managed EventSource
+  createNetworkInformation, // navigator.connection
+
+  // Browser APIs
+  createGeolocation, // navigator.geolocation
+  createFullscreen, // Fullscreen API
+  createWakeLock, // Screen Wake Lock API
+  createPageLeave, // beforeunload guard
+  createPreferredLanguages, // navigator.languages
+  createNotification, // Notification API
+  createSpeechRecognition, // Web Speech API
+  createPointerLock, // Pointer Lock API
+  createScreenOrientation, // Screen Orientation API
+  createBroadcastChannel, // cross-tab messaging
 } from "@anyhow/svelte";
 ```
 
-## Svelte actions (`use:` directives)
+## Svelte actions (`use:` directives) (14)
 
 ```ts
 import {
   createClickOutside, // detect clicks outside element
+  createFocusTrap, // trap Tab/Shift+Tab within element
+  createAutoFocus, // auto-focus on mount
+  createKeydown, // keyboard shortcuts
+  createPortal, // move element to another DOM container
   createElementSize, // reactive ResizeObserver
   createIntersectionObserver, // IntersectionObserver
+  createLazyLoad, // IntersectionObserver with callback
   createLongPress, // long press detection
+  createSwipe, // touch swipe detection
+  createMutationObserver, // DOM mutation watching
+  createHover, // hover state tracking
+  createFocus, // focus state tracking
+  createDraggable, // pointer-based drag
 } from "@anyhow/svelte";
 ```
 
@@ -102,6 +137,16 @@ export const load = safeLoad(async (event) => {
   if (!user) throw new Error("Not found");
   return { user };
 });
+```
+
+## Data composables
+
+```ts
+import {
+  createPagination, // page, perPage, total, prev/next
+  createFilteredList, // search + sort over a list
+  createInfiniteScroll, // page-based loading with sentinel action
+} from "@anyhow/svelte";
 ```
 
 See the [main README](https://github.com/roushou/anyhow#svelte) for full documentation and examples.

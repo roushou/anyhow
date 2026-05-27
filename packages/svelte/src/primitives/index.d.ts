@@ -245,3 +245,157 @@ export function createColorScheme(): { readonly scheme: "light" | "dark" };
 
 /** Reactive page visibility (`document.visibilityState`). */
 export function createVisibility(): { readonly visible: boolean };
+
+/**
+ * Reactive mouse position backed by Svelte 5 `$state`.
+ */
+export function createMousePosition(): {
+  readonly pageX: number;
+  readonly pageY: number;
+  readonly clientX: number;
+  readonly clientY: number;
+};
+
+/**
+ * Reactive WebSocket connection backed by Svelte 5 `$state`.
+ */
+export function createWebSocket(url: string | (() => string), protocols?: string | string[]): {
+  readonly data: string | null;
+  readonly readyState: number;
+  readonly error: Error | undefined;
+  send(message: string): void;
+  close(code?: number, reason?: string): void;
+};
+
+/**
+ * Reactive page-leave guard backed by Svelte 5 `$state`.
+ */
+export function createPageLeave(): {
+  setDirty(value: boolean): void;
+  disable(): void;
+};
+
+/**
+ * Reactive geolocation backed by Svelte 5 `$state`.
+ */
+export function createGeolocation(opts?: PositionOptions): {
+  readonly latitude: number | null;
+  readonly longitude: number | null;
+  readonly accuracy: number | null;
+  readonly altitude: number | null;
+  readonly altitudeAccuracy: number | null;
+  readonly heading: number | null;
+  readonly speed: number | null;
+  readonly error: Error | undefined;
+  readonly loading: boolean;
+};
+
+/**
+ * Reactive Fullscreen API wrapper backed by Svelte 5 `$state`.
+ */
+export function createFullscreen(): {
+  readonly isFullscreen: boolean;
+  enter(el?: HTMLElement): Promise<void>;
+  exit(): Promise<void>;
+  toggle(): Promise<void>;
+};
+
+/**
+ * Reactive reduced-motion preference backed by Svelte 5 `$state`.
+ */
+export function createReducedMotion(): { readonly reduced: boolean };
+
+/**
+ * Reactive text selection backed by Svelte 5 `$state`.
+ */
+export function createTextSelection(): {
+  readonly text: string;
+  readonly ranges: Range[];
+  readonly rects: DOMRect[];
+};
+
+/**
+ * Reactive preferred languages backed by Svelte 5 `$state`.
+ */
+export function createPreferredLanguages(): {
+  readonly languages: string[];
+};
+
+/**
+ * Reactive Screen Wake Lock API wrapper backed by Svelte 5 `$state`.
+ */
+export function createWakeLock(): {
+  readonly isActive: boolean;
+  readonly isSupported: boolean;
+  request(): Promise<void>;
+  release(): Promise<void>;
+};
+
+/**
+ * Reactive Network Information API wrapper backed by Svelte 5 `$state`.
+ */
+export function createNetworkInformation(): {
+  readonly effectiveType: string | undefined;
+  readonly downlink: number | undefined;
+  readonly rtt: number | undefined;
+  readonly saveData: boolean | undefined;
+  readonly isSupported: boolean;
+};
+
+/**
+ * Reactive Speech Recognition (Web Speech API) wrapper backed by Svelte 5 `$state`.
+ */
+export function createSpeechRecognition(opts?: {
+  lang?: string;
+  continuous?: boolean;
+  interimResults?: boolean;
+}): {
+  readonly listening: boolean;
+  readonly transcript: string;
+  readonly interim: string;
+  readonly error: Error | undefined;
+  readonly isSupported: boolean;
+  start(): void;
+  stop(): void;
+};
+
+/**
+ * Reactive Notification API wrapper backed by Svelte 5 `$state`.
+ */
+export function createNotification(): {
+  readonly permission: NotificationPermission;
+  readonly isSupported: boolean;
+  show(title: string, opts?: NotificationOptions): boolean;
+};
+
+/**
+ * Reactive Pointer Lock API wrapper backed by Svelte 5 `$state`.
+ */
+export function createPointerLock(): {
+  readonly locked: boolean;
+  readonly movementX: number;
+  readonly movementY: number;
+  readonly isSupported: boolean;
+  request(el?: Element): Promise<void>;
+  exit(): void;
+};
+
+/**
+ * Reactive Screen Orientation API wrapper backed by Svelte 5 `$state`.
+ */
+export function createScreenOrientation(): {
+  readonly type: string;
+  readonly angle: number;
+  readonly isSupported: boolean;
+  lock(orientation: OrientationLockType): Promise<void>;
+  unlock(): void;
+};
+
+/**
+ * Reactive BroadcastChannel wrapper backed by Svelte 5 `$state`.
+ */
+export function createBroadcastChannel(name: string): {
+  readonly messages: any[];
+  postMessage(data: any): void;
+  close(): void;
+};
