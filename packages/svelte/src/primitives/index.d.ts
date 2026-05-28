@@ -435,3 +435,38 @@ export function createEventListener<E extends Event>(
   handler: (e: E) => void,
   opts?: boolean | AddEventListenerOptions,
 ): void;
+
+// ── Battery ──
+
+/** Reactive Battery Status API wrapper backed by Svelte 5 `$state`. */
+export function createBattery(): {
+  readonly charging: boolean;
+  readonly level: number;
+  readonly chargingTime: number;
+  readonly dischargingTime: number;
+  readonly isSupported: boolean;
+};
+
+// ── Media devices ──
+
+/** Reactive MediaDevices API wrapper backed by Svelte 5 `$state`. */
+export function createMediaDevices(): {
+  readonly stream: MediaStream | null;
+  readonly devices: MediaDeviceInfo[];
+  readonly error: string | undefined;
+  readonly loading: boolean;
+  readonly isSupported: boolean;
+  request(constraints?: MediaStreamConstraints): Promise<void>;
+  stop(): void;
+};
+
+// ── Performance observer ──
+
+/** Reactive PerformanceObserver wrapper backed by Svelte 5 `$state`. */
+export function createPerformanceObserver(opts: {
+  type: string;
+  buffered?: boolean;
+}): {
+  readonly entries: PerformanceEntry[];
+  readonly isSupported: boolean;
+};

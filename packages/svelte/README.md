@@ -14,7 +14,7 @@ import { createFormAction, createPagination } from "@anyhow/svelte/composables";
 import { createClickOutside, createFocusTrap } from "@anyhow/svelte/actions";
 ```
 
-## Reactive primitives (43)
+## Reactive primitives (46)
 
 Standalone `$state`-based composables. No imports from `@anyhow/std` needed — but composes seamlessly with `@anyhow/std/schema` and `@anyhow/std/result`.
 
@@ -74,6 +74,9 @@ import {
   createPointerLock, // Pointer Lock API
   createScreenOrientation, // Screen Orientation API
   createBroadcastChannel, // cross-tab messaging
+  createBattery, // Battery Status API
+  createMediaDevices, // camera / microphone
+  createPerformanceObserver, // Core Web Vitals
 } from "@anyhow/svelte";
 ```
 

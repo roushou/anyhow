@@ -42,6 +42,9 @@ export {
   createBroadcastChannel,
   createStateMachine,
   createEventListener,
+  createBattery,
+  createMediaDevices,
+  createPerformanceObserver,
 } from "./primitives/index.js";
 export { isBrowser } from "./browser.js";
 
