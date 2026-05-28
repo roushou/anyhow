@@ -19,6 +19,8 @@
  * />
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createPointerLock() {
   let locked = $state(false);
   let movementX = $state(0);
@@ -45,11 +47,12 @@ export function createPointerLock() {
       movementY = e.movementY;
     }
 
-    document.addEventListener("pointerlockchange", onLockChange);
-    document.addEventListener("mousemove", onMouseMove);
+    const listeners = [
+      listen(document, "pointerlockchange", onLockChange),
+      listen(document, "mousemove", onMouseMove),
+    ];
     return () => {
-      document.removeEventListener("pointerlockchange", onLockChange);
-      document.removeEventListener("mousemove", onMouseMove);
+      for (const l of listeners) l.destroy();
       document.exitPointerLock();
     };
   });

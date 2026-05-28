@@ -22,6 +22,8 @@
  * {#if bp.current === "lg"}Desktop layout{/if}
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createBreakpoints<T extends Record<string, number>>(breakpoints: T) {
   const sorted = Object.entries(breakpoints).sort(([, a], [, b]) => b - a) as [
     keyof T & string,
@@ -44,10 +46,8 @@ export function createBreakpoints<T extends Record<string, number>>(breakpoints:
 
   $effect(() => {
     compute();
-    if (typeof window === "undefined") return;
-    window.addEventListener("resize", compute);
-    return () => window.removeEventListener("resize", compute);
   });
+  createEventListener(window, "resize", compute);
 
   /** Returns `true` if the current breakpoint is larger than `name`. */
   function above(name: keyof T & string): boolean {

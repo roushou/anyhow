@@ -24,6 +24,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createClickOutside(
   node: HTMLElement,
   handler: (event: MouseEvent) => void,
@@ -34,11 +36,5 @@ export function createClickOutside(
     }
   }
 
-  document.addEventListener("click", onClick, true);
-
-  return {
-    destroy() {
-      document.removeEventListener("click", onClick, true);
-    },
-  };
+  return listen(document, "click", onClick, true);
 }

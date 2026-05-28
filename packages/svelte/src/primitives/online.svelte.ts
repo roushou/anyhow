@@ -18,22 +18,16 @@
  * {/if}
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createOnline() {
   let online = $state(typeof navigator !== "undefined" ? navigator.onLine : true);
 
-  $effect(() => {
-    if (typeof window === "undefined") return;
-
-    function update() {
-      online = navigator.onLine;
-    }
-
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-    };
+  createEventListener(window, "online", () => {
+    online = navigator.onLine;
+  });
+  createEventListener(window, "offline", () => {
+    online = navigator.onLine;
   });
 
   return {

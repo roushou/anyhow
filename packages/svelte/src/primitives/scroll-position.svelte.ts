@@ -19,6 +19,8 @@
  * </button>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createScrollPosition() {
   let x = $state(0);
   let y = $state(0);
@@ -42,12 +44,12 @@ export function createScrollPosition() {
       }, 150);
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const scrollListener = listen(window, "scroll", onScroll, { passive: true });
     // Capture initial position without triggering isScrolling
     x = window.scrollX;
     y = window.scrollY;
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      scrollListener.destroy();
       clearTimeout(timer);
     };
   });

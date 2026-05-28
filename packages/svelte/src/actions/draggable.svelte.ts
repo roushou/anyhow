@@ -22,6 +22,8 @@
  * </div>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createDraggable() {
   let x = $state(0);
   let y = $state(0);
@@ -47,15 +49,15 @@ export function createDraggable() {
       dragging = false;
     }
 
-    node.addEventListener("pointerdown", onPointerDown);
-    node.addEventListener("pointermove", onPointerMove);
-    node.addEventListener("pointerup", onPointerUp);
+    const listeners = [
+      listen(node, "pointerdown", onPointerDown),
+      listen(node, "pointermove", onPointerMove),
+      listen(node, "pointerup", onPointerUp),
+    ];
 
     return {
       destroy() {
-        node.removeEventListener("pointerdown", onPointerDown);
-        node.removeEventListener("pointermove", onPointerMove);
-        node.removeEventListener("pointerup", onPointerUp);
+        for (const l of listeners) l.destroy();
       },
     };
   }

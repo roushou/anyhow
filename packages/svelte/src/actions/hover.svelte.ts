@@ -15,6 +15,8 @@
  * </div>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createHover() {
   let isHovering = $state(false);
 
@@ -26,13 +28,13 @@ export function createHover() {
       isHovering = false;
     }
 
-    node.addEventListener("mouseenter", onEnter);
-    node.addEventListener("mouseleave", onLeave);
+    const enterListener = listen(node, "mouseenter", onEnter);
+    const leaveListener = listen(node, "mouseleave", onLeave);
 
     return {
       destroy() {
-        node.removeEventListener("mouseenter", onEnter);
-        node.removeEventListener("mouseleave", onLeave);
+        enterListener.destroy();
+        leaveListener.destroy();
       },
     };
   }

@@ -22,20 +22,15 @@
  * </script>
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createVisibility() {
   let visible = $state(
     typeof document !== "undefined" ? document.visibilityState === "visible" : true,
   );
 
-  $effect(() => {
-    if (typeof document === "undefined") return;
-
-    function update() {
-      visible = document.visibilityState === "visible";
-    }
-
-    document.addEventListener("visibilitychange", update);
-    return () => document.removeEventListener("visibilitychange", update);
+  createEventListener(document, "visibilitychange", () => {
+    visible = document.visibilityState === "visible";
   });
 
   return {

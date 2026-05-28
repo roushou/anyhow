@@ -22,6 +22,8 @@
  * </button>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createLongPress(
   node: HTMLElement,
   opts: { duration: number; handler: () => void },
@@ -41,15 +43,15 @@ export function createLongPress(
     }
   }
 
-  node.addEventListener("pointerdown", onPointerDown);
-  node.addEventListener("pointerup", onPointerUp);
-  node.addEventListener("pointercancel", onPointerUp);
+  const listeners = [
+    listen(node, "pointerdown", onPointerDown),
+    listen(node, "pointerup", onPointerUp),
+    listen(node, "pointercancel", onPointerUp),
+  ];
 
   return {
     destroy() {
-      node.removeEventListener("pointerdown", onPointerDown);
-      node.removeEventListener("pointerup", onPointerUp);
-      node.removeEventListener("pointercancel", onPointerUp);
+      for (const l of listeners) l.destroy();
       onPointerUp();
     },
   };

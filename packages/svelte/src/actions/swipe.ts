@@ -25,6 +25,8 @@
  * }}>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createSwipe(
   node: HTMLElement,
   opts: {
@@ -71,13 +73,13 @@ export function createSwipe(
     opts.onSwipe({ direction, distance, velocity });
   }
 
-  node.addEventListener("touchstart", onTouchStart, { passive: true });
-  node.addEventListener("touchend", onTouchEnd, { passive: true });
+  const startListener = listen(node, "touchstart", onTouchStart, { passive: true });
+  const endListener = listen(node, "touchend", onTouchEnd, { passive: true });
 
   return {
     destroy() {
-      node.removeEventListener("touchstart", onTouchStart);
-      node.removeEventListener("touchend", onTouchEnd);
+      startListener.destroy();
+      endListener.destroy();
     },
   };
 }

@@ -14,7 +14,7 @@ import { createFormAction, createPagination } from "@anyhow/svelte/composables";
 import { createClickOutside, createFocusTrap } from "@anyhow/svelte/actions";
 ```
 
-## Reactive primitives (42)
+## Reactive primitives (43)
 
 Standalone `$state`-based composables. No imports from `@anyhow/std` needed — but composes seamlessly with `@anyhow/std/schema` and `@anyhow/std/result`.
 
@@ -30,6 +30,7 @@ import {
   createStore, // localStorage / sessionStorage sync
   createUndoRedo, // undo/redo stack
   createStateMachine, // finite state machine (from @anyhow/std/state)
+  createEventListener, // typed event listener with $effect cleanup
 
   // URL / Browser
   createMediaQuery, // reactive media query

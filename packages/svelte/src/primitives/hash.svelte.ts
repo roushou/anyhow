@@ -17,18 +17,13 @@
  * {#if route.hash === "settings"}<Settings />{/if}
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createHash() {
   let hash = $state(typeof window !== "undefined" ? window.location.hash.replace(/^#/, "") : "");
 
-  $effect(() => {
-    if (typeof window === "undefined") return;
-
-    function update() {
-      hash = window.location.hash.replace(/^#/, "");
-    }
-
-    window.addEventListener("hashchange", update);
-    return () => window.removeEventListener("hashchange", update);
+  createEventListener(window, "hashchange", () => {
+    hash = window.location.hash.replace(/^#/, "");
   });
 
   return {

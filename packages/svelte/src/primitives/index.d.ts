@@ -64,13 +64,6 @@ export function createThrottledState<T>(initial: T, waitMs: number): {
   flush(): void;
 };
 
-/**
- * Reactive state persisted to `localStorage`, backed by Svelte 5 `$state`.
- */
-export function createPersistedState<T>(key: string, initial: T): {
-  value: T;
-};
-
 // ── Store ──
 
 /** Reactive state persisted to browser storage (`local` or `session`). */
@@ -422,3 +415,23 @@ export function createStateMachine<S extends string, E extends string, C = void>
   history(): readonly import("@anyhow/std/state").TransitionRecord<S, E>[];
   reset(): void;
 };
+
+// ── Event listener ──
+
+/**
+ * Typed event listener with automatic `$effect`-backed cleanup.
+ *
+ * SSR-safe: no-op when `target` is `null`/`undefined`.
+ *
+ * @typeParam E - The expected event type.
+ * @param target - The `EventTarget` (e.g. `window`, `document`, `HTMLElement`).
+ * @param type - The event type string.
+ * @param handler - The event handler.
+ * @param opts - Optional `AddEventListenerOptions` or capture boolean.
+ */
+export function createEventListener<E extends Event>(
+  target: EventTarget | null | undefined,
+  type: string,
+  handler: (e: E) => void,
+  opts?: boolean | AddEventListenerOptions,
+): void;

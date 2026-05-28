@@ -18,18 +18,13 @@
  * </button>
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createFullscreen() {
   let isFullscreen = $state(false);
 
-  $effect(() => {
-    if (typeof document === "undefined") return;
-
-    function update() {
-      isFullscreen = !!document.fullscreenElement;
-    }
-
-    document.addEventListener("fullscreenchange", update);
-    return () => document.removeEventListener("fullscreenchange", update);
+  createEventListener(document, "fullscreenchange", () => {
+    isFullscreen = !!document.fullscreenElement;
   });
 
   return {

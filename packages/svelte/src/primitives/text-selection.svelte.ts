@@ -18,6 +18,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createTextSelection() {
   let text = $state("");
   let ranges = $state<Range[]>([]);
@@ -45,8 +47,7 @@ export function createTextSelection() {
       }
     }
 
-    document.addEventListener("selectionchange", update);
-    return () => document.removeEventListener("selectionchange", update);
+    return listen(document, "selectionchange", update).destroy;
   });
 
   return {

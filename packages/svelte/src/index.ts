@@ -40,6 +40,8 @@ export {
   createPointerLock,
   createScreenOrientation,
   createBroadcastChannel,
+  createStateMachine,
+  createEventListener,
 } from "./primitives/index.js";
 export { isBrowser } from "./browser.js";
 

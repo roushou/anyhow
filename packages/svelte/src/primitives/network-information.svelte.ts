@@ -21,6 +21,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createNetworkInformation() {
   let effectiveType = $state<string | undefined>(undefined);
   let downlink = $state<number | undefined>(undefined);
@@ -42,8 +44,7 @@ export function createNetworkInformation() {
     }
 
     update();
-    conn.addEventListener("change", update);
-    return () => conn.removeEventListener("change", update);
+    return listen(conn, "change", update).destroy;
   });
 
   return {

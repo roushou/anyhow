@@ -15,6 +15,8 @@
  * // {#if isMobile.current}...{/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createMediaQuery(query: string) {
   let matches = $state(false);
 
@@ -23,13 +25,9 @@ export function createMediaQuery(query: string) {
 
     const mql = window.matchMedia(query);
     matches = mql.matches;
-
-    function onChange(e: MediaQueryListEvent) {
+    return listen(mql, "change", (e: MediaQueryListEvent) => {
       matches = e.matches;
-    }
-
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
+    }).destroy;
   });
 
   return {

@@ -16,6 +16,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createFocus() {
   let focused = $state(false);
 
@@ -27,13 +29,13 @@ export function createFocus() {
       focused = false;
     }
 
-    node.addEventListener("focus", onFocus);
-    node.addEventListener("blur", onBlur);
+    const focusListener = listen(node, "focus", onFocus);
+    const blurListener = listen(node, "blur", onBlur);
 
     return {
       destroy() {
-        node.removeEventListener("focus", onFocus);
-        node.removeEventListener("blur", onBlur);
+        focusListener.destroy();
+        blurListener.destroy();
       },
     };
   }

@@ -21,6 +21,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createReducedMotion() {
   let reduced = $state(false);
 
@@ -28,14 +30,10 @@ export function createReducedMotion() {
     if (typeof window === "undefined") return;
 
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    function update(e?: MediaQueryListEvent) {
-      reduced = (e ?? mql).matches;
-    }
-
-    update();
-    mql.addEventListener("change", update);
-    return () => mql.removeEventListener("change", update);
+    reduced = mql.matches;
+    return listen(mql, "change", () => {
+      reduced = mql.matches;
+    }).destroy;
   });
 
   return {

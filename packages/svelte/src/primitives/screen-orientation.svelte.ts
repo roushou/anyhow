@@ -16,6 +16,8 @@
  * <button onclick={() => orient.lock("landscape")}>Lock Landscape</button>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createScreenOrientation() {
   let type = $state<string>("");
   let angle = $state(0);
@@ -32,8 +34,7 @@ export function createScreenOrientation() {
     }
 
     update();
-    orientation.addEventListener("change", update);
-    return () => orientation.removeEventListener("change", update);
+    return listen(orientation, "change", update).destroy;
   });
 
   return {

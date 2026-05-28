@@ -18,21 +18,15 @@
  * {/if}
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createActiveElement() {
   let element = $state<Element | null>(
     typeof document !== "undefined" ? document.activeElement : null,
   );
 
-  $effect(() => {
-    if (typeof document === "undefined") return;
-
-    function update() {
-      element = document.activeElement;
-    }
-
-    document.addEventListener("focusin", update);
-    update();
-    return () => document.removeEventListener("focusin", update);
+  createEventListener(document, "focusin", () => {
+    element = document.activeElement;
   });
 
   return {

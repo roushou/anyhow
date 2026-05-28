@@ -23,6 +23,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createFocusTrap(node: HTMLElement): { destroy: () => void } {
   const previous = document.activeElement;
 
@@ -68,11 +70,11 @@ export function createFocusTrap(node: HTMLElement): { destroy: () => void } {
     node.focus();
   }
 
-  node.addEventListener("keydown", onKeydown);
+  const keyListener = listen(node, "keydown", onKeydown);
 
   return {
     destroy() {
-      node.removeEventListener("keydown", onKeydown);
+      keyListener.destroy();
       if (previous instanceof HTMLElement) previous.focus();
     },
   };

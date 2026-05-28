@@ -16,20 +16,15 @@
  * <p>Your primary language: {pl.languages[0] ?? "unknown"}</p>
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createPreferredLanguages() {
   let languages = $state<string[]>(
     typeof navigator !== "undefined" ? [...navigator.languages] : [],
   );
 
-  $effect(() => {
-    if (typeof window === "undefined") return;
-
-    function update() {
-      languages = [...navigator.languages];
-    }
-
-    window.addEventListener("languagechange", update);
-    return () => window.removeEventListener("languagechange", update);
+  createEventListener(window, "languagechange", () => {
+    languages = [...navigator.languages];
   });
 
   return {

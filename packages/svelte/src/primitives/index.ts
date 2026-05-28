@@ -40,3 +40,4 @@ export { createPointerLock } from "./pointer-lock.svelte.js";
 export { createScreenOrientation } from "./screen-orientation.svelte.js";
 export { createBroadcastChannel } from "./broadcast-channel.svelte.js";
 export { createStateMachine } from "./state-machine.svelte.js";
+export { createEventListener } from "./event-listener.svelte.js";

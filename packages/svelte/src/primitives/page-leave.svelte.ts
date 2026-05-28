@@ -24,20 +24,20 @@
  * </form>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createPageLeave() {
   let dirty = $state(false);
 
   $effect(() => {
     if (typeof window === "undefined") return;
-
     if (!dirty) return;
 
     function handler(e: BeforeUnloadEvent) {
       e.preventDefault();
     }
 
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
+    return listen(window, "beforeunload", handler).destroy;
   });
 
   return {

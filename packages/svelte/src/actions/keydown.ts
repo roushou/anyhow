@@ -21,6 +21,8 @@
  * <svelte:window use:createKeydown={shortcuts} />
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createKeydown(
   node: HTMLElement,
   shortcuts: Record<string, (e: KeyboardEvent) => void>,
@@ -41,11 +43,5 @@ export function createKeydown(
     }
   }
 
-  node.addEventListener("keydown", onKeydown);
-
-  return {
-    destroy() {
-      node.removeEventListener("keydown", onKeydown);
-    },
-  };
+  return listen(node, "keydown", onKeydown);
 }

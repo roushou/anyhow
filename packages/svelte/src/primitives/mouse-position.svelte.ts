@@ -19,24 +19,19 @@
  * ></div>
  * ```
  */
+import { createEventListener } from "./event-listener.svelte.js";
+
 export function createMousePosition() {
   let pageX = $state(0);
   let pageY = $state(0);
   let clientX = $state(0);
   let clientY = $state(0);
 
-  $effect(() => {
-    if (typeof window === "undefined") return;
-
-    function update(e: MouseEvent) {
-      pageX = e.pageX;
-      pageY = e.pageY;
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    window.addEventListener("mousemove", update);
-    return () => window.removeEventListener("mousemove", update);
+  createEventListener(window, "mousemove", (e: MouseEvent) => {
+    pageX = e.pageX;
+    pageY = e.pageY;
+    clientX = e.clientX;
+    clientY = e.clientY;
   });
 
   return {

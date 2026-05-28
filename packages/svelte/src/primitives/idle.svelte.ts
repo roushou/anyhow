@@ -19,6 +19,8 @@
  * {/if}
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createIdle(ms: number) {
   let idle = $state(false);
 
@@ -35,17 +37,16 @@ export function createIdle(ms: number) {
       }, ms);
     }
 
-    const events = ["pointermove", "keydown", "scroll"];
-    for (const event of events) {
-      window.addEventListener(event, reset, { passive: true });
-    }
+    const listeners = [
+      listen(window, "pointermove", reset, { passive: true }),
+      listen(window, "keydown", reset, { passive: true }),
+      listen(window, "scroll", reset, { passive: true }),
+    ];
     reset();
 
     return () => {
       clearTimeout(timer);
-      for (const event of events) {
-        window.removeEventListener(event, reset);
-      }
+      for (const l of listeners) l.destroy();
     };
   });
 

@@ -17,6 +17,8 @@
  * <body class:dark={cs.scheme === "dark"}>
  * ```
  */
+import { listen } from "../listen.js";
+
 export function createColorScheme() {
   let scheme = $state<"light" | "dark">("light");
 
@@ -24,14 +26,10 @@ export function createColorScheme() {
     if (typeof window === "undefined") return;
 
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
-
-    function update(e?: MediaQueryListEvent) {
-      scheme = (e ?? mql).matches ? "dark" : "light";
-    }
-
-    update();
-    mql.addEventListener("change", update);
-    return () => mql.removeEventListener("change", update);
+    scheme = mql.matches ? "dark" : "light";
+    return listen(mql, "change", () => {
+      scheme = mql.matches ? "dark" : "light";
+    }).destroy;
   });
 
   return {
