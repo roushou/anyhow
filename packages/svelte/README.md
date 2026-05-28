@@ -100,35 +100,53 @@ import {
 } from "@anyhow/svelte";
 ```
 
-## Form actions
+## Form state
 
-Four progressive tiers — from bare-bones to full `@anyhow/std` `Result` integration:
+A single `createForm` entrypoint that handles both client-side field state
+(value, error, touched, dirty, validation) and optional SvelteKit form
+action submission via `use:enhance`. No manual bridge code.
 
 ```ts
-import { createFormAction } from "@anyhow/svelte";
+import { createForm } from "@anyhow/svelte";
 
-// Path A — simple action (no validation)
-const form = createFormAction(async (fd) => {
-  const name = fd.get("name");
-  return await api.submit(name);
-});
-
-// Path D — schema + Result (first-party integration)
-import { s } from "@anyhow/std/schema";
-import { ok, err } from "@anyhow/std/result";
-
-const loginSchema = s.object({ email: s.string(), password: s.string() });
-
-const form = createFormAction({
-  schema: loginSchema,
-  action: async (data) => {
-    const user = await api.login(data);
-    return ok(user);
+// Client-only form
+const form = createForm({
+  initial: { email: "", name: "" },
+  validate: (values) => {
+    const errors: Partial<Record<keyof typeof values, string>> = {};
+    if (!values.email.includes("@")) errors.email = "Invalid email";
+    return errors;
   },
 });
-// {#if form.result?.ok}
-//   Welcome, {form.result.value.name}
-// {/if}
+// form.fields.email.value, .error, .touched, .dirty
+// form.fields.email.onChange(v), .onBlur()
+// form.valid, form.dirty, form.validate(), form.reset()
+
+// SvelteKit form (adds onSubmit → pending, result, enhance, submit)
+import { ok } from "@anyhow/std/result";
+
+const loginForm = createForm({
+  initial: { email: "", password: "" },
+  validate: (v) => {
+    const errors: Partial<Record<keyof typeof v, string>> = {};
+    if (!v.email) errors.email = "Required";
+    return errors;
+  },
+  onSubmit: async (values) => ok(await api.login(values)),
+});
+// loginForm.pending, .result, .enhance (for use:enhance), .submit()
+```
+
+```svelte
+<form method="POST" use:loginForm.enhance>
+  <input name="email" value={loginForm.fields.email.value}
+    oninput={(e) => loginForm.fields.email.onChange(e.currentTarget.value)}
+    onblur={() => loginForm.fields.email.onBlur()} />
+  {#if loginForm.fields.email.touched && loginForm.fields.email.error}
+    <span class="error">{loginForm.fields.email.error}</span>
+  {/if}
+  <button type="submit" disabled={loginForm.pending}>Login</button>
+</form>
 ```
 
 ## Load / actions safety

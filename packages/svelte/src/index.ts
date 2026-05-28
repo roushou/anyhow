@@ -47,19 +47,14 @@ export { isBrowser } from "./browser.js";
 
 // ── SvelteKit composables ──
 export {
-  createFormAction,
+  createForm,
   safeLoad,
   safeActions,
   createPagination,
   createFilteredList,
   createInfiniteScroll,
 } from "./composables/index.js";
-export type {
-  FormActionSimple,
-  FormActionWithValidation,
-  FormActionWithSchema,
-  FormActionStateWithResult,
-} from "./composables/index.js";
+export type { FieldState, ClientForm, SubmitForm } from "./composables/index.js";
 
 // ── Svelte actions ──
 export {

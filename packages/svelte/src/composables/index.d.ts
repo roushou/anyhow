@@ -7,108 +7,58 @@ interface SubmitContext {
   submitter: HTMLElement | null;
 }
 
-/** Validation error detail. */
-interface ValidationErrorLike {
-  path: (string | number)[];
-  message: string;
-  expected?: string;
-  received?: string;
+/** Reactive state for a single form field. */
+export interface FieldState<V> {
+  readonly value: V;
+  readonly error: string;
+  readonly touched: boolean;
+  readonly dirty: boolean;
+  onChange(v: V): void;
+  onBlur(): void;
 }
 
-/**
- * The reactive state returned by `createFormAction` Path A.
- */
-export interface FormActionSimple<T = unknown> {
-  readonly pending: boolean;
-  readonly data: T | undefined;
-  readonly error: string | undefined;
-  enhance: () => (ctx: SubmitContext) => Promise<void>;
+/** Return type when `onSubmit` is not provided — client-only form. */
+export interface ClientForm<T extends Record<string, any>> {
+  fields: { [K in keyof T]: FieldState<T[K]> };
+  readonly valid: boolean;
+  readonly dirty: boolean;
+  validate(): boolean;
+  setErrors(errors: Partial<Record<keyof T, string>>): void;
   reset(): void;
+  getValues(): T;
 }
 
-/**
- * The reactive state returned by `createFormAction` Path B.
- */
-export interface FormActionWithValidation<T = unknown> {
+/** Return type when `onSubmit` is provided — SvelteKit-ready form. */
+export interface SubmitForm<T extends Record<string, any>> extends ClientForm<T> {
   readonly pending: boolean;
-  readonly data: T | undefined;
-  readonly error: string | undefined;
-  readonly validationError: string | undefined;
+  readonly result: import("@anyhow/std/result").Result<any, any> | undefined;
+  readonly formError: string | undefined;
   enhance: () => (ctx: SubmitContext) => Promise<void>;
-  reset(): void;
+  submit(): Promise<void>;
 }
 
 /**
- * The reactive state returned by `createFormAction` Path C.
- */
-export interface FormActionWithSchema<T = unknown> {
-  readonly pending: boolean;
-  readonly data: T | undefined;
-  readonly error: string | undefined;
-  readonly validationErrors: ValidationErrorLike[] | undefined;
-  enhance: () => (ctx: SubmitContext) => Promise<void>;
-  reset(): void;
-}
-
-/** Options for Path B: validate + action. */
-interface ValidateOpts<V, T> {
-  validate: (fd: FormData) => V | string;
-  action: (data: V) => Promise<T>;
-}
-
-/** Options for Path C: schema + action. */
-interface SchemaOpts<V, T> {
-  schema: { parse(value: unknown): { ok: boolean; value?: V; error?: unknown } };
-  action: (data: V) => Promise<T>;
-}
-
-/**
- * Creates a reactive form action backed by Svelte 5 `$state`.
+ * Creates a reactive form backed by Svelte 5 `$state`.
  *
- * Path A — Simple action (no validation).
+ * Client-only variant — no `onSubmit`.
  */
-export function createFormAction<T>(action: (fd: FormData) => Promise<T>): FormActionSimple<T>;
+export function createForm<T extends Record<string, any>>(opts: {
+  initial: T;
+  validate?: (values: T) => Partial<Record<keyof T, string>>;
+  validateOn?: "blur" | "change" | "submit";
+}): ClientForm<T>;
 
 /**
- * Creates a reactive form action backed by Svelte 5 `$state`.
+ * Creates a reactive form backed by Svelte 5 `$state`.
  *
- * Path B — Inline validation with a `validate` function.
+ * SvelteKit variant — includes `onSubmit`.
  */
-export function createFormAction<V, T>(opts: ValidateOpts<V, T>): FormActionWithValidation<T>;
-
-/**
- * Creates a reactive form action backed by Svelte 5 `$state`.
- *
- * Path C — Schema-based validation (compatible with `@anyhow/std/schema`).
- */
-export function createFormAction<V, T>(opts: SchemaOpts<V, T>): FormActionWithSchema<T>;
-
-/** Options for Path D: schema + action returning `Result`. */
-interface SchemaResultOpts<V, T, E> {
-  schema: import("@anyhow/std/schema").Schema<V>;
-  action: (data: V) => Promise<import("@anyhow/std/result").Result<T, E>>;
-}
-
-/**
- * The reactive state returned by `createFormAction` Path D.
- */
-export interface FormActionStateWithResult<T = unknown, E = Error> {
-  readonly pending: boolean;
-  readonly result: import("@anyhow/std/result").Result<T, E> | undefined;
-  readonly error: string | undefined;
-  readonly validationErrors: import("@anyhow/std/schema").ValidationError[] | undefined;
-  enhance: () => (ctx: SubmitContext) => Promise<void>;
-  reset(): void;
-}
-
-/**
- * Creates a reactive form action backed by Svelte 5 `$state`.
- *
- * Path D — Schema + `Result` (first-party `@anyhow/std` integration).
- */
-export function createFormAction<V, T, E = Error>(
-  opts: SchemaResultOpts<V, T, E>,
-): FormActionStateWithResult<T, E>;
+export function createForm<T extends Record<string, any>>(opts: {
+  initial: T;
+  validate?: (values: T) => Partial<Record<keyof T, string>>;
+  validateOn?: "blur" | "change" | "submit";
+  onSubmit?: (values: T) => Promise<import("@anyhow/std/result").Result<any, any>>;
+}): SubmitForm<T>;
 
 /**
  * Wraps a SvelteKit `load` function so thrown errors are returned as data.
