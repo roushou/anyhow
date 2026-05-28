@@ -18,10 +18,11 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 
 | Category            | Module      | Import                    | Key exports                                                                                                                          |
 | ------------------- | ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Core types**      | Result      | `@anyhow/std/result`      | `ok`, `err`, `Result`, `Pipeline`, `Stepper`                                                                                         |
+| **Core types**      | Result      | `@anyhow/std/result`      | `ok`, `err`, `Result`, `Result.all()`, `Result.transpose()`, `Pipeline`, `Stepper`                                                   |
 |                     | Option      | `@anyhow/std/option`      | `some`, `none`, `Option`                                                                                                             |
 |                     | Brand       | `@anyhow/std/brand`       | `brand`, `Brand`, `Unbrand`, `BrandOf`                                                                                               |
 |                     | Pipe        | `@anyhow/std/pipe`        | `pipe`, `compose`, `flow`                                                                                                            |
+|                     | State       | `@anyhow/std/state`       | `stateMachine`, `StateMachine`                                                                                                       |
 | **Validation**      | Guard       | `@anyhow/std/guard`       | `isString`, `isObject`, `hasProperty`, `assert`, `assertDefined`, `assertNever`                                                      |
 |                     | Schema      | `@anyhow/std/schema`      | `s.string()`, `s.number()`, `s.object()`, `s.array()`, `s.union()`, `s.brand()`                                                      |
 | **Async**           | Async       | `@anyhow/std/async`       | `sleep`, `debounce`, `throttle`, `retry`, `Backoff`, `concurrent`, `RateLimiter`, `Semaphore`, `timeout`, `memoizeAsync`, `Deferred` |
@@ -50,7 +51,7 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 |                     | Log         | `@anyhow/std/log`         | `Logger`, `prettyFormatter`, `memorySink`, `LogLevel`                                                                                |
 |                     | Config      | `@anyhow/std/config`      | `Config.load()`, `Config.file()`, `Config.env()`, `Config.args()`                                                                    |
 | **Frameworks**      | CLI         | `@anyhow/cli`             | `defineCommand`, `defineCli`                                                                                                         |
-|                     | Svelte      | `@anyhow/svelte`          | `createToggle`, `createAsyncState`, `createFormAction`, `createPagination`, `safeLoad`, `createFocusTrap`, `createClickOutside`      |
+|                     | Svelte      | `@anyhow/svelte`          | `createToggle`, `createStateMachine`, `createAsyncState`, `createFormAction`, `createPagination`, `safeLoad`, `createFocusTrap`      |
 
 ## Installation
 
@@ -117,6 +118,16 @@ Result.decodeURIComponent("hello%20world"); // safe URI decode
 Result.all([ok(1), ok(2), ok(3)]); // Ok([1, 2, 3])
 Result.partition([ok(1), err("a"), ok(2)]); // { ok: [1,2], err: ["a"] }
 Result.any([err("a"), ok(42)]); // Ok(42)
+
+// Object form — validates a record of Results into a typed object
+const user = Result.all({
+  name: ok("Alice"),
+  age: ok(30),
+});
+
+// Transpose — swap Result and Option layers
+Result.transpose(ok(some(42))); // some(ok(42))
+Result.transpose(ok(none())); // none()
 
 // ── Pipeline (reusable, observable stages) ──
 
@@ -328,6 +339,74 @@ const process = flow(
   (s: string) => `[${s}]`,
 );
 process("  Hello  "); // "[hello]"
+```
+
+### State
+
+Finite state machine with guards, lifecycle hooks (entry/exit), transition
+actions, and typed context. Only transitions explicitly declared in the
+definition are allowed.
+
+```ts
+import { stateMachine } from "@anyhow/std/state";
+
+type State = "idle" | "loading" | "done";
+type Event = "FETCH" | "RESOLVE";
+
+const fetchMachine = stateMachine<State, Event>({
+  initial: "idle",
+  states: {
+    idle: { on: { FETCH: { target: "loading" } } },
+    loading: { on: { RESOLVE: { target: "done" } } },
+    done: {},
+  },
+});
+
+fetchMachine.send("FETCH"); // true, idle → loading
+fetchMachine.state(); // "loading"
+fetchMachine.can("RESOLVE"); // true
+fetchMachine.send("FETCH"); // false — no transition from loading
+
+// Guards prevent invalid transitions
+const orderMachine = stateMachine(
+  {
+    initial: "pending",
+    states: {
+      pending: {
+        on: {
+          CONFIRM: {
+            target: "confirmed",
+            guard: (ctx: { paid: boolean }) => ctx.paid,
+          },
+        },
+      },
+      confirmed: {},
+    },
+  },
+  { paid: false },
+);
+orderMachine.send("CONFIRM"); // false — guard rejected
+
+// Lifecycle hooks (exit → action → entry)
+const wizard = stateMachine({
+  initial: "step1",
+  states: {
+    step1: {
+      on: { NEXT: { target: "step2" } },
+      exit: () => console.log("leaving step1"),
+    },
+    step2: {
+      entry: () => console.log("entered step2"),
+    },
+  },
+});
+wizard.send("NEXT");
+
+// History tracks every transition
+wizard.history();
+// [{ from: "step1", event: "NEXT", to: "step2" }]
+
+wizard.reset(); // back to initial state, clears history
 ```
 
 ### Async
@@ -1533,6 +1612,7 @@ import {
   createQueryParams,
   createAsyncState,
   createUndoRedo,
+  createStateMachine,
   createOnline,
   createInterval,
   createScrollPosition,
@@ -1612,6 +1692,18 @@ const user = createAsyncState(async (id: string) => {
 const history = createUndoRedo("Hello");
 // history.push("World"), history.undo(), history.redo()
 // history.canUndo, history.canRedo
+
+// State machine (from @anyhow/std/state, made reactive with $state)
+const wizard = createStateMachine<"personal" | "address" | "review", "NEXT" | "BACK">({
+  initial: "personal",
+  states: {
+    personal: { on: { NEXT: { target: "address" } } },
+    address: { on: { NEXT: { target: "review" }, BACK: { target: "personal" } } },
+    review: { on: { BACK: { target: "address" } } },
+  },
+});
+// wizard.state — reactive, auto-updates in templates
+// wizard.send("NEXT"), wizard.can("BACK"), wizard.history(), wizard.reset()
 
 // Online status
 const net = createOnline();

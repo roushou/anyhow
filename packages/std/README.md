@@ -1,6 +1,6 @@
 # @anyhow/std
 
-A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable modules covering error handling, validation, async primitives, data transformation, and more.
+A **zero-dependency, TypeScript-first utility toolkit** — 31 tree-shakeable modules covering error handling, validation, async primitives, data transformation, and more.
 
 Every function returns `Result` instead of throwing. Import only what you use via subpath exports.
 
@@ -50,6 +50,9 @@ Each module is independently importable via subpath exports:
 - [**async**](https://github.com/roushou/anyhow#async) — `sleep`, `debounce`, `throttle`, `retry`, `concurrent`, `memoizeAsync`, `RateLimiter`, `Semaphore`
 - [**cache**](https://github.com/roushou/anyhow#cache) — LRU cache with TTL and sync memoization
 - [**event**](https://github.com/roushou/anyhow#event) — Typed event emitters and signals
+- [**channel**](https://github.com/roushou/anyhow#channel) — CSP-style async channels with `select()`
+- [**mutex**](https://github.com/roushou/anyhow#mutex) — `Mutex<T>` and `RwLock<T>` async locks
+- [**state**](https://github.com/roushou/anyhow#state) — Finite state machine with guards and lifecycle hooks
 
 ### Data transformation
 
@@ -67,7 +70,7 @@ Each module is independently importable via subpath exports:
 ### Data structures
 
 - [**collections**](https://github.com/roushou/anyhow#collections) — Object/array helpers, deep merge, deep equal
-- [**struct**](https://github.com/roushou/anyhow#struct) — Stack, Queue, BloomFilter, Trie, DisjointSet
+- [**struct**](https://github.com/roushou/anyhow#struct) — Stack, Queue, Deque, RingBuffer, TreeNode, BloomFilter, Trie, DisjointSet
 
 ### Platform & I/O
 

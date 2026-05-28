@@ -66,7 +66,7 @@ anyhow/
         ├── build.ts       # Svelte compileModule + bun build per subpath
         └── src/
             ├── index.d.ts         # Hand-crafted root declarations
-            ├── primitives/        # Reactive $state composables (26 exports)
+            ├── primitives/        # Reactive $state composables (42 exports)
             │   └── index.d.ts     # Hand-crafted primitives declarations
             ├── composables/       # SvelteKit form/load/action utilities (3 exports)
             │   └── index.d.ts     # Hand-crafted composables declarations
