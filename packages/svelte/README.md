@@ -77,7 +77,7 @@ import {
 } from "@anyhow/svelte";
 ```
 
-## Svelte actions (`use:` directives) (16)
+## Svelte actions (`use:` directives) (20)
 
 ```ts
 import {
@@ -97,6 +97,10 @@ import {
   createDraggable, // pointer-based drag
   createDismissible, // Escape + click-outside dismissal
   createTextareaAutosize, // auto-resize textarea
+  createTooltip, // positioned tooltip with collision detection
+  createPaste, // clipboard paste handling
+  createCopy, // click-to-copy
+  createDropZone, // file drop zone
 } from "@anyhow/svelte";
 ```
 

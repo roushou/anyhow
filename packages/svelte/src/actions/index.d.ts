@@ -114,3 +114,62 @@ export function createTextareaAutosize(
   node: HTMLTextAreaElement,
   opts?: { minHeight?: number; maxHeight?: number },
 ): { destroy(): void };
+
+/** Svelte action that shows a positioned tooltip on hover. */
+export function createTooltip(opts: {
+  content: string;
+  placement?: "top" | "bottom" | "left" | "right";
+  delay?: number;
+  arrow?: boolean;
+  offset?: number;
+  viewportPadding?: number;
+}): {
+  readonly visible: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** A single item extracted from a paste event. */
+export interface PasteItem {
+  kind: "text" | "image" | "file";
+  text?: string;
+  getAsFile(): File | null;
+}
+
+/** Svelte action that handles paste events. */
+export function createPaste(
+  node: HTMLElement,
+  opts: {
+    accept?: "text" | "image" | "file" | "all";
+    onPaste: (items: PasteItem[]) => void | Promise<void>;
+  },
+): { destroy(): void };
+
+/** Svelte action that copies text to the clipboard on click. */
+export function createCopy(opts?: {
+  target?: () => HTMLElement | null;
+  text?: string;
+  onCopy?: (text: string) => void;
+  onError?: (error: Error) => void;
+  resetMs?: number;
+}): {
+  readonly copied: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};
+
+/** A file that was rejected from the drop zone. */
+export interface RejectedFile {
+  file: File;
+  reason: "size" | "type";
+}
+
+/** Svelte action that creates a file drop zone. */
+export function createDropZone(opts: {
+  accept?: string[];
+  multiple?: boolean;
+  maxSize?: number;
+  onDrop: (files: File[], rejected: RejectedFile[]) => void;
+}): {
+  readonly isOver: boolean;
+  readonly isRejected: boolean;
+  action: (node: HTMLElement) => { destroy(): void };
+};

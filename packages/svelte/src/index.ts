@@ -74,4 +74,8 @@ export {
   createDraggable,
   createDismissible,
   createTextareaAutosize,
+  createTooltip,
+  createPaste,
+  createCopy,
+  createDropZone,
 } from "./actions/index.js";
