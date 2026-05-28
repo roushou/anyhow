@@ -20,3 +20,4 @@ export type { PasteItem } from "./paste.js";
 export { createCopy } from "./copy.svelte.js";
 export { createDropZone } from "./drop-zone.svelte.js";
 export type { RejectedFile } from "./drop-zone.svelte.js";
+export { createPreloadData } from "./preload-data.js";

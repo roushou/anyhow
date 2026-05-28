@@ -173,3 +173,12 @@ export function createDropZone(opts: {
   readonly isRejected: boolean;
   action: (node: HTMLElement) => { destroy(): void };
 };
+
+/** Svelte action that preloads page data on hover or viewport entry. */
+export function createPreloadData(
+  node: HTMLAnchorElement,
+  opts?: {
+    on?: "hover" | "viewport" | "both";
+    delay?: number;
+  },
+): { destroy(): void };

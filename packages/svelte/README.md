@@ -80,7 +80,7 @@ import {
 } from "@anyhow/svelte";
 ```
 
-## Svelte actions (`use:` directives) (20)
+## Svelte actions (`use:` directives) (21)
 
 ```ts
 import {
@@ -104,6 +104,7 @@ import {
   createPaste, // clipboard paste handling
   createCopy, // click-to-copy
   createDropZone, // file drop zone
+  createPreloadData, // preload page data on hover
 } from "@anyhow/svelte";
 ```
 
@@ -175,6 +176,8 @@ import {
   createPagination, // page, perPage, total, prev/next
   createFilteredList, // search + sort over a list
   createInfiniteScroll, // page-based loading with sentinel action
+  createViewTransition, // SvelteKit onNavigate wrapper
+  createSearchParams, // typed URL search params with coercion
 } from "@anyhow/svelte";
 ```
 

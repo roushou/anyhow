@@ -121,3 +121,32 @@ export function createInfiniteScroll<T>(
   reset(): void;
   sentinel: (node: HTMLElement) => { destroy(): void };
 };
+
+/** Reactive SvelteKit view transition state backed by Svelte 5 `$state`. */
+export function createViewTransition(opts: {
+  onNavigate: (
+    fn: (nav: {
+      from: { url: URL } | null;
+      to: { url: URL } | null;
+      type: "link" | "popstate" | "goto";
+    }) => void,
+  ) => () => void;
+}): {
+  readonly navigating: boolean;
+  readonly from: URL | undefined;
+  readonly to: URL | undefined;
+  readonly type: "link" | "popstate" | "goto" | undefined;
+};
+
+/** Typed reactive URL search params backed by Svelte 5 `$state`. */
+export function createSearchParams<
+  T extends Record<
+    string,
+    { default: any; parse: (v: string) => any; serialize: (v: any) => string }
+  >,
+>(
+  defs: T,
+): {
+  params: { [K in keyof T]: ReturnType<T[K]["parse"]> };
+  reset(): void;
+};

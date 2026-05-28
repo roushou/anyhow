@@ -56,6 +56,8 @@ export {
   createPagination,
   createFilteredList,
   createInfiniteScroll,
+  createViewTransition,
+  createSearchParams,
 } from "./composables/index.js";
 export type { FieldState, ClientForm, SubmitForm } from "./composables/index.js";
 
@@ -81,4 +83,5 @@ export {
   createPaste,
   createCopy,
   createDropZone,
+  createPreloadData,
 } from "./actions/index.js";
