@@ -32,6 +32,7 @@ const modules = [
   "color",
   "channel",
   "mutex",
+  "state",
 ];
 
 // Clean dist first

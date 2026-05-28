@@ -399,3 +399,26 @@ export function createBroadcastChannel(name: string): {
   postMessage(data: any): void;
   close(): void;
 };
+
+/**
+ * Reactive state machine backed by Svelte 5 `$state`.
+ *
+ * Wraps `@anyhow/std/state`. `state` is a reactive getter that auto-updates
+ * templates on every transition.
+ *
+ * @typeParam S - The state type (string union).
+ * @typeParam E - The event type (string union).
+ * @typeParam C - The context type (defaults to `void`).
+ * @param def - The state machine definition.
+ * @param ctx - Optional shared context.
+ */
+export function createStateMachine<S extends string, E extends string, C = void>(
+  def: import("@anyhow/std/state").StateMachineDef<S, E, C>,
+  ctx?: C,
+): {
+  readonly state: S;
+  send(event: E): boolean;
+  can(event: E): boolean;
+  history(): readonly import("@anyhow/std/state").TransitionRecord<S, E>[];
+  reset(): void;
+};

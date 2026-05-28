@@ -1,7 +1,7 @@
 {
   "name": "@anyhow/std",
   "version": "0.4.0",
-  "description": "Zero-dependency TypeScript utility toolkit \u2014 28 tree-shakeable modules for error handling, validation, async, formatting, and more.",
+  "description": "Zero-dependency TypeScript utility toolkit — 28 tree-shakeable modules for error handling, validation, async, formatting, and more.",
   "repository": {
     "type": "git",
     "url": "https://github.com/roushou/anyhow",
@@ -169,6 +169,11 @@
       "import": "./dist/mutex/index.js",
       "require": "./dist/mutex/index.cjs",
       "types": "./dist/mutex/index.d.ts"
+    },
+    "./state": {
+      "import": "./dist/state/index.js",
+      "require": "./dist/state/index.cjs",
+      "types": "./dist/state/index.d.ts"
     }
   },
   "publishConfig": {
