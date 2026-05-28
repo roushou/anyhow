@@ -1,5 +1,12 @@
 # @anyhow/cli
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [f2a3d08]
+  - @anyhow/std@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
