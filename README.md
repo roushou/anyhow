@@ -27,6 +27,8 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 | **Async**           | Async       | `@anyhow/std/async`       | `sleep`, `debounce`, `throttle`, `retry`, `Backoff`, `concurrent`, `RateLimiter`, `Semaphore`, `timeout`, `memoizeAsync`, `Deferred` |
 |                     | Cache       | `@anyhow/std/cache`       | `LRU`, `memoizeSync`                                                                                                                 |
 |                     | Event       | `@anyhow/std/event`       | `EventEmitter`, `createSignal`                                                                                                       |
+|                     | Channel     | `@anyhow/std/channel`     | `channel`, `select`                                                                                                                  |
+|                     | Mutex       | `@anyhow/std/mutex`       | `mutex`, `Mutex`, `rwlock`, `RwLock`                                                                                                 |
 | **Transformation**  | Iter        | `@anyhow/std/iter`        | `map`, `filter`, `flatMap`, `take`, `chunk`, `zip`, `groupBy`, `partition`                                                           |
 |                     | Math        | `@anyhow/std/math`        | `clamp`, `lerp`, `roundTo`, `sum`, `average`, `median`, `gcd`, `lcm`, `isPrime`                                                      |
 |                     | Random      | `@anyhow/std/random`      | `random.int()`, `random.shuffle()`, `random.uuid()`, `createRandom`                                                                  |
@@ -39,7 +41,7 @@ A **zero-dependency, TypeScript-first utility toolkit** — 28 tree-shakeable mo
 |                     | Color       | `@anyhow/std/color`       | `Color.fromHex()`, `.fromRgb()`, `.fromHsl()`, `.lighten()`, `.darken()`, `.contrast()`                                              |
 |                     | Text        | `@anyhow/std/text`        | `levenshtein`, `fuzzyMatch`, `fuzzyFilter`, `diffLines`, `diffWords`                                                                 |
 | **Data structures** | Collections | `@anyhow/std/collections` | `keyBy`, `uniqBy`, `range`, `deepMerge`, `deepEqual`, `pick`, `omit`, `get`, `set`                                                   |
-|                     | Struct      | `@anyhow/std/struct`      | `Stack`, `Queue`, `Deque`, `PriorityQueue`, `BloomFilter`, `Trie`, `DisjointSet`                                                     |
+|                     | Struct      | `@anyhow/std/struct`      | `Stack`, `Queue`, `Deque`, `PriorityQueue`, `BloomFilter`, `Trie`, `DisjointSet, `RingBuffer`, `TreeNode`, `tree``                   |
 | **Platform / I/O**  | FS          | `@anyhow/std/fs`          | `readText`, `readJson`, `writeText`, `writeJson`, `ensureDir`, `remove`, `exists`, `glob`, `walk`                                    |
 |                     | Env         | `@anyhow/std/env`         | `env.string()`, `env.number()`, `env.bool()`, `env.url()`, `env.prefix()`, `env.check()`, `env.loadFile()`                           |
 |                     | HTTP        | `@anyhow/std/http`        | `get`, `post`, `put`, `del`, `http.create()`, `HttpClient`, `RequestBuilder`                                                         |
@@ -766,6 +768,89 @@ onLogout.subscribe((msg) => console.log(msg));
 await onLogout.emit("session expired");
 ```
 
+### Channel
+
+CSP-style async channels for message-passing between concurrent tasks.
+Supports buffered and unbuffered channels, non-blocking `trySend`/`tryRecv`,
+and multi-channel `select`.
+
+```ts
+import { channel, select } from "@anyhow/std/channel";
+
+// Unbuffered — send blocks until a receiver is ready
+const ch = channel<string>();
+
+// Producer
+(async () => {
+  await ch.send("hello");
+  ch.close();
+})();
+
+// Consumer
+while (true) {
+  const msg = await ch.recv();
+  if (msg.isNone()) break;
+  console.log(msg.unwrap()); // "hello"
+}
+
+// Buffered channel — up to 10 items without blocking
+const buf = channel<number>({ capacity: 10 });
+buf.trySend(42); // true — accepted immediately
+
+// Multi-channel select
+const orders = channel<Order>({ capacity: 5 });
+const cancels = channel<string>({ capacity: 5 });
+
+const result = await select(orders, cancels);
+if (result.index === 0) processOrder(result.value.unwrap());
+else cancelOrder(result.value.unwrap());
+```
+
+### Mutex
+
+Async mutual exclusion and readers-writer locks that guard access to values.
+The type system prevents accessing the guarded value without acquiring the lock.
+`Mutex<T>` for exclusive access; `RwLock<T>` for many-readers / one-writer.
+
+```ts
+import { mutex, rwlock } from "@anyhow/std/mutex";
+
+// Mutex — serialises access to a shared counter
+const counter = mutex(0);
+
+await Promise.all(
+  Array.from({ length: 100 }, async () => {
+    const guard = await counter.lock();
+    guard.value += 1;
+    guard.unlock();
+  }),
+);
+
+const final = await counter.lock();
+console.log(final.value); // 100
+final.unlock();
+
+// RwLock — concurrent reads, exclusive writes
+const cache = rwlock(new Map<string, User>());
+
+// Many readers run concurrently
+const reader = await cache.read();
+const user = reader.value.get("alice");
+reader.unlock();
+
+// Only one writer at a time
+const writer = await cache.write();
+writer.value.set("alice", updatedUser);
+writer.unlock();
+
+// Non-blocking attempts
+const maybeWriter = cache.tryWrite();
+if (maybeWriter.isSome()) {
+  maybeWriter.unwrap().value.set("key", value);
+  maybeWriter.unwrap().unlock();
+}
+```
+
 ### Date
 
 Date arithmetic, comparison, boundaries, and queries. Zero-dependency date math
@@ -1145,7 +1230,16 @@ deepEqual({ a: [1, 2] }, { a: [1, 2] }); // true
 Classic data structures — stacks, queues, bloom filters, tries, and disjoint sets.
 
 ```ts
-import { Stack, Queue, BloomFilter, Trie, DisjointSet } from "@anyhow/std/struct";
+import {
+  Stack,
+  Queue,
+  BloomFilter,
+  Trie,
+  DisjointSet,
+  RingBuffer,
+  TreeNode,
+  tree,
+} from "@anyhow/std/struct";
 
 // Stack (LIFO)
 const stack = new Stack<number>();
@@ -1168,6 +1262,16 @@ trie.startsWith("fo"); // [1]
 const ds = new DisjointSet(5);
 ds.union(0, 1);
 ds.connected(0, 1); // true
+
+// RingBuffer — fixed-capacity circular buffer (last-N tracking)
+const ring = new RingBuffer<string>(100);
+ring.push("event");
+ring.toArray(); // oldest to newest
+
+// TreeNode — generic n-ary tree with traversal
+const t = tree("root", [tree("a"), tree("b", [tree("c")])]);
+for (const node of t.dfs()) console.log(node.value);
+const found = t.find((n) => n.value === "c"); // TreeNode | undefined
 ```
 
 ### Env

@@ -30,6 +30,8 @@ const modules = [
   "config",
   "codec",
   "color",
+  "channel",
+  "mutex",
 ];
 
 // Clean dist first
