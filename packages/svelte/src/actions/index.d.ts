@@ -98,3 +98,19 @@ export function createDraggable(): {
   readonly dragging: boolean;
   action: (node: HTMLElement) => { destroy(): void };
 };
+
+/** Svelte action that dismisses an element on Escape and/or click outside. */
+export function createDismissible(
+  node: HTMLElement,
+  opts: {
+    handler: () => void;
+    escape?: boolean;
+    outside?: boolean;
+  },
+): { destroy(): void };
+
+/** Svelte action that auto-resizes a `<textarea>` to fit its content. */
+export function createTextareaAutosize(
+  node: HTMLTextAreaElement,
+  opts?: { minHeight?: number; maxHeight?: number },
+): { destroy(): void };

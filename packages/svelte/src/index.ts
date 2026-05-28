@@ -77,4 +77,6 @@ export {
   createHover,
   createFocus,
   createDraggable,
+  createDismissible,
+  createTextareaAutosize,
 } from "./actions/index.js";

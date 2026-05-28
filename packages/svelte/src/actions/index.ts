@@ -12,3 +12,5 @@ export { createMutationObserver } from "./mutation-observer.svelte.js";
 export { createHover } from "./hover.svelte.js";
 export { createFocus } from "./focus.svelte.js";
 export { createDraggable } from "./draggable.svelte.js";
+export { createDismissible } from "./dismissible.js";
+export { createTextareaAutosize } from "./textarea-autosize.js";

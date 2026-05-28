@@ -77,7 +77,7 @@ import {
 } from "@anyhow/svelte";
 ```
 
-## Svelte actions (`use:` directives) (14)
+## Svelte actions (`use:` directives) (16)
 
 ```ts
 import {
@@ -95,6 +95,8 @@ import {
   createHover, // hover state tracking
   createFocus, // focus state tracking
   createDraggable, // pointer-based drag
+  createDismissible, // Escape + click-outside dismissal
+  createTextareaAutosize, // auto-resize textarea
 } from "@anyhow/svelte";
 ```
 
