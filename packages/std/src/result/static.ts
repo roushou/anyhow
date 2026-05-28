@@ -1,4 +1,5 @@
 import { ok, err, type Result } from "./result.js";
+import { some, none, type Option } from "../option/option.js";
 
 /** Internal: wraps a throwy sync function in a Result. */
 function sync_<T>(fn: () => T): Result<T> {
@@ -121,6 +122,31 @@ function decodeURIComponent_(encoded: string): Result<string> {
   return sync_(() => decodeURIComponent(encoded));
 }
 
+// Overloaded all: array form + object form. Defined outside the object
+// so TypeScript can infer overload signatures.
+function all<T, E>(results: Result<T, E>[]): Result<T[], E>;
+function all<T extends Record<string, Result<any, E>>, E>(
+  results: T,
+): Result<{ [K in keyof T]: T[K] extends Result<infer V, E> ? V : never }, E>;
+function all(results: any): any {
+  if (Array.isArray(results)) {
+    const values: any[] = [];
+    for (const r of results) {
+      if (!r.ok) return r;
+      values.push(r.value);
+    }
+    return ok(values);
+  }
+  // Object form
+  const acc: any = {};
+  for (const key of Object.keys(results)) {
+    const r = results[key];
+    if (!r.ok) return r;
+    acc[key] = r.value;
+  }
+  return ok(acc);
+}
+
 /** Static combinators. Re-exported as `Result` from the barrel. */
 export const ResultStatic = {
   ok,
@@ -221,15 +247,19 @@ export const ResultStatic = {
    * Result.all([ok(1), err("fail"), ok(3)]);
    * // { ok: false, error: "fail" }
    * ```
+   *
+   * @example
+   * ```ts
+   * // Object form — validates a record of {@link Result}s into a typed object:
+   * const user = Result.all({
+   *   name: validateName(input),
+   *   email: validateEmail(input),
+   *   age: validateAge(input),
+   * });
+   * // Ok({ name: "Alice", email: "...", age: 30 }) or Err(first error)
+   * ```
    */
-  all<T, E>(results: Result<T, E>[]): Result<T[], E> {
-    const values: T[] = [];
-    for (const r of results) {
-      if (!r.ok) return r as unknown as Result<T[], E>;
-      values.push(r.value);
-    }
-    return ok(values);
-  },
+  all,
 
   /**
    * Partitions an array of {@link Result}s into separate `ok` and `err` arrays.
@@ -257,6 +287,35 @@ export const ResultStatic = {
       else e.push(r.error);
     }
     return { ok: o, err: e };
+  },
+
+  /**
+   * Transposes a `Result<Option<T>, E>` into an `Option<Result<T, E>>`.
+   *
+   * - `Ok(some(value))` becomes `some(ok(value))`
+   * - `Ok(none())` becomes `none()`
+   * - `Err(e)` becomes `some(err(e))`
+   *
+   * Useful when you have a {@link Result} that may or may not contain a value
+   * and you want to unwrap the {@link Option} layer.
+   *
+   * @typeParam T - The inner ok value type.
+   * @typeParam E - The error type.
+   * @param r - A `Result<Option<T>, E>`.
+   * @returns `Option<Result<T, E>>`.
+   *
+   * @example
+   * ```ts
+   * Result.transpose(ok(some(42)));  // some(ok(42))
+   * Result.transpose(ok(none()));    // none()
+   * Result.transpose(err("fail"));   // some(err("fail"))
+   * ```
+   */
+  transpose<T, E>(r: Result<Option<T>, E>): Option<Result<T, E>> {
+    if (!r.ok) return some(r as unknown as Result<T, E>);
+    const opt = r.value;
+    if (opt.isNone()) return none();
+    return some(ok(opt.value));
   },
 
   /**

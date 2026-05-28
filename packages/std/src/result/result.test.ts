@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { some, none, type Option } from "../option/option.js";
 import { ok, err, type Result } from "./result.js";
 import { ResultStatic as R } from "./static.js";
 import { pipeline } from "./pipeline.js";
@@ -351,6 +352,41 @@ describe("Result.all", () => {
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value).toEqual([]);
   });
+
+  it("object form returns ok with typed values", () => {
+    const r = R.all({ name: ok("Alice"), age: ok(30) });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.name).toBe("Alice");
+      expect(r.value.age).toBe(30);
+    }
+  });
+
+  it("object form short-circuits on first err", () => {
+    const r = R.all({ name: ok("Alice"), age: err("invalid") as Result<number, string> });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe("invalid");
+  });
+
+  it("object form returns ok with empty object", () => {
+    const r = R.all({});
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value).toEqual({});
+  });
+
+  it("object form infers mixed types", () => {
+    const r = R.all({
+      name: ok("Bob"),
+      active: ok(true),
+      score: ok(42 as number),
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.value.name).toBe("Bob");
+      expect(r.value.active).toBe(true);
+      expect(r.value.score).toBe(42);
+    }
+  });
 });
 
 describe("Result.partition", () => {
@@ -372,6 +408,32 @@ describe("Result.any", () => {
     const r: Result<number, string[]> = R.any([err("a"), err("b")]);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toEqual(["a", "b"]);
+  });
+});
+
+describe("Result.transpose", () => {
+  it("Ok(some) becomes some(Ok)", () => {
+    const r = ok(some(42));
+    const t = R.transpose(r);
+    expect(t.isSome()).toBe(true);
+    const inner = t.unwrap();
+    expect(inner.ok).toBe(true);
+    if (inner.ok) expect(inner.value).toBe(42);
+  });
+
+  it("Ok(none) becomes none", () => {
+    const r = ok(none());
+    const t = R.transpose(r);
+    expect(t.isNone()).toBe(true);
+  });
+
+  it("Err becomes some(Err)", () => {
+    const r = err("fail") as Result<Option<number>, string>;
+    const t = R.transpose(r);
+    expect(t.isSome()).toBe(true);
+    const inner = t.unwrap();
+    expect(inner.ok).toBe(false);
+    if (!inner.ok) expect(inner.error).toBe("fail");
   });
 });
 
